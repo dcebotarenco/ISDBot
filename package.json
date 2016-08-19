@@ -1,0 +1,14 @@
+{
+    "name": "ISDBot",
+    "version": "1.0.0",
+    "main": "main.js",
+    "keywords": ["util", "functional", "server", "client", "browser"],
+    "author": "dcebotarenco",
+    "contributors": [],
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "botbuilder": "^3.0.1",
+        "restify": "^4.1.1"
+    }
+}
