@@ -10,6 +10,9 @@
     "scripts": {
     "start": "node main.js"
     },
+    "engines": {
+    "node": "6.4.0"
+    },
     "dependencies": {
         "botbuilder": "^3.0.1",
         "restify": "^4.1.1"
