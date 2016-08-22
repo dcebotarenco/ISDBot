@@ -9,8 +9,8 @@ class SkypeBot
 {
     constructor()
     {
-        this.APP_ID = "ba07cfa7-1eed-40d4-b746-825205d1a4fe";
-        this.PSW = "LrAmnvjnNViw5uxnBUjPnp1";
+        this.APP_ID = process.env.MICROSOFT_APP_ID;
+        this.PSW = process.env.MICROSOFT_APP_PASSWORD;
         this.botConnection = new botbuilder.ChatConnector({
             appId: this.APP_ID,
             appPassword: this.PSW
