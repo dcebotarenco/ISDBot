@@ -7,6 +7,9 @@
     "contributors": [],
     "license": "ISC",
     "description": "",
+    "scripts": {
+    "start": "node main.js"
+    },
     "dependencies": {
         "botbuilder": "^3.0.1",
         "restify": "^4.1.1"
