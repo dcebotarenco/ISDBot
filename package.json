@@ -10,7 +10,8 @@
     "scripts": {
     "start": "node main.js"
     },
-    "engines": {
+    "engines": 
+            {
     "node": "6.4.0"
     },
     "dependencies": {
