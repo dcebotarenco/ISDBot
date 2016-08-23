@@ -14,7 +14,7 @@ class RootIntent
         this.rootIntents.matches(LogWorkDialog.match(), LogWorkDialog.name());
         this.rootIntents.onDefault([
             function (session) {
-                session.send("I'm sorry. I didn't understand.");
+                session.send("I'm sorry. I didn't understand. Bastard");
                 session.send("What would you like me to do?");
                 session.send("!logwork");
             }
