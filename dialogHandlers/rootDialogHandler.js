@@ -3,9 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-var rootHandler = function (session)
-{
+var botbuilder = require('botbuilder');
+var LogWorkDialog = require('./logworkDialogHandler.js');
 
-};
-module.exports.rootHandler = rootHandler;
+class RootIntent
+{
+    constructor()
+    {
+        this.rootIntents = new botbuilder.IntentDialog();
+        this.rootIntents.matches(LogWorkDialog.match(), LogWorkDialog.name());
+        this.rootIntents.onDefault([
+            function (session) {
+                session.send("I'm sorry. I didn't understand.");
+                session.send("What would you like me to do?");
+                session.send("!logwork");
+            }
+        ]);
+    }
+
+    get intent()
+    {
+        return this.rootIntents;
+    }
+}
+
+module.exports = RootIntent;
 
