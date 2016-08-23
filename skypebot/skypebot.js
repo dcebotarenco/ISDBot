@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 var botbuilder = require('botbuilder');
+var rootHandler = require('../dialogHandlers/rootDialogHandler.js')
 
 class SkypeBot
 {
@@ -17,9 +18,7 @@ class SkypeBot
         });
 
         this.bot = new botbuilder.UniversalBot(this.botConnection);
-        this.bot.dialog('/', function (session) {
-            session.send("Hello");
-        });
+        this.bot.dialog('/', rootHandler.rootHandler);
     }
     get connection()
     {
