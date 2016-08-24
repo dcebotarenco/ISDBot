@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 var log4js = require('log4js');
+var fs = require('fs');
 
 var initialized = false;
 var logger;
@@ -17,6 +18,10 @@ class Logger
         log4js.loadAppender('file');
         log4js.replaceConsole();
         //log4js.addAppender(log4js.appenders.console());
+        if(!fs.exists('./logs'))
+        {
+            fs.mkdir('./logs');
+        }
         log4js.addAppender(log4js.appenders.file('logs/main.log'), 'main');
         
         logger = log4js.getLogger('main');
