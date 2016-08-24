@@ -5,11 +5,13 @@
  */
 var botbuilder = require('botbuilder');
 var LogWorkDialog = require('./logworkDialogHandler.js');
+var Logger = require('../logger/logger');
 
 class RootIntent
 {
     constructor()
     {
+        Logger.logger().info("Creating Root Intent");
         this.rootIntents = new botbuilder.IntentDialog();
         this.rootIntents.matches(LogWorkDialog.match(), LogWorkDialog.name());
         this.rootIntents.onDefault([

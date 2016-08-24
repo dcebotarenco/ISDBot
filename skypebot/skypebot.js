@@ -6,11 +6,13 @@
 var botbuilder = require('botbuilder');
 var RootIntent = require('../dialogHandlers/rootDialogHandler.js');
 var LogWorkDialog = require('../dialogHandlers/logworkDialogHandler.js');
+var Logger = require('../logger/logger');
 
 class SkypeBot
 {
     constructor()
     {
+        Logger.logger().info("Creating Bot");
         this.APP_ID = process.env.MICROSOFT_APP_ID;
         this.PSW = process.env.MICROSOFT_APP_PASSWORD;
         this.botConnection = new botbuilder.ChatConnector({
@@ -18,11 +20,17 @@ class SkypeBot
             appPassword: this.PSW
         });
         this.bot = new botbuilder.UniversalBot(this.botConnection);
-        
+        // Install First Run middleware and dialog
+        this.bot.use({botbuilder: function (session, next) {
+                Logger.logger().info("Message receive[%s]", session.message.text);
+                next();
+            }
+        });
+        Logger.logger().info("Adding Dialogs");
         this.rootIntent = new RootIntent();
-        this.worklog = new LogWorkDialog();
+        this.logwork = new LogWorkDialog();
         this.bot.dialog('/', this.rootIntent.intent);
-        this.bot.dialog(LogWorkDialog.name(), this.worklog.dialog);
+        this.bot.dialog(LogWorkDialog.name(), this.logwork.dialog);
     }
     get connection()
     {

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 var restify = require('restify');
-
+var Logger = require('../logger/logger.js');
 class Rest
 {
     constructor() {}
@@ -12,12 +12,13 @@ class Rest
     {
         this.rest_server = restify.createServer();
         this.rest_server.listen(port, function () {
-            console.log("Rest Server started on %s", port);
+            Logger.logger().info("Rest Server started on %s", port);
         });
     }
 
     attachBot(bot, path)
     {
+        Logger.logger().info("Bot attached on [%s]", path);
         this.rest_server.post(path, bot.connection.listen());
     }
 }
