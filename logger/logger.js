@@ -16,9 +16,9 @@ class Logger
         //console log is loaded by default, so you won't normally need to do this
         //log4js.loadAppender('console');
         log4js.loadAppender('file');
-        log4js.replaceConsole();
+//        log4js.replaceConsole();
         //log4js.addAppender(log4js.appenders.console());
-        if(!fs.exists('./logs'))
+        if(!fs.existsSync('./logs'))
         {
             fs.mkdir('./logs');
         }

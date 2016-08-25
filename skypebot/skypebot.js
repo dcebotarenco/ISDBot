@@ -23,8 +23,8 @@ class SkypeBot
         // Install First Run middleware and dialog
         this.bot.use({botbuilder: function (session, next) {
                 Logger.logger().info("Message receive[%s]", session.message.text);
-                next();
-            }
+                    next();
+                }
         });
         Logger.logger().info("Adding Dialogs");
         this.rootIntent = new RootIntent();
