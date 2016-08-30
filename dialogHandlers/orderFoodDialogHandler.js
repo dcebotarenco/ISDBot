@@ -18,9 +18,7 @@ class OrderFoodDialog
                     data.forEach(function (value) {
                         session.send(value);
                     });
-//                    builder.Prompts.choice(session, "Pick an option", "1M|2M|3M|4M");
                     builder.Prompts.choice(session, "Pick an option", "1M|2M|3M|4M", {listStyle: builder.ListStyle["button"]});
-//                    next();
                 }
             },
             function (session, results, next) {
