@@ -12,16 +12,17 @@ class LogWorkDialog
         Logger.logger().info("Creating LogWork Intent");
         this.dialogs = [
             function (session, results, next) {
-                LogWorkDialog.prototype.logSession(session);
+                LogWorkDialog.logSession(session);
                 var text = session.message.text;
                 var matchResult = text.match(LogWorkDialog.match());
                 if (matchResult[1] !== undefined && matchResult[2] !== undefined)
                 {
                     let tracker = matchResult[1];
                     let date = matchResult[2];
-                    let issue = matchResult[3];
+                    let loggingItem = matchResult[3];
                     let logtime = matchResult[4];
-                    Logger.logger().info("Issue[%s] and time[%s]", issue, logtime);
+                    Logger.logger().info("Issue[%s] and time[%s]", loggingItem, logtime);
+
                 } else
                 {
                     Logger.logger().info("Issue and time were NOT inserted");
@@ -29,12 +30,12 @@ class LogWorkDialog
                 }
             },
             function (session, results, next) {
-                LogWorkDialog.prototype.logSession(session);
-                builder.Prompts.choice(session, "Where", "Time Tracker|Jira", {listStyle: builder.ListStyle["button"]});
+                LogWorkDialog.logSession(session);
+                builder.Prompts.choice(session, "Where", "Jira", {listStyle: builder.ListStyle["button"]});
             },
             function (session, results, next) {
                 session.dialogData.where = results.response.entity;
-                LogWorkDialog.prototype.logSession(session);
+                LogWorkDialog.logSession(session);
 
                 Logger.logger().info("User selected [%s]", session.dialogData.where);
                 builder.Prompts.choice(session, "When", "Today|Other Date", {listStyle: builder.ListStyle["button"]});
@@ -42,7 +43,7 @@ class LogWorkDialog
             function (session, results, next) {
 
                 session.dialogData.when = results.response.entity;
-                LogWorkDialog.prototype.logSession(session);
+                LogWorkDialog.logSession(session);
 
                 Logger.logger().info("User selected [%s]", session.dialogData.when);
                 if (session.dialogData.when === "Other Date")
@@ -63,14 +64,62 @@ class LogWorkDialog
                     Logger.logger().info("User was asked for a date");
                     var time = builder.EntityRecognizer.resolveTime([results.response]);
                     session.dialogData.date = time;
-                    LogWorkDialog.prototype.logSession(session);
+                    LogWorkDialog.logSession(session);
                 }
                 next();
+            },
+            function (session, results, next) {
+                if(session.dialogData.where === 'Time Tracker')
+                {
+                    builder.Prompts.choice(session, "Choose on what you want to log your time", "ISD(Work Generic)|IntherCore|Service", {listStyle: builder.ListStyle["button"]});
+                }
+                else
+                {
+                    next();
+                }
+            },
+            function (session, results, next) {
+                if(session.dialogData.where === 'Time Tracker')
+                {
+                    let response = results.response.entity;
+                    if(response !== "ISD(Work Generic)")
+                    {
+                        if(response === "IntherCore")
+                        {
+                            builder.Prompts.choice(session, "Choose activity", "Development", {listStyle: builder.ListStyle["button"]});
+                        }
+                        else
+                        {
+                            builder.Prompts.text(session, 'Write down your project');
+                        }
+                    }
+                    else
+                    {
+                        session.dialogData.what = response;
+                        next();
+                    }
+                }
+                else
+                {
+                    next();
+                }
+            },
+            function (session, results, next) {
+                LogWorkDialog.logSession(session);
+                Logger.logger().info("Logging work");
+                if (session.dialogData.where === 'TT')
+                {
+
+                } else
+                {
+                    let jira = new Jira();
+                    jira.log();
+                }
             }
         ];
     }
 
-    logSession(session)
+    static logSession(session)
     {
         Logger.logger().info("Where[%s]", session.dialogData.where);
         Logger.logger().info("When[%s]", session.dialogData.when);
@@ -89,7 +138,7 @@ class LogWorkDialog
 
     static match()
     {
-        return /^(!logwork\s+(\w+|\w+\-\d+)\s+(\d{1,2}\.\d{1}))|(!logwork)/i;
+        return /^(!logwork\s+(TT|JIRA)\s+(\w+|\w+\-\d+)\s+(\d{1,2}\.\d{1}))|(!logwork)/i;
     }
 
 }

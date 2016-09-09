@@ -28,8 +28,8 @@ class SkypeBot
         });
         Logger.logger().info("Adding Dialogs");
         this.rootIntent = new RootIntent();
+        this.bot.dialog(RootIntent.name(), this.rootIntent.intent);
         this.logwork = new LogWorkDialog();
-        this.bot.dialog('/', this.rootIntent.intent);
         this.bot.dialog(LogWorkDialog.name(), this.logwork.dialog);
     }
     get connection()

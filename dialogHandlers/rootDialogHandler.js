@@ -13,6 +13,14 @@ class RootIntent
     {
         Logger.logger().info("Creating Root Intent");
         this.rootIntents = new botbuilder.IntentDialog();
+        this.rootIntents.onBegin(function (session, args, next) {
+            Logger.logger().info("User[%s]",session.message.address.user.name);
+            if(!session.message.address.user.name.match(/inther_(.+)/i))
+            {
+                session.endDialog();
+            }
+            next();
+        });
         this.rootIntents.matches(LogWorkDialog.match(), LogWorkDialog.name());
         this.rootIntents.onDefault([
             function (session) {
@@ -26,6 +34,11 @@ class RootIntent
     get intent()
     {
         return this.rootIntents;
+    }
+
+    static name()
+    {
+        return "/";
     }
 }
 
