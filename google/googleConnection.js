@@ -8,14 +8,14 @@ class GoogleConnection
     static getConnection() {
         var jwtClient = new google.auth.JWT(
                 gserviceaccount,
-                googleKeyPem,
                 null,
+                googleKeyPem,
                 ['https://www.googleapis.com/auth/spreadsheets']
                 );
 
         jwtClient.authorize(function (err, tokens) {
             if (err) {
-                Logger.Logger.error(err);
+                Logger.logger().error(err);
                 return;
             } else {
                 Logger.logger().info("Successfully connected!");
