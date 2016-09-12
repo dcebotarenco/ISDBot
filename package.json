@@ -1,21 +1,28 @@
 {
-    "name": "ISDBot",
-    "version": "1.0.0",
-    "main": "main.js",
-    "keywords": ["util", "functional", "server", "client", "browser"],
-    "author": "dcebotarenco",
-    "contributors": [],
-    "license": "ISC",
-    "description": "",
-    "scripts": {
+  "name": "ISDBot",
+  "version": "1.0.0",
+  "main": "main.js",
+  "keywords": [
+    "util",
+    "functional",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "dcebotarenco",
+  "contributors": [],
+  "license": "ISC",
+  "description": "",
+  "scripts": {
     "start": "node main.js"
-    },
-    "engines":{
+  },
+  "engines": {
     "node": "6.4.0"
-    },
-    "dependencies": {
-        "botbuilder": "^3.0.1",
-        "restify": "^4.1.1",
-        "log4js":"^0.6.38"
-    }
+  },
+  "dependencies": {
+    "botbuilder": "^3.0.1",
+    "googleapis": "^12.4.0",
+    "log4js": "^0.6.38",
+    "restify": "^4.1.1"
+  }
 }
