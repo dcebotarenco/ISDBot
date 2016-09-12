@@ -5,7 +5,6 @@
  */
 var botbuilder = require('botbuilder');
 var RootIntent = require('../dialogHandlers/rootDialogHandler.js');
-var LogWorkDialog = require('../dialogHandlers/logworkDialogHandler.js');
 var OrderFoodDialog = require('../dialogHandlers/orderFoodDialogHandler.js');
 var Logger = require('../logger/logger');
 
@@ -29,11 +28,9 @@ class SkypeBot
         });
         Logger.logger().info("Adding Dialogs");
         this.rootIntent = new RootIntent();
-        this.logwork = new LogWorkDialog();
         this.orderfood = new OrderFoodDialog();
         
         this.bot.dialog(RootIntent.name(), this.rootIntent.intent);
-        this.bot.dialog(LogWorkDialog.name(), this.logwork.dialog);
         this.bot.dialog(OrderFoodDialog.name(), this.orderfood.dialog);
     }
     get connection()

@@ -17,8 +17,6 @@
     "botbuilder": "^3.0.1",
     "restify": "^4.1.1",
     "log4js":"^0.6.38",
-    "jira-connector":"^2.3.0",
-    "express":"^4.14.0"
     "googleapis": "^12.4.0"
   }
 }

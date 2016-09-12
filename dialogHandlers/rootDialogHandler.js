@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 var botbuilder = require('botbuilder');
-var LogWorkDialog = require('./logworkDialogHandler.js');
 var OrderFoodDialog = require('./orderFoodDialogHandler.js');
 var Logger = require('../logger/logger');
 
@@ -22,7 +21,6 @@ class RootIntent
             }
             next();
         });
-        this.rootIntents.matches(LogWorkDialog.match(), LogWorkDialog.name());
         this.rootIntents.matches(OrderFoodDialog.match(), OrderFoodDialog.name());
         this.rootIntents.onDefault([
             function (session) {
