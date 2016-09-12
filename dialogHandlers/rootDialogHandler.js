@@ -5,6 +5,7 @@
  */
 var botbuilder = require('botbuilder');
 var LogWorkDialog = require('./logworkDialogHandler.js');
+var OrderFoodDialog = require('./orderFoodDialogHandler.js');
 var Logger = require('../logger/logger');
 
 class RootIntent
@@ -22,6 +23,7 @@ class RootIntent
             next();
         });
         this.rootIntents.matches(LogWorkDialog.match(), LogWorkDialog.name());
+        this.rootIntents.matches(OrderFoodDialog.match(), OrderFoodDialog.name());
         this.rootIntents.onDefault([
             function (session) {
                 session.send("I'm sorry. I didn't understand. Bastard");
