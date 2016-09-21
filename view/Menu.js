@@ -4,33 +4,39 @@
 var builder = require('botbuilder');
 
 class Menu {
-    constructor(title,
+    constructor(session,
+                title,
                 mealList,
-                buttons,
-                session) {
+                buttons) {
         this.buttons = buttons;
         this.title = title;
         this.mealList = mealList;
         this.session = session;
-        this.mealCard = Menu._buildMealCard();
+        this.mealCard = this._buildMealCard();
     }
 
-    static _buildMealCard() {
-        new builder.HeroCard(this.session).title(this.title).text(Menu._formatMealsName()).buttons(Menu._getButtonsActionCards())
+    _buildMealCard() {
+        return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
     }
 
-    static _formatMealsName() {
+    _formatMealsName() {
         return this.mealList.join();
     }
 
-    static _getButtonsActionCards() {
-        return buttons.map(function (button) {
-            button.action;
-        })
+    _getButtonsActionCards() {
+        let array = this.buttons.map(function (button,index,array) {
+            return button.actionCard;
+        });
+        return array;
     }
 
     get card() {
         return this.mealCard;
+    }
+
+    get btns()
+    {
+        return this.buttons;
     }
 }
 module.exports = Menu;

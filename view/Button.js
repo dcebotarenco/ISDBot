@@ -9,16 +9,26 @@ class Button {
         this.session = session;
         this.menuName = menuName;
         this.menuGroupName = menuGroupName;
-        this.cardAction = Button._buildCardAction();
+        this.cardAction = this._buildCardAction();
     }
 
-    static _buildCardAction() {
-        return builder.CardAction.imBack(this.session, this.menuName, this.menuGroupName);
+    _buildCardAction() {
+        return builder.CardAction.imBack(this.session, this.menuName+this.menuGroupName, this.menuGroupName);
     }
 
-    get action()
+    get actionCard()
     {
         return this.cardAction;
+    }
+
+    get menuname()
+    {
+        return this.menuName;
+    }
+
+    get menugroup()
+    {
+        return this.menuGroupName;
     }
 }
 module.exports = Button;

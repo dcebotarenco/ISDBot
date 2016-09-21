@@ -7,24 +7,29 @@ class Day {
     constructor(session, menuList) {
         this.session = session;
         this.menuList = menuList;
-        this.message = Day._buildDay();
+        this.message = this._buildDay();
     }
 
-    static _buildDay() {
-        new builder.Message(this.session)
+    _buildDay() {
+        return new builder.Message(this.session)
             .textFormat(builder.TextFormat.markdown)
             .attachmentLayout(builder.AttachmentLayout.carousel)
-            .attachments(Day._getMenuCards());
+            .attachments(this._getMenuCards());
     }
 
-    static _getMenuCards()
+    _getMenuCards()
     {
-        return this.menuList.map(function(val){val.card});
+        return this.menuList.map(function(menu){return menu.card});
+    }
+
+    get msg()
+    {
+        return this.message;
     }
 
     get menus()
     {
-        return this.message;
+        return this.menuList;
     }
 }
 
