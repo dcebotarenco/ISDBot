@@ -19,7 +19,9 @@ class RootIntent
             {
                 session.endDialog();
             }
-            next();
+            else {
+                next();
+            }
         });
         this.rootIntents.matches(OrderFoodDialog.match(), OrderFoodDialog.name());
         this.rootIntents.onDefault([
