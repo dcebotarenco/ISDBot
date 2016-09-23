@@ -1,5 +1,5 @@
-var SMealGroup = require('./lunchList/mealsGroup/SMealGroup.js');
-var MMealGroup = require('./lunchList/mealsGroup/MMealGroup.js');
+var SMealGroup = require('../lunchList/mealsGroup/SMealGroup.js');
+var MMealGroup = require('../lunchList/mealsGroup/MMealGroup.js');
 
 class MealGroupFactory {
   constructor() {}

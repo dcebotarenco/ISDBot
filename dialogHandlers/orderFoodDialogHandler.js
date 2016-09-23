@@ -226,6 +226,7 @@ class OrderFoodDialog {
     static onMenuReceived(session, results, next, columns)
     {
         //create Model
+
         //add Model to Session
         if (rows.length == 0) {
             Logger.logger().warn('No data found');

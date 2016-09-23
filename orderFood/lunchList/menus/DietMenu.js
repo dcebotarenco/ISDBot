@@ -1,7 +1,7 @@
 var Menu = require('./Menu.js');
-class PostMenu extends Menu {
+class DietMenu extends Menu {
   constructor(meals) {
     super(meals);
   }
 }
-module.exports = PostMenu;
+module.exports = DietMenu;
