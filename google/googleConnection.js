@@ -3,6 +3,7 @@ var Logger = require('../logger/logger');
 var gserviceaccount = process.env.G_SERVICE_ACCOUNT;
 var googleKeyPem = process.env.G_KEY_PEM;
 
+var CalendarUtil = require('../util/CalendarUtil');
 let MealFactory = require('../orderFood/factory/MealFactory');
 let MealsGroupFactory = require('../orderFood/factory/MealsGroupFactory');
 let MenuFactory = require('../orderFood/factory/MenuFactory');
@@ -60,6 +61,8 @@ class GoogleConnection {
         let firstMealIndexes = [3, 7, 11, 15];
         let secondMealIndexes = [4, 8, 12, 16];
         let saladMealIndexes = [5, 9, 13, 17];
+        let updateDate = columns[1][0];
+        var monday = CalendarUtil.getMonday(updateDate);        
 
         let days = [];
         let columnsWithoutFirstColumn = columns.slice(1, 6);
@@ -85,7 +88,9 @@ class GoogleConnection {
                 MenuFactory.getMenu("PostMenu",mealsPerDay.slice(6,9)),
                 MenuFactory.getMenu("DietMenu",mealsPerDay.slice(9,12))
             ];
-            days.push(new Day(null, menu));
+            let dayOfWeek = new Date(monday)
+            dayOfWeek.setDate(dayOfWeek.getDate() + index);
+            days.push(new Day(dayOfWeek, menu));
         });
         return days;
     }
