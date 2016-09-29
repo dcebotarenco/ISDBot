@@ -5,10 +5,10 @@ class MealGroupFactory {
   constructor() {}
 
   static getMealGroup(mealGroupClass, meals) {
-    if (mealGroupClass instanceof SMealGroup) {
+    if (mealGroupClass=== "SMealGroup") {
       return new SMealGroup(meals);
     } else
-    if (mealGroupClass instanceof MMealGroup) {
+    if (mealGroupClass === "MMealGroup") {
       return new MMealGroup(meals);
     } else {
       return null;

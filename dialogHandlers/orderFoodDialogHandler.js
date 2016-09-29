@@ -169,8 +169,8 @@ class OrderFoodDialog {
     }
 
     static askUserForMeal(session, results, next) {
-        let day = DayFactory.buildDay(session);
-        builder.Prompts.choice(session, day.msg);
+        let day = DayFactory.buildDay(session,session.dialogData.sheet.getDayByDate(new Date()));
+        builder.Prompts.choice(session, day.msg,"mo-1S|mo-2S|mo-3S|mo-4S|mo-1M|mo-2M|mo-3M|mo-4M|tu-1S|tu-2S|tu-3S|tu-4S|tu-1M|tu-2M|tu-3M|tu-4M|we-1S|we-2S|we-3S|we-4S|we-1M|we-2M|we-3M|we-4M|th-1S|th-2S|th-3S|th-4S|th-1M|th-2M|th-3M|th-4M|fr-1S|fr-2S|fr-3S|fr-4S|fr-1M|fr-2M|fr-3M|fr-4M");
     }
 
     static isMenuUpToDate(session, results, next) {
@@ -223,55 +223,19 @@ class OrderFoodDialog {
         return session.dialogData.upToDate;
     }
 
-    static onMenuReceived(session, results, next, columns)
-    {
-        //create Model
 
-        //add Model to Session
-        if (rows.length == 0) {
-            Logger.logger().warn('No data found');
-            session.endDialog('There is a problem with reading data from Lunch List');
-        } else {
-            session.dialogData.rows = rows;
-            var monday = new Array();
-            var tuesday = new Array();
-            var wednesday = new Array();
-            var thursday = new Array();
-            var friday = new Array();
-
-            for (var range = 0; range < rows.length; range++) {
-                for (var menuItem = 0; menuItem < rows[range].values[0].length; menuItem++) {
-                    if (range < 4) {
-                        monday.push(rows[range].values[0][menuItem]);
-                    }
-                    if (range >= 4 && range < 8) {
-                        tuesday.push(rows[range].values[0][menuItem]);
-                    }
-                    if (range >= 8 && range < 12) {
-                        wednesday.push(rows[range].values[0][menuItem]);
-                    }
-                    if (range >= 12 && range < 16) {
-                        thursday.push(rows[range].values[0][menuItem]);
-                    }
-                    if (range >= 16 && range < 20) {
-                        friday.push(rows[range].values[0][menuItem]);
-                    }
-                }
-            }
-            session.dialogData.monday = monday.toString();
-            session.dialogData.tuesday = tuesday.toString();
-            session.dialogData.wednesday = wednesday.toString();
-            session.dialogData.thursday = thursday.toString();
-            session.dialogData.friday = friday.toString();
-
-
-            next();
-        }
-    }
 
     static fetchMenu(session, results, next) {
         Logger.logger().info("Gather all data from Lunch List");
-        google.fetchMenu(session, results, next,spreadsheetId, OrderFoodDialog.onMenuReceived);
+        google.fetchMenu(session, results, next, spreadsheetId, OrderFoodDialog.onMenuReceived);
+    }
+
+    static onMenuReceived(session, results, next, sheet) {
+        //create Model
+        // save(session,days,false);
+        //add Model to Session
+        session.dialogData.sheet = sheet;
+        next();
     }
 
 

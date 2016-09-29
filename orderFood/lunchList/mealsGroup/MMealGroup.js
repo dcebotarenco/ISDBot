@@ -4,5 +4,10 @@ class MMealGroup extends MealGroup {
     super(meals);
     this.name = 'M';
   }
+
+  get groupName()
+  {
+    return this.name;
+  }
 }
 module.exports = MMealGroup;
