@@ -170,7 +170,7 @@ class OrderFoodDialog {
 
     static askUserForMeal(session, results, next) {
         let day = DayFactory.buildDay(session,session.dialogData.sheet.getDayByDate(new Date()));
-        builder.Prompts.choice(session, day.msg,"mo-1S|mo-2S|mo-3S|mo-4S|mo-1M|mo-2M|mo-3M|mo-4M|tu-1S|tu-2S|tu-3S|tu-4S|tu-1M|tu-2M|tu-3M|tu-4M|we-1S|we-2S|we-3S|we-4S|we-1M|we-2M|we-3M|we-4M|th-1S|th-2S|th-3S|th-4S|th-1M|th-2M|th-3M|th-4M|fr-1S|fr-2S|fr-3S|fr-4S|fr-1M|fr-2M|fr-3M|fr-4M");
+        builder.Prompts.choice(session, day.msg, day.choises);
     }
 
     static isMenuUpToDate(session, results, next) {

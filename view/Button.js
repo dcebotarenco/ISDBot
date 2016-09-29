@@ -9,26 +9,20 @@ class Button {
         this.session = session;
         this.menuName = menuName;
         this.menuGroupName = menuGroupName;
+        this.buttonChoice = this.menuName + "-" + this.menuGroupName;
         this.cardAction = this._buildCardAction();
     }
 
     _buildCardAction() {
-        return builder.CardAction.imBack(this.session, this.menuName+this.menuGroupName, this.menuGroupName);
+        return builder.CardAction.imBack(this.session, this.buttonChoice, this.menuGroupName);
     }
 
-    get actionCard()
-    {
+    get actionCard() {
         return this.cardAction;
     }
 
-    get menuname()
-    {
-        return this.menuName;
-    }
-
-    get menugroup()
-    {
-        return this.menuGroupName;
+    get choice() {
+        return this.buttonChoice;
     }
 }
 module.exports = Button;

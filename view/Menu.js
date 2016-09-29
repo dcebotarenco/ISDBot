@@ -6,8 +6,10 @@ var builder = require('botbuilder');
 class Menu {
     constructor(session,
                 title,
+                type,
                 mealList,
                 buttons) {
+        this.menuType = type;
         this.buttons = buttons;
         this.title = title;
         this.mealList = mealList;
@@ -20,11 +22,19 @@ class Menu {
     }
 
     _formatMealsName() {
-        return this.mealList.join();
+        let end = "\</ul\>";
+        let start = "\<ul style=\"color:green\"\>";;
+        let lis = [];
+        this.mealList.forEach(function (meal, index) {
+            let li = "\<li\>"+meal.name+"\</li\>";
+            lis.push(li);
+
+        });
+        return start + lis.join('') + end;
     }
 
     _getButtonsActionCards() {
-        let array = this.buttons.map(function (button,index,array) {
+        let array = this.buttons.map(function (button, index, array) {
             return button.actionCard;
         });
         return array;
@@ -34,9 +44,13 @@ class Menu {
         return this.mealCard;
     }
 
-    get btns()
-    {
+    get btns() {
         return this.buttons;
+    }
+
+    get type()
+    {
+        return this.menuType;
     }
 }
 module.exports = Menu;

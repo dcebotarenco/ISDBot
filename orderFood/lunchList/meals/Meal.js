@@ -1,11 +1,11 @@
 /*Meal- one meal from menu. ex: rice*/
 class Meal {
   constructor(name) {
-    this.name = name;
+    this.nameVar = name;
   }
 
-  get nameVar() {
-    return this.name;
+  get name() {
+    return this.nameVar;
   }
 }
 module.exports = Meal;

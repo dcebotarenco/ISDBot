@@ -14,9 +14,9 @@ class DayFactory {
             let buttonList = [];
             menu.mealGroups.forEach(function(group,index)
             {
-                buttonList.push(new Button(session, menu.name, group.groupName));
+                buttonList.push(new Button(session, menu.constructor.name, group.groupName));
             });
-            menuList.push(new Menu(session, menu.name, menu.mealsList, buttonList));
+            menuList.push(new Menu(session, menu.name, menu.constructor.name, menu.mealsList, buttonList));
         });
         let dayMenu = new Day(session, menuList);
         Logger.logger().info("Building Day Menus Done");

@@ -17,18 +17,27 @@ class Day {
             .attachments(this._getMenuCards());
     }
 
-    _getMenuCards()
-    {
-        return this.menuList.map(function(menu){return menu.card});
+    _getMenuCards() {
+        return this.menuList.map(function (menu) {
+            return menu.card
+        });
     }
 
-    get msg()
-    {
+    get msg() {
         return this.message;
     }
 
-    get menus()
-    {
+    get choises() {
+        let choises = [];
+        this.menuList.forEach(function (menu) {
+            menu.btns.forEach(function (button) {
+                choises.push(button.choice);
+            });
+        });
+        return choises.join('|');
+    }
+
+    get menus() {
         return this.menuList;
     }
 }
