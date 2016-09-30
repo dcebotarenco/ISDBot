@@ -24,7 +24,7 @@ class Menu {
     _formatMealsName() {
         let lis = [];
         this.mealList.forEach(function (meal, index) {
-            let li = "* *"+meal.name+"*\n";
+            let li = "*"+meal.name+"*\n";
             lis.push(li);
 
         });
