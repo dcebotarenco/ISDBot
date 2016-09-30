@@ -28,7 +28,7 @@ class Menu {
             lis.push(li);
 
         });
-        return line + lis.join('');
+        return lis.join('');
     }
 
     _getButtonsActionCards() {
