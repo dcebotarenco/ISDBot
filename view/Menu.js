@@ -22,15 +22,14 @@ class Menu {
     }
 
     _formatMealsName() {
-        let end = "\</ul\>";
-        let start = "\<ul style=\"color:green\"\>";;
+        let line = ">\n";
         let lis = [];
         this.mealList.forEach(function (meal, index) {
-            let li = "\<li\>"+meal.name+"\</li\>";
+            let li = "* "+meal.name+" :leaves: \n";
             lis.push(li);
 
         });
-        return start + lis.join('') + end;
+        return line + lis.join('');
     }
 
     _getButtonsActionCards() {
