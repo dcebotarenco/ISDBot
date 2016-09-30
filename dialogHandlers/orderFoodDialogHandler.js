@@ -1,7 +1,7 @@
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
-var ReadData = require('../readData/ReadData');
-let data = ReadData.read('./readData/input.dat');
+//var ReadData = require('../readData/ReadData');
+//let data = ReadData.read('./readData/input.dat');
 var google = require('../google/googleConnection');
 var CalendarUtil = require('../util/CalendarUtil');
 var spreadsheetId = process.env.G_SPREADSHEET_ID;
@@ -10,6 +10,11 @@ var Button = require('../view/Button');
 var Menu = require('../view/Menu');
 var Day = require('../view/Day');
 var DayFactory = require('../view/DayFactory');
+var month = new Date().toLocaleString("en-us",{month: "long"});
+var year = new Date().getFullYear();
+var menuSheetName = 'Lunch Menu';
+var choiceSheetName = month = " " + year;
+var ModelBuilder = require('../modelBuilder/ModelBuilder');
 class OrderFoodDialog {
 
     constructor() {
@@ -76,17 +81,16 @@ class OrderFoodDialog {
         return session.dialogData.upToDate;
     }
 
-
-
     static fetchMenu(session, results, next) {
         Logger.logger().info("Gather all data from Lunch List");
-        google.fetchMenu(session, results, next, spreadsheetId, OrderFoodDialog.onMenuReceived);
+        google.fetchMenu(session, results, next, spreadsheetId, menuSheetName, OrderFoodDialog.onMenuReceived);
     }
 
-    static onMenuReceived(session, results, next, sheet) {
+    static onMenuReceived(session, results, next, columns) {
         //create Model
         // save(session,days,false);
         //add Model to Session
+        let sheet = ModelBuilder.createMenuModelSheet(columns);
         session.dialogData.sheet = sheet;
         next();
     }
@@ -103,6 +107,5 @@ class OrderFoodDialog {
     static match() {
         return /^!orderfood/i;
     }
-
 }
 module.exports = OrderFoodDialog;
