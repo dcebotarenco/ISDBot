@@ -22,13 +22,22 @@ class Menu {
     }
 
     _formatMealsName() {
-        let lis = [];
+        /*let lis = [];
         this.mealList.forEach(function (meal, index) {
             let li = "*"+meal.name+"*\n";
             lis.push(li);
 
         });
-        return lis.join('');
+        return lis.join('');*/
+        var markdownContent = "#A heading\n";
+        markdownContent += "##A subheading\n";
+        markdownContent += "**something bold**\n\n";
+        markdownContent += "*something italic*\n\n";
+        markdownContent += "[a link!](http://robinosborne.co.uk/?s=bot)\n\n";
+        markdownContent += "![AN IMAGE!](http://robinosborne.co.uk/wp-content/uploads/2016/07/robinosborne.jpg)\n";
+        markdownContent += "> A quote of something interesting\n\n";
+        markdownContent += "```\nvar this = \"code\";\n```\n";
+        return markdownContent;
     }
 
     _getButtonsActionCards() {
