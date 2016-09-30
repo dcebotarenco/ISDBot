@@ -30,7 +30,7 @@ class Menu {
         //
         // });
         // return line + lis.join('');
-        return "* Item 1 ";
+        return "> Item 1 ";
     }
 
     _getButtonsActionCards() {
