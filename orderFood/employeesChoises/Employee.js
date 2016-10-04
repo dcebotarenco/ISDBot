@@ -1,15 +1,15 @@
 class Employee {
-  constructor(id, name) {
-    this.id = id;
-    this.name = name;
+  constructor(skypeName, fullName) {
+    this.skypeNameVar = skypeName;
+    this.fullNameVar = fullName;
   }
 
-  get idVar() {
-    return this.id;
+  get skypeName() {
+    return this.skypeNameVar;
   }
 
-  get nameVar() {
-    return this.name;
+  get fullName() {
+    return this.fullNameVar;
   }
 }
 module.exports = Employee;

@@ -25,14 +25,14 @@ class GoogleConnection {
     });
     return jwtClient;
   }
-    static fetchMenu(session, results, next, spreadsheetId, sheetName, callback) {
+    static fetchGoogleSheet(session, results, next, spreadsheetId, sheetName, majorDimension, callback) {
         var sheets = google.sheets('v4');
 
         sheets.spreadsheets.values.get({
             auth: this.getConnection(),
             spreadsheetId: spreadsheetId,
             range: sheetName,
-            majorDimension: "COLUMNS"
+            majorDimension: majorDimension
         }, function (err, response) {
             if (err) {
                 Logger.logger().error('The API returned an error: ' + err);
