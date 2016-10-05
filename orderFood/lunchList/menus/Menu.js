@@ -8,7 +8,7 @@ class Menu {
     this.meals = meals;
     this.groups =[];
     this.groups.push(MealsGroupFactory.getMealGroup("MMealGroup",meals));
-    this.groups.push(MealsGroupFactory.getMealGroup("SMealGroup",meals.slice(1,2)));
+    this.groups.push(MealsGroupFactory.getMealGroup("SMealGroup",meals.slice(1,3)));
   }
 
   get mealsList() {
