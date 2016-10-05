@@ -70,6 +70,11 @@ class SkypeBot
 
         // Install First Run middleware and dialog
         this.bot.use({botbuilder: function (session, next) {
+                Logger.logger().info("Service URL[%s]",session.message.address.serviceUrl);
+                Logger.logger().info("Service URL[%s]",session.message.address.channelId);
+                Logger.logger().info("Service URL[%s]",session.message.address.bot.name);
+                Logger.logger().info("Service URL[%s]",session.message.address.user.name);
+                Logger.logger().info("Service URL[%s]",session.message.address.useAuth);
                 Logger.logger().info("Message receive[%s]", session.message.text);
                     next();
                 }
