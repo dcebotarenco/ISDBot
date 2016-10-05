@@ -70,12 +70,13 @@ class SkypeBot
 
         // Install First Run middleware and dialog
         this.bot.use({botbuilder: function (session, next) {
-                Logger.logger().info("Service URL[%s]",session.message.address.serviceUrl);
-                Logger.logger().info("Service URL[%s]",session.message.address.channelId);
-                Logger.logger().info("Service URL[%s]",session.message.address.bot.name);
-                Logger.logger().info("Service URL[%s]",session.message.address.user.name);
-                Logger.logger().info("Service URL[%s]",session.message.address.useAuth);
-                Logger.logger().info("Message receive[%s]", session.message.text);
+                Logger.logger().info("Message received[%s][%s][%s][%s][%s]", session.message.text,
+                    session.message.address.serviceUrl,
+                    session.message.address.channelId,
+                    session.message.address.bot.name,
+                    session.message.address.user.name,
+                    session.message.address.user.id,
+                    session.message.address.useAuth);
                     next();
                 }
         });
@@ -85,48 +86,48 @@ class SkypeBot
         
         this.bot.dialog(RootIntent.name(), this.rootIntent.intent);
         this.bot.dialog(OrderFoodDialog.name(), this.orderfood.dialog);
-        this.bot.dialog('/a',function(session){
-            session.endDialog("Hello");
-        })
+        // this.bot.dialog('/a',function(session){
+        //     session.endDialog("Hello");
+        // })
 
 
-        Cron.schedule('* */1 * * *', function(a,b)
-        {
-            Logger.logger().info("Test " + a + b);
-            // var address =
-            // {
-            //     bot: {
-            //         id:'ISD',
-            //         name:'ISD'
-            //     },
-            //     channelId: "emulator",
-            //     user: {
-            //         id:'inther_d',
-            //         name:'inther_d'
-            //     },
-            //     id:'service_url_id',
-            //     serviceUrl: "http://localhost:9000",
-            //     useAuth:true
-            // }
-            // this.bot.beginDialog(address, OrderFoodDialog.name());
-        }.bind(null,"a","c"));
+        // Cron.schedule('* */1 * * *', function(a,b)
+        // {
+        //     Logger.logger().info("Test " + a + b);
+        //     // var address =
+        //     // {
+        //     //     bot: {
+        //     //         id:'ISD',
+        //     //         name:'ISD'
+        //     //     },
+        //     //     channelId: "emulator",
+        //     //     user: {
+        //     //         id:'inther_d',
+        //     //         name:'inther_d'
+        //     //     },
+        //     //     id:'service_url_id',
+        //     //     serviceUrl: "http://localhost:9000",
+        //     //     useAuth:true
+        //     // }
+        //     // this.bot.beginDialog(address, OrderFoodDialog.name());
+        // }.bind(null,"a","c"));
 
-        var address =
-        {
-            bot: {
-                id:'ISD',
-                name:'ISD'
-            },
-            channelId: "emulator",
-            user: {
-                id:'inther_d',
-                name:'inther_d'
-            },
-            id:'service_url_id',
-            serviceUrl: "http://localhost:9000",
-            useAuth:true
-        }
-        this.bot.beginDialog(address, '/a');
+        // var address =
+        // {
+        //     bot: {
+        //         id:'ISD',
+        //         name:'ISD'
+        //     },
+        //     channelId: "emulator",
+        //     user: {
+        //         id:'inther_d',
+        //         name:'inther_d'
+        //     },
+        //     id:'service_url_id',
+        //     serviceUrl: "http://localhost:9000",
+        //     useAuth:true
+        // }
+        //this.bot.beginDialog(address, '/a');
 
     }
     get connection()
