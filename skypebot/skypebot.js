@@ -37,26 +37,9 @@ class SkypeBot {
         this.bot.dialog(GreetingDialog.name(), this.greetingDialog.dialog);
         this.bot.dialog(HelpDialog.name(), this.helpDialog.dialog);
 
-        Cron.schedule('*/10 * * * * *', function (bot) {
-            bot.beginOrderfoodDialogForUser('29:1piNRAb1_qeQ42IRJEOk5TDpXUMl8_Sn0WZuiN8EUKga9RC3ytjuSxT4vX-Qdokan','DAN');
-        }.bind(null, this));
-
-        // var address =
-        // {
-        //     bot: {
-        //         id:'ISD',
-        //         name:'ISD'
-        //     },
-        //     channelId: "emulator",
-        //     user: {
-        //         id:'inther_d',
-        //         name:'inther_d'
-        //     },
-        //     id:'service_url_id',
-        //     serviceUrl: "http://localhost:9000",
-        //     useAuth:true
-        // }
-        //this.bot.beginDialog(address, '/a');
+        // Cron.schedule('*/10 * * * * *', function (bot) {
+        //     bot.beginOrderfoodDialogForUser('http://localhost:9000','sdf','DAN');
+        // }.bind(null, this));
 
     }
 
@@ -86,7 +69,7 @@ class SkypeBot {
         next();
     }
 
-    beginOrderfoodDialogForUser(userId, userName) {
+    beginOrderfoodDialogForUser(serviceUrl,userId, userName) {
         var address =
         {
             bot: {
@@ -99,7 +82,7 @@ class SkypeBot {
                 name: userName
             },
             id: 'service_url_id',
-            serviceUrl: "http://localhost:9000",
+            serviceUrl: serviceUrl,
             useAuth: true
         }
         this.bot.beginDialog(address, OrderFoodDialog.name());
