@@ -4,8 +4,10 @@
  * and open the template in the editor.
  */
 var botbuilder = require('botbuilder');
-var RootIntent = require('../dialogHandlers/rootDialogHandler.js');
-var OrderFoodDialog = require('../dialogHandlers/orderFoodDialogHandler.js');
+var RootIntent = require('../dialogHandlers/RootIntent.js');
+var OrderFoodDialog = require('../dialogHandlers/OrderFoodDialog.js');
+var GreetingDialog = require('../dialogHandlers/GreetingDialog.js');
+var HelpDialog = require('../dialogHandlers/HelpDialog.js');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 
@@ -53,11 +55,8 @@ class SkypeBot
 
         this.bot.on('contactRelationUpdate', function (message) {
             if (message.action === 'add') {
-                var name = message.user ? message.user.name : null;
-                var reply = new botbuilder.Message()
-                    .address(message.address)
-                    .text("Hello %s... Thanks for adding me. Say 'hello' to see some great demos.", name || 'there');
-                this.send(reply);
+                this.beginDialog(message.address,GreetingDialog.name());
+                this.beginDialog(message.address,HelpDialog.name());
             } else {
                 // delete their data
             }
@@ -80,12 +79,19 @@ class SkypeBot
                     next();
                 }
         });
-        Logger.logger().info("Adding Dialogs");
+        Logger.logger().info("State end point [%s]",this.bot.settings.storage.settings.endpoint.stateEndpoint);
+        Logger.logger().info("Bot connector issuer [%s]",this.bot.settings.storage.settings.endpoint.botConnectorIssuer);
+        Logger.logger().info("Open id metadata [%s]",this.bot.settings.storage.settings.endpoint.msaOpenIdMetadata);
+        Logger.logger().info("Refresh endpoint [%s]",this.bot.settings.storage.settings.endpoint.refreshEndpoint);
         this.rootIntent = new RootIntent();
         this.orderfood = new OrderFoodDialog();
+        this.greetingDialog = new GreetingDialog();
+        this.helpDialog = new HelpDialog();
         
         this.bot.dialog(RootIntent.name(), this.rootIntent.intent);
         this.bot.dialog(OrderFoodDialog.name(), this.orderfood.dialog);
+        this.bot.dialog(GreetingDialog.name(), this.greetingDialog.dialog);
+        this.bot.dialog(HelpDialog.name(), this.helpDialog.dialog);
         // this.bot.dialog('/a',function(session){
         //     session.endDialog("Hello");
         // })

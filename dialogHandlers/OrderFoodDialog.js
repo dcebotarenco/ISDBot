@@ -1,7 +1,5 @@
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
-//var ReadData = require('../readData/ReadData');
-//let data = ReadData.read('./readData/input.dat');
 var google = require('../google/googleConnection');
 var CalendarUtil = require('../util/CalendarUtil');
 var spreadsheetId = process.env.G_SPREADSHEET_ID;
@@ -20,7 +18,7 @@ var columnsMajorDimension = 'COLUMNS';
 class OrderFoodDialog {
 
     constructor() {
-        Logger.logger().info("Creating OrderFood Intent");
+        Logger.logger().info("Creating OrderFood Dialog");
         this.dialogs = [
             // OrderFoodDialog.signIn,
             // OrderFoodDialog.reply,
