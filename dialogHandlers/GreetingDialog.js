@@ -23,7 +23,7 @@ class GreetingDialog {
             ]);
         var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
-        session.send("Hi... I'm the ISD Bot bot for Skype. I can order some food for you.");
+        session.send("Hi... I'm the ISD Bot for Skype. I can order some food for you.");
         session.endDialog("Please provide this key [%s] to Administrator",session.message.user.id);
     }
 
