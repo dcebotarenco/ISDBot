@@ -38,7 +38,7 @@ class SkypeBot {
         this.bot.dialog(HelpDialog.name(), this.helpDialog.dialog);
 
         Cron.schedule('*/10 * * * * *', function (bot) {
-            bot.beginOrderfoodDialogOnChannel('skype');
+            bot.beginOrderfoodDialogForUser('29:1piNRAb1_qeQ42IRJEOk5TDpXUMl8_Sn0WZuiN8EUKga9RC3ytjuSxT4vX-Qdokan','DAN');
         }.bind(null, this));
 
         // var address =
@@ -95,7 +95,7 @@ class SkypeBot {
             },
             channelId: 'skype',
             user: {
-                id: '29:1piNRAb1_qeQ42IRJEOk5TDpXUMl8_Sn0WZuiN8EUKga9RC3ytjuSxT4vX-Qdokan',
+                id: userId,
                 name: userName
             },
             id: 'service_url_id',
