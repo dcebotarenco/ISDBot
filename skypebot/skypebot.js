@@ -12,6 +12,7 @@ var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 
 class SkypeBot {
+
     constructor() {
         Logger.logger().info("Creating Bot");
         this.APP_ID = process.env.MICROSOFT_APP_ID;
@@ -21,26 +22,16 @@ class SkypeBot {
             appPassword: this.PSW
         });
         this.bot = new botbuilder.UniversalBot(this.botConnection);
-
         this.bot.on('contactRelationUpdate', SkypeBot.onBotAddedInContacts);
-
-        // Install First Run middleware and dialog
         this.bot.use({botbuilder: SkypeBot.proxy});
-
-        this.rootIntent = new RootIntent();
-        this.orderfood = new OrderFoodDialog();
-        this.greetingDialog = new GreetingDialog();
-        this.helpDialog = new HelpDialog();
-
-        this.bot.dialog(RootIntent.name(), this.rootIntent.intent);
-        this.bot.dialog(OrderFoodDialog.name(), this.orderfood.dialog);
-        this.bot.dialog(GreetingDialog.name(), this.greetingDialog.dialog);
-        this.bot.dialog(HelpDialog.name(), this.helpDialog.dialog);
+        this.bot.dialog(RootIntent.name(), new RootIntent().intent);
+        this.bot.dialog(OrderFoodDialog.name(), new OrderFoodDialog().dialog);
+        this.bot.dialog(GreetingDialog.name(), new GreetingDialog().dialog);
+        this.bot.dialog(HelpDialog.name(), new HelpDialog().dialog);
 
         // Cron.schedule('*/10 * * * * *', function (bot) {
         //     bot.beginOrderfoodDialogForUser('http://localhost:9000','sdf','DAN');
         // }.bind(null, this));
-
     }
 
     get connection() {

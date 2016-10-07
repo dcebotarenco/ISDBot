@@ -3,6 +3,8 @@
  */
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
+var HelpDialog = require('../dialogHandlers/HelpDialog.js');
+
 
 class GreetingDialog {
     constructor()
@@ -17,14 +19,15 @@ class GreetingDialog {
     {
         var card = new builder.HeroCard(session)
             .title("ISD Bot")
-            .text("Your bots - wherever your users are talking.")
+            .subtitle("Hi! I'm the ISD Bot for Skype.")
+            .text("I can order some food for you.")
             .images([
                 builder.CardImage.create(session, "http://isd-soft.com/wp-content/themes/isd/images/logo.png")
             ]);
-        var msg = new builder.Message(session).attachments([card]);
+        var msg = new builder.Message(session).attachments(card);
         session.send(msg);
-        session.send("Hi... I'm the ISD Bot for Skype. I can order some food for you.");
-        session.endDialog("Please provide this key [%s] to Administrator",session.message.user.id);
+        session.send("Please provide this key [%s] to Administrator",session.message.user.id);
+        session.beginDialog(HelpDialog.name());
     }
 
     get dialog() {
