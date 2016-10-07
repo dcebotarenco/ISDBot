@@ -8,6 +8,8 @@ var RootIntent = require('../dialogHandlers/RootIntent.js');
 var OrderFoodDialog = require('../dialogHandlers/OrderFoodDialog.js');
 var GreetingDialog = require('../dialogHandlers/GreetingDialog.js');
 var HelpDialog = require('../dialogHandlers/HelpDialog.js');
+var GoogleConnection = require('../google/googleConnection.js');
+var ModelBuilder = require('../modelBuilder/ModelBuilder.js');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 

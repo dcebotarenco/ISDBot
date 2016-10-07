@@ -24,7 +24,7 @@ class GreetingDialog {
             .images([
                 builder.CardImage.create(session, "http://isd-soft.com/wp-content/themes/isd/images/logo.png")
             ]);
-        var msg = new builder.Message(session).attachments(card);
+        var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
         session.send("Please provide this key [%s] to Administrator",session.message.user.id);
         session.beginDialog(HelpDialog.name());

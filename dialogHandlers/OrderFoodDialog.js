@@ -20,8 +20,7 @@ class OrderFoodDialog {
     constructor() {
         Logger.logger().info("Creating OrderFood Dialog");
         this.dialogs = [
-            // OrderFoodDialog.signIn,
-            // OrderFoodDialog.reply,
+            OrderFoodDialog.isUserRegistered,
             OrderFoodDialog.fetchMenu,
             OrderFoodDialog.fetchEmployeeChoises,
             OrderFoodDialog.askUserForMeal,
@@ -29,16 +28,21 @@ class OrderFoodDialog {
         ];
     }
 
-    static signIn(session, results, next) {
-        var msg = new builder.Message(session).addAttachment(
-            new builder.SigninCard(session)
-                .text('BotFramework Sign-in Card')
-                .button('Sign-in', 'https://accounts.google.com/Login'));
-        session.send(msg);
+    static isUserRegistered(session, results, next) {
+        google.fetchRegisteredEmployees(session, results, next, OrderFoodDialog.onEmployeesFetched);
     }
 
-    static reply(session, results, next)
-    {
+    static onEmployeesFetched(session, results, next, rows) {
+        let employeeList = ModelBuilder.createRegisteredEmployees(rows);
+        if (employeeList.filter(function (employee) {
+                return session.message.address.user.id === employee.id;
+            }).length === 0) {
+            session.endDialog("Sorry. You are not registered. Contact Administrator")
+        }
+        next();
+    }
+
+    static reply(session, results, next) {
         Logger.logger().info("Reply");
     }
 
