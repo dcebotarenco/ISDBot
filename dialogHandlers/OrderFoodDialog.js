@@ -103,7 +103,7 @@ class OrderFoodDialog {
 
     static fetchMenu(session, results, next) {
         Logger.logger().info("Gather all data from [%s]", menuSheetName);
-        google.fetchGoogleSheet(session, results, next, spreadsheetId, menuSheetName, columnsMajorDimension, OrderFoodDialog.onMenuReceived);
+        google.fetchGoogleSheet(spreadsheetId, menuSheetName, columnsMajorDimension, (response)=> OrderFoodDialog.onMenuReceived(session, results, next, response.values));
     }
 
     static onMenuReceived(session, results, next, columns) {
@@ -117,7 +117,7 @@ class OrderFoodDialog {
 
     static fetchEmployeeChoises(session, results, next) {
         Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(session, results, next, spreadsheetId, choiceSheetName, rowsMajorDimension, OrderFoodDialog.onChoiceReceived);
+        google.fetchGoogleSheet(spreadsheetId, menuSheetName, columnsMajorDimension, (response)=> OrderFoodDialog.onChoiceReceived(session, results, next, response.values));
     }
 
     static onChoiceReceived(session, results, next, rows) {

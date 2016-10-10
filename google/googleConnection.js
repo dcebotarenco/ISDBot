@@ -26,7 +26,7 @@ class GoogleConnection {
         return jwtClient;
     }
 
-    static fetchGoogleSheet(session, results, next, spreadsheetId, sheetName, majorDimension, callback) {
+    static fetchGoogleSheet(spreadsheetId, sheetName, majorDimension, callback) {
         Logger.logger().info('Fetching google sheet [%s]',sheetName);
         var sheets = google.sheets('v4');
 
@@ -41,7 +41,7 @@ class GoogleConnection {
                 return;
             }
             Logger.logger().info('Fetchedgoogle sheet [%s]',sheetName);
-            callback(session, results, next, response.values)
+            callback(response)
         });
     }
 
@@ -87,7 +87,7 @@ class GoogleConnection {
                 return;
             }
             Logger.logger().info('Bot settings fetched');
-            callback(response.values);
+            callback(response);
         });
     }
 }
