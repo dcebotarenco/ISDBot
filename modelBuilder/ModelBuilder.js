@@ -4,6 +4,7 @@ let MenuFactory = require('../orderFood/factory/MenuFactory');
 let Day = require('../orderFood/lunchList/Day');
 let Sheet = require('../orderFood/lunchList/Sheet');
 let Employee = require('../registration/Employee.js');
+let BotSettings = require('../settings/BotSettings.js');
 class ModelBuilder {
     constructor() {
     }
@@ -116,6 +117,16 @@ class ModelBuilder {
         }).filter(function (employee) {
             return employee.skypeAccount.startsWith('inther_') || employee.skypeAccount.startsWith('live:')
         });
+    }
+
+    static createBotSettings(rows) {
+        let settingsMap = new Map();
+        rows.filter(function (row) {
+            return row.length != 0;
+        }).forEach(function (row) {
+            settingsMap.set(row[0],row[1]);
+        });
+        return new BotSettings(settingsMap);
     }
 }
 

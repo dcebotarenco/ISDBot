@@ -14,8 +14,8 @@ var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 
 class SkypeBot {
-
-    constructor() {
+    constructor(settings) {
+        this._settings = settings;
         Logger.logger().info("Creating Bot");
         this.APP_ID = process.env.MICROSOFT_APP_ID;
         this.PSW = process.env.MICROSOFT_APP_PASSWORD;
@@ -31,10 +31,60 @@ class SkypeBot {
         this.bot.dialog(GreetingDialog.name(), new GreetingDialog().dialog);
         this.bot.dialog(HelpDialog.name(), new HelpDialog().dialog);
 
-        // Cron.schedule('*/10 * * * * *', function (bot) {
-        //     bot.beginOrderfoodDialogForUser('http://localhost:9000','sdf','DAN');
-        // }.bind(null, this));
+        this._initOrderFoodCron();
+        this._initUpdateCron();
     }
+
+    _initOrderFoodCron() {
+        let orderFoodCron = this.settings.getValueByKey('cron_orderFood');
+        Logger.logger().info("Creating order food cron at [%s]", orderFoodCron);
+        Cron.schedule(orderFoodCron, function (bot) {
+            GoogleConnection.fetchRegisteredEmployees(bot, function (bot, rows) {
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
+                    if (employee.id) {
+                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.name, employee.id);
+                        bot.beginDialogForUser('http://localhost:9000', employee.id, employee.name, OrderFoodDialog.name());
+                    }
+                    else {
+                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', OrderFoodDialog.name(), employee.name);
+                    }
+                });
+            });
+        }.bind(null, this));
+    }
+
+    _initUpdateCron() {
+        let updateMenuCron = this.settings.getValueByKey('cron_updateMenu');
+        Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
+        Cron.schedule(updateMenuCron, function (bot) {
+            Logger.logger().info('Send begin dialog update menu to administrators');
+        }.bind(null, this));
+    }
+
+    _isOrderFoodCronTheSame(newSettings) {
+        return this.settings.getValueByKey('cron_orderFood') === newSettings.getValueByKey('cron_orderFood');
+    }
+
+    _isUpdateMenuCronTheSame(newSettings) {
+        return this.settings.getValueByKey('cron_updateMenu') === newSettings.getValueByKey('cron_updateMenu');
+    }
+
+    get settings() {
+        return this._settings;
+    }
+
+    updateSettings(newSettings) {
+        this._settings = newSettings;
+        if (!this._isOrderFoodCronTheSame(newSettings)) {
+            Logger.logger().info("Order food cron is not the same");
+            this._initOrderFoodCron();
+        }
+        if (!this._isUpdateMenuCronTheSame(newSettings)) {
+            Logger.logger().info("Update menu cron is not the same");
+            this._initUpdateCron();
+        }
+    }
+
 
     get connection() {
         return this.botConnection;
@@ -62,7 +112,7 @@ class SkypeBot {
         next();
     }
 
-    beginOrderfoodDialogForUser(serviceUrl,userId, userName) {
+    beginDialogForUser(serviceUrl, userId, userName, dialog) {
         var address =
         {
             bot: {
@@ -78,7 +128,7 @@ class SkypeBot {
             serviceUrl: serviceUrl,
             useAuth: true
         }
-        this.bot.beginDialog(address, OrderFoodDialog.name());
+        this.bot.beginDialog(address, dialog);
     }
 
 }
