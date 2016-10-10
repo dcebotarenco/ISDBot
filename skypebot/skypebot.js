@@ -39,7 +39,7 @@ class SkypeBot {
         let orderFoodCron = this.settings.getValueByKey('cron_orderFood');
         Logger.logger().info("Creating order food cron at [%s]", orderFoodCron);
         Cron.schedule(orderFoodCron, function (bot) {
-            GoogleConnection.fetchRegisteredEmployees(bot, function (bot, rows) {
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
                 ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
                     if (employee.id) {
                         Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.name, employee.id);
@@ -49,7 +49,7 @@ class SkypeBot {
                         Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', OrderFoodDialog.name(), employee.name);
                     }
                 });
-            });
+            }(bot, response.values));
         }.bind(null, this));
     }
 

@@ -45,7 +45,7 @@ class GoogleConnection {
         });
     }
 
-    static fetchRegisteredEmployees(session, results, next,callback)
+    static fetchRegisteredEmployees(c)
     {
         Logger.logger().info('Fetching registered employees from dialog');
         var sheets = google.sheets('v4');
@@ -64,29 +64,7 @@ class GoogleConnection {
                 return;
             }
             Logger.logger().info('Registered employees fetched');
-            callback(session, results, next,response.values);
-        });
-    }
-    static fetchRegisteredEmployees(bot,callback)
-    {
-        Logger.logger().info('Fetching registered employees from bot');
-        var sheets = google.sheets('v4');
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
-        var choiceSheetName = month + " " + year;
-        var spreadsheetId = process.env.G_SPREADSHEET_ID;
-        sheets.spreadsheets.values.get({
-            auth: this.getConnection(),
-            spreadsheetId: spreadsheetId,
-            range: choiceSheetName+'!A5:C50',
-            majorDimension: 'ROWS'
-        }, function (err, response) {
-            if (err) {
-                Logger.logger().error('The API returned an error: ' + err);
-                return;
-            }
-            Logger.logger().info('Registered employees fetched');
-            callback(bot,response.values);
+            c(response);
         });
     }
 

@@ -29,7 +29,7 @@ class OrderFoodDialog {
     }
 
     static isUserRegistered(session, results, next) {
-        google.fetchRegisteredEmployees(session, results, next, OrderFoodDialog.onEmployeesFetched);
+        google.fetchRegisteredEmployees((response) => OrderFoodDialog.onEmployeesFetched(session, results, next, response.values));
     }
 
     static onEmployeesFetched(session, results, next, rows) {
