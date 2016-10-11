@@ -32,7 +32,7 @@ class SkypeBot {
         this.bot.dialog(HelpDialog.name(), new HelpDialog().dialog);
 
         this._initOrderFoodCron();
-        this._initUpdateCron();
+        this._initUpdateMenuCron();
     }
 
     _initOrderFoodCron() {
@@ -50,15 +50,19 @@ class SkypeBot {
                     }
                 });
             }(bot, response.values));
-        }.bind(null, this));
+        }.bind(null, this), false);
     }
 
-    _initUpdateCron() {
+    _initUpdateMenuCron() {
         let updateMenuCron = this.settings.getValueByKey('cron_updateMenu');
         Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
         Cron.schedule(updateMenuCron, function (bot) {
             Logger.logger().info('Send begin dialog update menu to administrators');
-        }.bind(null, this));
+            let firstAdminId = bot.settings.getValueByKey('first_menu_administrator');
+            let secondMenuId = bot.settings.getValueByKey('second_menu_administrator');
+            bot.beginDialogForUser('http://localhost:9000', firstAdminId, '', OrderFoodDialog.name());
+            bot.beginDialogForUser('http://localhost:9000', secondMenuId, '', OrderFoodDialog.name());
+        }.bind(null, this), false);
     }
 
     _isOrderFoodCronTheSame(newSettings) {

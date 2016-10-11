@@ -59,7 +59,6 @@ class OrderFoodDialog {
         var today = new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate());
         Logger.logger().info('Today: %s', today);
 
-        new Date().get
         if (sheet.updateDate.getWeek() === today.getWeek()) {
             session.dialogData.upToDate = true;
             Logger.logger().info('Update date is OK!');
@@ -79,7 +78,7 @@ class OrderFoodDialog {
 
     static fetchEmployeeChoices(session, results, next) {
         Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(spreadsheetId, menuSheetName, columnsMajorDimension, (response)=> OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(spreadsheetId, menuSheetName, rowsMajorDimension, (response)=> OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
     }
 
     static onChoicesReceived(session, results, next, rows) {
