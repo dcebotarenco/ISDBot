@@ -7,19 +7,19 @@ var Cron = require('node-cron');
 var http = require('http');
 
 Logger.logger().info("Starting App");
-GoogleConnection.fetchBotSettings((response)=>function (rows) {
-    let settings = ModelBuilder.createBotSettings(rows);
-    let restServer = new Rest();
-    restServer.startServer(process.env.PORT);
-    let skypeBot = new SkypeBot(settings);
-    restServer.attachBot(skypeBot, "/api/messages");
-    Cron.schedule(settings.getValueByKey('cron_updateSettings'), function (skypeBot) {
-        http.get(settings.getValueByKey('bot_url'));
-        GoogleConnection.fetchBotSettings((response) => function (rows) {
-            let settings = ModelBuilder.createBotSettings(rows);
-            skypeBot.updateSettings(settings);
-        }(response.values));
-    }.bind(null, skypeBot));
-}(response.values));
+GoogleConnection.fetchBotSettings((response) => function (rows) {
+        let settings = ModelBuilder.createBotSettings(rows);
+        let restServer = new Rest();
+        restServer.startServer(process.env.PORT);
+        let skypeBot = new SkypeBot(settings);
+        restServer.attachBot(skypeBot, "/api/messages");
+        Cron.schedule(settings.getValueByKey('cron_updateSettings'), function (skypeBot) {
+            http.get(settings.getValueByKey('bot_url'));
+            GoogleConnection.fetchBotSettings((response) => function (rows) {
+                    let settings = ModelBuilder.createBotSettings(rows);
+                    skypeBot.updateSettings(settings);
+                }(response.values));
+        }.bind(null, skypeBot));
+    }(response.values));
 
 
