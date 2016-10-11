@@ -97,7 +97,7 @@ class OrderFoodDialog {
     }
 
     static match() {
-        return /!orderfood/i;
+        return /!(!orderfood cancel (mo|tu|we|th|fr))|(!orderfood (mo|tu|we|th|fr))|(!orderfood)/i;
     }
 }
 module.exports = OrderFoodDialog;
