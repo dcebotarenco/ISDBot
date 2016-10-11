@@ -22,9 +22,8 @@ class OrderFoodDialog {
         this.dialogs = [
             OrderFoodDialog.isUserRegistered,
             OrderFoodDialog.fetchMenu,
-            OrderFoodDialog.fetchEmployeeChoises,
-            OrderFoodDialog.askUserForMeal,
-            OrderFoodDialog.handleUserReplayOnMenuNotUpToDate
+            OrderFoodDialog.fetchEmployeeChoices,
+            OrderFoodDialog.askUserForMeal
         ];
     }
 
@@ -42,64 +41,6 @@ class OrderFoodDialog {
         next();
     }
 
-    static reply(session, results, next) {
-        Logger.logger().info("Reply");
-    }
-
-    static askUserForMeal(session, results, next) {
-        let day = DayFactory.buildDay(session, session.dialogData.sheet.getDayByDate(new Date()));
-        builder.Prompts.choice(session, day.msg, day.choises);
-    }
-
-    static isMenuUpToDate(session, results, next) {
-        Logger.logger().info("Checking update date");
-        google.fetchUpdateDate(session, next, spreadsheetId, OrderFoodDialog.onMenuFetched);
-    }
-
-    static onMenuFetched(session, next, menuDate) {
-        session.dialogData.updateDate = menuDate;
-        Logger.logger().info('Menu Date %s', menuDate);
-        var nextFriday = CalendarUtil.getNextFriday(menuDate);
-        Logger.logger().info('Next Friday %s', nextFriday);
-        var today = new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate());
-        Logger.logger().info('Today: %s', today);
-        if (menuDate <= today && today < nextFriday) {
-            OrderFoodDialog.handleMenuUpToDate(session, next);
-        } else {
-            OrderFoodDialog.handleMenuNotUpToDate(session);
-        }
-    }
-
-    static handleMenuNotUpToDate(session, next) {
-        Logger.logger().info('Update date is OK!');
-        session.dialogData.upToDate = true;
-        next();
-    }
-
-    static handleMenuUpToDate(session) {
-        Logger.logger().warn('Update date is not in interval!');
-        session.dialogData.upToDate = false;
-        session.send("Seems that the lunch list was not updated yet");
-        builder.Prompts.confirm(session, "Are you sure you wish to order anyway?");
-    }
-
-    static handleUserReplayOnMenuNotUpToDate(session, results, next) {
-        if (!OrderFoodDialog.isMenuUpToDate(session)) {
-            Logger.logger().info("User chose '%s'", results.response);
-            if (results.response) {
-                next();
-            } else {
-                Logger.logger().info('OrderFoodDialog ended.');
-                session.endDialog();
-            }
-        } else {
-            next();
-        }
-    }
-
-    static isMenuUpToDate(session) {
-        return session.dialogData.upToDate;
-    }
 
     static fetchMenu(session, results, next) {
         Logger.logger().info("Gather all data from [%s]", menuSheetName);
@@ -112,18 +53,39 @@ class OrderFoodDialog {
         //add Model to Session
         let sheet = ModelBuilder.createMenuModelSheet(columns);
         session.dialogData.sheet = sheet;
+        Logger.logger().info('Menu Date %s', sheet.updateDate);
+        var nextFriday = CalendarUtil.getNextFriday(sheet.updateDate);
+        Logger.logger().info('Next Friday %s', nextFriday);
+        var today = new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate());
+        Logger.logger().info('Today: %s', today);
+
+        new Date().get
+        if (sheet.updateDate.getWeek() === today.getWeek()) {
+            session.dialogData.upToDate = true;
+            Logger.logger().info('Update date is OK!');
+        } else {
+            session.dialogData.upToDate = false;
+            Logger.logger().warn('Update date is not in interval!');
+            session.endDialog("Seems that the lunch list was not updated yet");
+        }
         next();
     }
 
-    static fetchEmployeeChoises(session, results, next) {
-        Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(spreadsheetId, menuSheetName, columnsMajorDimension, (response)=> OrderFoodDialog.onChoiceReceived(session, results, next, response.values));
+    static askUserForMeal(session, results, next) {
+        let day = DayFactory.buildDay(session, session.dialogData.sheet.getDayByDate(new Date()));
+        builder.Prompts.choice(session, day.msg, day.choises);
     }
 
-    static onChoiceReceived(session, results, next, rows) {
+
+    static fetchEmployeeChoices(session, results, next) {
+        Logger.logger().info("Gather all data from [%s]", choiceSheetName);
+        google.fetchGoogleSheet(spreadsheetId, menuSheetName, columnsMajorDimension, (response)=> OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
+    }
+
+    static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("OrderFoodDialog.onChoiceReceived");
-        let choises = ModelBuilder.createChoiceModelSheet(rows, session);
-        session.dialogData.choises = choises;
+        let choices = ModelBuilder.createChoiceModelSheet(rows, session);
+        session.dialogData.choices = choices;
         next();
     }
 

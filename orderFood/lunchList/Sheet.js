@@ -2,12 +2,18 @@
  * Created by dcebotarenco on 9/28/2016.
  */
 class Sheet {
-    constructor(days) {
+    constructor(days, updateDate) {
         this.days = days;
+        this._updateDate = updateDate
     }
 
     get dayList() {
         return this.days;
+    }
+
+    get updateDate()
+    {
+        return this._updateDate;
     }
 
     getDayByDate(date) {

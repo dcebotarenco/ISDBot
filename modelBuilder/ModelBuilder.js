@@ -20,10 +20,10 @@ class ModelBuilder {
         var pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
         var updateDate = new Date(columns[1][0].replace(pattern, '$3-$2-$1'));
         let days = [];
-        let columnsWithoutFirstColumn = columns.slice(updateDate.getDay(), 6);
-        columnsWithoutFirstColumn.forEach(function (column, index) {
 
 
+        let availableColumnsBasedOnUpdateDate = columns.slice(updateDate.getDay(), 6);
+        availableColumnsBasedOnUpdateDate.forEach(function (column, index) {
             let mealsPerDay = [];
             column.forEach(function (row, index) {
                 if (firstMealIndexes.filter(function (e) {
@@ -51,7 +51,7 @@ class ModelBuilder {
             let dayDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + index);
             days.push(new Day(dayDate, menu));
         });
-        return new Sheet(days);
+        return new Sheet(days,updateDate);
     }
 
     static createChoiceModelSheet(rows, session) {
