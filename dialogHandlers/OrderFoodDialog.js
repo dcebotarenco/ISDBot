@@ -2,23 +2,14 @@ var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var google = require('../google/googleConnection');
 var CalendarUtil = require('../util/CalendarUtil');
-var spreadsheetId = process.env.G_SPREADSHEET_ID;
-
-var Button = require('../view/Button');
-var Menu = require('../view/Menu');
-var Day = require('../view/Day');
 var DayFactory = require('../view/DayFactory');
-var month = new Date().toLocaleString("en-us", {month: "long"});
-var year = new Date().getFullYear();
-var menuSheetName = 'Lunch Menu';
-var choiceSheetName = month + " " + year;
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
-var rowsMajorDimension = 'ROWS';
-var columnsMajorDimension = 'COLUMNS';
+
 class OrderFoodDialog {
 
     constructor() {
         Logger.logger().info("Creating OrderFood Dialog");
+        this.menuSheetName = 'Lunch Menu';
         this.dialogs = [
             OrderFoodDialog.isUserRegistered,
             OrderFoodDialog.fetchMenu,
@@ -43,8 +34,8 @@ class OrderFoodDialog {
 
 
     static fetchMenu(session, results, next) {
-        Logger.logger().info("Gather all data from [%s]", menuSheetName);
-        google.fetchGoogleSheet(spreadsheetId, menuSheetName, columnsMajorDimension, (response)=> OrderFoodDialog.onMenuReceived(session, results, next, response.values));
+        Logger.logger().info("Gather all data from [%s]", this.menuSheetName);
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, this.menuSheetName, 'COLUMNS', (response)=> OrderFoodDialog.onMenuReceived(session, results, next, response.values));
     }
 
     static onMenuReceived(session, results, next, columns) {
@@ -77,8 +68,11 @@ class OrderFoodDialog {
 
 
     static fetchEmployeeChoices(session, results, next) {
+        var month = new Date().toLocaleString("en-us", {month: "long"});
+        var year = new Date().getFullYear();
+        var choiceSheetName = month + " " + year;
         Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(spreadsheetId, menuSheetName, rowsMajorDimension, (response)=> OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, this.menuSheetName, 'ROWS', (response)=> OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
     }
 
     static onChoicesReceived(session, results, next, rows) {
