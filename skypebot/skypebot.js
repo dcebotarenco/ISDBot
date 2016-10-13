@@ -39,6 +39,7 @@ class SkypeBot {
         let orderFoodCron = this.settings.getValueByKey('cron_orderFood');
         Logger.logger().info("Creating order food cron at [%s]", orderFoodCron);
         Cron.schedule(orderFoodCron, function (bot) {
+            Logger.logger().info("Running order food cron");
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
                 ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
                     if (employee.id) {
@@ -50,7 +51,7 @@ class SkypeBot {
                     }
                 });
             }(bot, response.values));
-        }.bind(null, this), false);
+        }.bind(null, this));
     }
 
     _initUpdateMenuCron() {
@@ -62,7 +63,7 @@ class SkypeBot {
             let secondMenuId = bot.settings.getValueByKey('second_menu_administrator');
             bot.beginDialogForUser('http://localhost:9000', firstAdminId, '', OrderFoodDialog.name());
             bot.beginDialogForUser('http://localhost:9000', secondMenuId, '', OrderFoodDialog.name());
-        }.bind(null, this), false);
+        }.bind(null, this));
     }
 
     _isOrderFoodCronTheSame(newSettings) {
