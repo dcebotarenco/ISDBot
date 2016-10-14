@@ -1,32 +1,39 @@
 class User {
-  constructor(id, skypeName, fullName) {
-    this._id = id;
-    this._skypeName = skypeName;
-    this._fullName = fullName;
-    this._dayChoiceMap = new Map();
-  }
+    constructor(id, skypeName, fullName) {
+        this._id = id;
+        this._skypeName = skypeName;
+        this._fullName = fullName;
+        this._dayChoiceMap = new Map();
+    }
 
-  get id() {
-    return this._id;
-  }
+    get id() {
+        return this._id;
+    }
 
-  get skypeName() {
-    return this._skypeName;
-  }
-  get fullName() {
-    return this._fullName;
-  }
+    get skypeName() {
+        return this._skypeName;
+    }
 
-  get dayChoiceMap() {
-    return this._dayChoiceMap;
-  }
+    get fullName() {
+        return this._fullName;
+    }
 
-  addListOfChoicesPerDay(dayChoice, choices) {
-    this._dayChoiceMap.set(dayChoice, choices);
-  }
+    get dayChoiceMap() {
+        return this._dayChoiceMap;
+    }
 
-  getChoiceMapByDayChoice(dayChoice) {
-    return this._dayChoiceMap.get[dayChoice];
-  }
+    addListOfChoicesPerDay(dayChoice, choices) {
+        let obj =
+        {
+            day: dayChoice,
+            choices: choices
+        };
+        let key = ''+ dayChoice.date.getFullYear() + dayChoice.date.getMonth() + dayChoice.date.getDate();
+        this._dayChoiceMap.set(key, obj);
+    }
+
+    getChoiceMapByDayChoice(date) {
+        return this._dayChoiceMap.get[date];
+    }
 }
 module.exports = User;
