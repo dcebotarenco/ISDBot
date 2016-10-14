@@ -14,7 +14,7 @@
   "license": "ISC",
   "description": "",
   "scripts": {
-    "run": "node main.js"
+    "start": "node main.js"
   },
   "engines": {
     "node": "6.4.0"
