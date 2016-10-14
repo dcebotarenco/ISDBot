@@ -93,7 +93,7 @@ class OrderFoodDialog {
         var year = new Date().getFullYear();
         var choiceSheetName = month + " " + year;
         Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, menuSheetName, 'ROWS', (response) => OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
     }
 
     static onChoicesReceived(session, results, next, rows) {

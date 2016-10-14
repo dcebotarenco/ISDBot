@@ -1,10 +1,10 @@
 class MealGroup {
   constructor(meals) {
-    this.meals = meals;
+    this._meals = meals;
   }
 
-  get mealsVar() {
-    return this.meals;
+  get meals() {
+    return this._meals;
   }
 }
 module.exports = MealGroup;
