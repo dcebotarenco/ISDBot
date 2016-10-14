@@ -1,9 +1,9 @@
-var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var google = require('../google/googleConnection');
 var CalendarUtil = require('../util/CalendarUtil');
-var DayFactory = require('../view/DayFactory');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
+var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog');
+var moment = require('moment');
 var menuSheetName = 'Lunch Menu';
 class OrderFoodDialog {
 
@@ -13,7 +13,7 @@ class OrderFoodDialog {
             OrderFoodDialog.isUserRegistered,
             OrderFoodDialog.fetchMenu,
             OrderFoodDialog.fetchEmployeeChoices,
-            OrderFoodDialog.askUserForMeal
+            OrderFoodDialog.resolveAction
         ];
     }
 
@@ -37,30 +37,55 @@ class OrderFoodDialog {
     }
 
     static onMenuReceived(session, results, next, columns) {
-        //create Model
-        // save(session,days,false);
-        //add Model to Session
         let sheet = ModelBuilder.createMenuModelSheet(columns);
-        session.dialogData.sheet = sheet;
+        session.userData.sheet = sheet;
         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
         Logger.logger().info('Today: %s', today);
 
         if (sheet.updateDate.getWeek() === today.getWeek()) {
             Logger.logger().info('Sheet week[%s] is in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
-            session.dialogData.upToDate = true;
             Logger.logger().info('Update date is OK!');
         } else {
             Logger.logger().info('Sheet week[%s] is not in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
-            session.dialogData.upToDate = false;
             Logger.logger().warn('Update date is not in interval!');
             session.endDialog("Seems that the lunch list was not updated yet");
         }
         next();
     }
 
-    static askUserForMeal(session, results, next) {
-        let day = DayFactory.buildDay(session, session.dialogData.sheet.getDayByDate(new Date()));
-        builder.Prompts.choice(session, day.msg, day.choises);
+    static resolveAction(session, results, next)
+    {
+        Logger.logger().info("Resolving Orderfood Dialog");
+        let cancelOrderRegex = /(!orderfood cancel (mo|tu|we|th|fr))/i;
+        let isCancelOrder = cancelOrderRegex.exec(session.message.text);
+        let placeOrderOnCurrentDayRegex = /(!orderfood)/i;
+        let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
+        let placeOrderOnSpecificDayRegex = /(!orderfood (mo|tu|we|th|fr))/i;
+        let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(session.message.text);
+
+        if (isPlaceOrderOnSpecificDay) {
+            Logger.logger().info("Place order for a specific day");
+            let userDay = CalendarUtil.resolveDate(isPlaceOrderOnSpecificDay[2]);
+            if (userDay.isSameOrAfter(moment(new Date()),'day')) {
+                session.userData.orderActionDate = userDay;
+                session.beginDialog(PlaceOrderDialog.name());
+            } else {
+                session.endDialog("Hey Dude, look at the calendar. You cannot place an order in the past. Come on.. |-(")
+            }
+        } else if (isPlaceOrderOnCurrentDay) {
+            Logger.logger().info("Place order for current day");
+            session.userData.orderActionDate = moment(new Date());
+            session.beginDialog(PlaceOrderDialog.name());
+        } else if (isCancelOrder) {
+            Logger.logger().info("Cancel order for a specific day");
+            let date = CalendarUtil.resolveDate(isCancelOrder[3]);
+            session.userData.orderActionDate = date;
+        } else {
+            Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
+            Logger.logger().info("Place order for current day");
+            session.userData.orderActionDate = moment(new Date());
+            session.beginDialog(PlaceOrderDialog.name());
+        }
     }
 
     static fetchEmployeeChoices(session, results, next) {
@@ -87,7 +112,7 @@ class OrderFoodDialog {
     }
 
     static match() {
-        return /!(!orderfood cancel (mo|tu|we|th|fr))|(!orderfood (mo|tu|we|th|fr))|(!orderfood)/i;
+        return /(!orderfood cancel (mo|tu|we|th|fr))|(!orderfood (mo|tu|we|th|fr))|(!orderfood)/i;
     }
 }
 module.exports = OrderFoodDialog;

@@ -1,12 +1,38 @@
 /**
  * Created by dcebotarenco on 9/21/2016.
  */
+let moment = require('moment');
 class CalendarUtil {
     static getNextFriday(date) {
         var dayOfWeek = 5;
         date = new Date(date.getTime());
         date.setDate(date.getDate() + (dayOfWeek + 7 - date.getDay()) % 7);
         return date;
+    }
+
+    static resolveDate(userChoice)
+    {
+        //mo|tu|we|th|fr
+        let weekNumber;
+        switch (userChoice)
+        {
+            case 'mo':
+                weekNumber = 1;
+                break;
+            case 'tu':
+                weekNumber = 2;
+                break;
+            case 'we':
+                weekNumber = 3;
+                break;
+            case 'th':
+                weekNumber = 4;
+                break;
+            case 'fr':
+                weekNumber = 5;
+                break;
+        }
+        return moment().day(weekNumber);
     }
 }
 

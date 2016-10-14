@@ -8,6 +8,7 @@ var RootIntent = require('../dialogHandlers/RootIntent.js');
 var OrderFoodDialog = require('../dialogHandlers/OrderFoodDialog.js');
 var GreetingDialog = require('../dialogHandlers/GreetingDialog.js');
 var HelpDialog = require('../dialogHandlers/HelpDialog.js');
+var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog.js');
 var GoogleConnection = require('../google/googleConnection.js');
 var ModelBuilder = require('../modelBuilder/ModelBuilder.js');
 var Logger = require('../logger/logger');
@@ -30,6 +31,7 @@ class SkypeBot {
         this.bot.dialog(OrderFoodDialog.name(), new OrderFoodDialog().dialog);
         this.bot.dialog(GreetingDialog.name(), new GreetingDialog().dialog);
         this.bot.dialog(HelpDialog.name(), new HelpDialog().dialog);
+        this.bot.dialog(PlaceOrderDialog.name(), new PlaceOrderDialog().dialog);
 
         this._initOrderFoodCron();
         this._initUpdateMenuCron();
@@ -44,7 +46,7 @@ class SkypeBot {
                 ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
                     if (employee.id) {
                         Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.name, employee.id);
-                        bot.beginDialogForUser('http://localhost:9000', employee.id, employee.name, OrderFoodDialog.name());
+                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.name, OrderFoodDialog.name());
                     }
                     else {
                         Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', OrderFoodDialog.name(), employee.name);
@@ -61,8 +63,8 @@ class SkypeBot {
             Logger.logger().info('Send begin dialog update menu to administrators');
             let firstAdminId = bot.settings.getValueByKey('first_menu_administrator');
             let secondMenuId = bot.settings.getValueByKey('second_menu_administrator');
-            bot.beginDialogForUser('http://localhost:9000', firstAdminId, '', OrderFoodDialog.name());
-            bot.beginDialogForUser('http://localhost:9000', secondMenuId, '', OrderFoodDialog.name());
+            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), firstAdminId, '', OrderFoodDialog.name());
+            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), secondMenuId, '', OrderFoodDialog.name());
         }.bind(null, this));
     }
 
@@ -132,7 +134,7 @@ class SkypeBot {
             id: 'service_url_id',
             serviceUrl: serviceUrl,
             useAuth: true
-        }
+        };
         this.bot.beginDialog(address, dialog);
     }
 
