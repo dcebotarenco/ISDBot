@@ -33,6 +33,8 @@ class SkypeBot {
         this.bot.dialog(HelpDialog.name(), new HelpDialog().dialog);
         this.bot.dialog(PlaceOrderDialog.name(), new PlaceOrderDialog().dialog);
 
+        // GoogleConnection.updateValue('C', 10, 'test2', 'bot_settings', function () {});
+
         this._initOrderFoodCron();
         this._initUpdateMenuCron();
     }

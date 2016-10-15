@@ -9,6 +9,7 @@ let Choice = require('../orderFood/employeesChoises/Choice');
 let WorkingDay = require('../orderFood/employeesChoises/WorkingDay');
 let User = require('../orderFood/employeesChoises/User');
 let ChoicesSheet = require('../orderFood/employeesChoises/ChoicesSheet');
+let SheetUtil = require('../util/SheetUtil');
 class ModelBuilder {
     constructor() {
     }
@@ -70,19 +71,17 @@ class ModelBuilder {
      */
     static createChoiceModelSheet(sheetRows) {
         Logger.logger().info("Creating choice model");
-        let rowIndent = 4;
-        let datesHeader = sheetRows[3].slice(rowIndent, sheetRows[3].length);
 
         let workingDays = [];
         Logger.logger().info("Creating WorkingDay");
-        datesHeader.forEach(function (date, columnIndex) {
+        sheetRows[3].forEach(function (date, columnIndex) {
             if (ModelBuilder.isNumeric(date)) {
                 let currentDate = new Date(new Date().getFullYear(), new Date().getMonth(), parseInt(date));
-                Logger.logger().info("Created a WorkingDay for date [%s] in position [%d]", currentDate, columnIndex + rowIndent);
-                workingDays.push(new WorkingDay(currentDate, columnIndex + rowIndent));
+                let columnLetter = SheetUtil.columnToLetter(columnIndex + 1);
+                Logger.logger().info("Created a WorkingDay for date [%s] on columns index [%d] and column letter [%s]", currentDate, columnIndex, columnLetter);
+                workingDays.push(new WorkingDay(currentDate, columnIndex, columnLetter));
             }
         });
-
 
         let users = [];
         sheetRows.forEach(function (row, index, rows) {
@@ -110,7 +109,7 @@ class ModelBuilder {
                 Logger.logger().info('Row [%d] is empty. Next user', index);
             }
         });
-        return new ChoicesSheet(workingDays,users);
+        return new ChoicesSheet(workingDays, users);
     }
 
     /**
