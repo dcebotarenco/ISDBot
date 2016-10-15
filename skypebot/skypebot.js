@@ -9,6 +9,7 @@ var OrderFoodDialog = require('../dialogHandlers/OrderFoodDialog.js');
 var GreetingDialog = require('../dialogHandlers/GreetingDialog.js');
 var HelpDialog = require('../dialogHandlers/HelpDialog.js');
 var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog.js');
+var JokeDialog = require('../dialogHandlers/JokeDialog.js');
 var GoogleConnection = require('../google/googleConnection.js');
 var ModelBuilder = require('../modelBuilder/ModelBuilder.js');
 var Logger = require('../logger/logger');
@@ -32,11 +33,13 @@ class SkypeBot {
         this.bot.dialog(GreetingDialog.name(), new GreetingDialog().dialog);
         this.bot.dialog(HelpDialog.name(), new HelpDialog().dialog);
         this.bot.dialog(PlaceOrderDialog.name(), new PlaceOrderDialog().dialog);
+        this.bot.dialog(JokeDialog.name(), new JokeDialog(this._settings).dialog);
 
         // GoogleConnection.updateValue('C', 10, 'test2', 'bot_settings', function () {});
 
         this._initOrderFoodCron();
         this._initUpdateMenuCron();
+        this._initJokesCron();
     }
 
     _initOrderFoodCron() {
@@ -52,6 +55,25 @@ class SkypeBot {
                     }
                     else {
                         Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', OrderFoodDialog.name(), employee.name);
+                    }
+                });
+            }(bot, response.values));
+        }.bind(null, this));
+    }
+
+    _initJokesCron() {
+        let jokes_cron = this.settings.getValueByKey('cron_jokes');
+        Logger.logger().info("Creating jokes cron at [%s]", jokes_cron);
+        Cron.schedule(jokes_cron, function (bot) {
+            Logger.logger().info("Running jokes cron");
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
+                    if (employee.id) {
+                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", JokeDialog.name(), employee.name, employee.id);
+                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.name, JokeDialog.name());
+                    }
+                    else {
+                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', JokeDialog.name(), employee.name);
                     }
                 });
             }(bot, response.values));
@@ -78,6 +100,10 @@ class SkypeBot {
         return this.settings.getValueByKey('cron_updateMenu') === newSettings.getValueByKey('cron_updateMenu');
     }
 
+    _isJokeCronTheSame(newSettings) {
+        return this.settings.getValueByKey('cron_jokes') === newSettings.getValueByKey('cron_jokes');
+    }
+
     get settings() {
         return this._settings;
     }
@@ -90,7 +116,11 @@ class SkypeBot {
         }
         if (!this._isUpdateMenuCronTheSame(newSettings)) {
             Logger.logger().info("Update menu cron is not the same");
-            this._initUpdateCron();
+            this._initUpdateMenuCron();
+        }
+        if (!this._isJokeCronTheSame(newSettings)) {
+            Logger.logger().info("Update menu cron is not the same");
+            this._initUpdateMenuCron();
         }
     }
 
