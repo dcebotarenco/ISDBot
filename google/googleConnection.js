@@ -70,8 +70,6 @@ class GoogleConnection {
     static fetchBotSettings(callback) {
         Logger.logger().info('Fetching Bot settings');
         var sheets = google.sheets('v4');
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
         var choiceSheetName = "bot_settings";
         var spreadsheetId = process.env.G_SPREADSHEET_ID;
         sheets.spreadsheets.values.get({

@@ -20,5 +20,26 @@ class SheetUtil {
         }
         return column;
     }
+
+    static resolveMenuType(message) {
+        var array = message.split('-');
+        var type = array[0];
+        let menuType = null;
+        switch (type) {
+            case 'FirstMenu':
+                menuType = '1';
+                break;
+            case 'SecondMenu':
+                menuType = '2';
+                break;
+            case 'PostMenu':
+                menuType = '3';
+                break;
+            case 'DietMenu':
+                menuType = '4';
+                break;
+                return menuType + array[1];
+        }
+    }
 }
 module.exports = SheetUtil;

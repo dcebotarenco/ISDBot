@@ -28,12 +28,13 @@ class User {
             day: dayChoice,
             choices: choices
         };
-        let key = ''+ dayChoice.date.getFullYear() + dayChoice.date.getMonth() + dayChoice.date.getDate();
+        let key = '' + dayChoice.date.getFullYear() + dayChoice.date.getMonth() + dayChoice.date.getDate();
         this._dayChoiceMap.set(key, obj);
     }
 
-    getChoiceMapByDayChoice(date) {
-        return this._dayChoiceMap.get[date];
+    getChoicesByDate(date) {
+        let key = '' + date.getFullYear() + date.getMonth() + date.getDate();
+        return this._dayChoiceMap.get(key);
     }
 }
 module.exports = User;
