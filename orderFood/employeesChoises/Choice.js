@@ -1,5 +1,5 @@
 let GoogleConnection = require('../../google/googleConnection');
-let Logger = require('../logger/logger');
+let Logger = require('../../logger/logger');
 
 class Choice {
     /*choiceMenuName stands for 'S' or 'M'*/
