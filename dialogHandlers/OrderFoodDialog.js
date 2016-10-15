@@ -24,8 +24,8 @@ class OrderFoodDialog {
     static onEmployeesFetched(session, results, next, rows) {
         let employeeList = ModelBuilder.createRegisteredEmployees(rows);
         if (employeeList.filter(function (employee) {
-            return session.message.address.user.id === employee.id;
-        }).length === 0) {
+                return session.message.address.user.id === employee.id;
+            }).length === 0) {
             session.endDialog("Sorry. You are not registered. Contact Administrator")
         }
         next();
@@ -44,7 +44,12 @@ class OrderFoodDialog {
 
         if (sheet.updateDate.getWeek() === today.getWeek()) {
             Logger.logger().info('Sheet week[%s] is in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
-            Logger.logger().info('Update date is OK!');
+            if (today.getDay() < 5) {
+                Logger.logger().info('Update date is OK!');
+            } else {
+                Logger.logger().info('Today is weekend');
+                session.endDialog("Seems that this is weekend :) Nobody is working now. See you on Monday");
+            }
         } else {
             Logger.logger().info('Sheet week[%s] is not in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
             Logger.logger().warn('Update date is not in interval!');
@@ -53,8 +58,7 @@ class OrderFoodDialog {
         next();
     }
 
-    static resolveAction(session, results, next)
-    {
+    static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
         let cancelOrderRegex = /(!orderfood cancel (mo|tu|we|th|fr))/i;
         let isCancelOrder = cancelOrderRegex.exec(session.message.text);
@@ -66,10 +70,11 @@ class OrderFoodDialog {
         if (isPlaceOrderOnSpecificDay) {
             Logger.logger().info("Place order for a specific day");
             let userDay = CalendarUtil.resolveDate(isPlaceOrderOnSpecificDay[2]);
-            if (userDay.isSameOrAfter(moment(new Date()),'day')) {
+            if (userDay.isSameOrAfter(moment(new Date()), 'day')) {
                 session.userData.orderActionDate = userDay;
                 session.beginDialog(PlaceOrderDialog.name());
             } else {
+                session.userData.choicesSheet = null;
                 session.endDialog("Hey Dude, look at the calendar. You cannot place an order in the past. Come on.. |-(")
             }
         } else if (isPlaceOrderOnCurrentDay) {
@@ -97,9 +102,9 @@ class OrderFoodDialog {
     }
 
     static onChoicesReceived(session, results, next, rows) {
-        Logger.logger().info("OrderFoodDialog.onChoiceReceived");
-        let choices = ModelBuilder.createChoiceModelSheet(rows, session);
-        session.dialogData.choices = choices;
+        Logger.logger().info("Choices Received");
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
+        session.userData.choicesSheet = choicesSheet;
         next();
     }
 

@@ -1,4 +1,4 @@
-class ChoiceDay {
+class WorkingDay {
   constructor(date, columnNumber) {
     this._date = date;
     this._columnNumber = columnNumber;
@@ -20,6 +20,6 @@ class ChoiceDay {
     this._choices.push.apply(this._choices, choiceList);
   }
 }
-module.exports = ChoiceDay;
+module.exports = WorkingDay;
 
 

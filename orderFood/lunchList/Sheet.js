@@ -16,6 +16,7 @@ class Sheet {
         return this._updateDate;
     }
 
+
     getDayByDate(date) {
         return this.days.filter(function (day) {
             let today = new Date(date.getFullYear(), date.getMonth(), date.getDate());

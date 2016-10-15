@@ -3,7 +3,7 @@
  */
 var builder = require('botbuilder');
 
-class Day {
+class MenusView {
     constructor(session, menuList) {
         this.session = session;
         this.menuList = menuList;
@@ -42,4 +42,4 @@ class Day {
     }
 }
 
-module.exports = Day;
+module.exports = MenusView;

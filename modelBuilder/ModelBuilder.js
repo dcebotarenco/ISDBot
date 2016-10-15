@@ -6,12 +6,18 @@ let Sheet = require('../orderFood/lunchList/Sheet');
 let Employee = require('../registration/Employee.js');
 let BotSettings = require('../settings/BotSettings.js');
 let Choice = require('../orderFood/employeesChoises/Choice');
-let ChoiceDay = require('../orderFood/employeesChoises/ChoiceDay');
+let WorkingDay = require('../orderFood/employeesChoises/WorkingDay');
 let User = require('../orderFood/employeesChoises/User');
+let ChoicesSheet = require('../orderFood/employeesChoises/ChoicesSheet');
 class ModelBuilder {
     constructor() {
     }
 
+    /**
+     * Create Menu Sheet
+     * @param columns
+     * @returns {Sheet}
+     */
     static createMenuModelSheet(columns) {
         let firstMealIndexes = [3, 7, 11, 15];
         let secondMealIndexes = [4, 8, 12, 16];
@@ -57,25 +63,29 @@ class ModelBuilder {
         return new Sheet(days, updateDate);
     }
 
-    static createChoiceModelSheet(rows) {
+    /**
+     * Create Employee Choices Sheet
+     * @param sheetRows
+     * @returns {ChoicesSheet}
+     */
+    static createChoiceModelSheet(sheetRows) {
         Logger.logger().info("Creating choice model");
         let rowIndent = 4;
-        let datesAndOtherStuff = rows[3].slice(rowIndent, rows[3].length);
-        let choiceDays = [];
+        let datesHeader = sheetRows[3].slice(rowIndent, sheetRows[3].length);
 
-
-        Logger.logger().info("Creating ChoiceDay");
-        datesAndOtherStuff.forEach(function (day, index) {
-            if (ModelBuilder.isNumeric(day)) {
-                let currentDate = new Date(new Date().getFullYear(), new Date().getMonth(), parseInt(day));
-                Logger.logger().info("Created a ChoiceDay for date [%s] in position [%d]", currentDate, index + rowIndent);
-                choiceDays.push(new ChoiceDay(currentDate, index + rowIndent));
+        let workingDays = [];
+        Logger.logger().info("Creating WorkingDay");
+        datesHeader.forEach(function (date, columnIndex) {
+            if (ModelBuilder.isNumeric(date)) {
+                let currentDate = new Date(new Date().getFullYear(), new Date().getMonth(), parseInt(date));
+                Logger.logger().info("Created a WorkingDay for date [%s] in position [%d]", currentDate, columnIndex + rowIndent);
+                workingDays.push(new WorkingDay(currentDate, columnIndex + rowIndent));
             }
         });
 
 
         let users = [];
-        rows.forEach(function (row, index, rows) {
+        sheetRows.forEach(function (row, index, rows) {
             let doesRowExists = row.length > 0;
             if (doesRowExists) {
                 Logger.logger().info("Row Exists");
@@ -88,53 +98,7 @@ class ModelBuilder {
                     let skypeAccountIsValid = skypeAccount.startsWith('live:') || skypeAccount.startsWith('inther_');
                     Logger.logger().info("Found Row with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
                     if (skypeAccountIsValid) {
-                        Logger.logger().info("Skype account is valid");
-                        let user = new User(id, skypeAccount, fullName);
-                        Logger.logger().info("User created with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
-                        Logger.logger().info("Determining choices for user[%s]..", user.skypeName);
-                        choiceDays.forEach(function (day) {
-                            let choices = [];
-                            Logger.logger().info("Determining choices for user[%s] for day [%s]", user.skypeName, day.date);
-                            let firstChoice = row[day.columnNumber];
-                            let choiceMenuNumber = firstChoice.charAt(0);
-                            let choiceMenuName = firstChoice.charAt(1);
-                            let choice = new Choice(choiceMenuNumber, choiceMenuName, day, user, index + 1);
-                            choices.push(choice);
-                            Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, firstChoice, day.date);
-                            Logger.logger().info("Check next row for new choices for user[%s] and day[%s]", user.skypeName, day.date);
-                            for (let nextIndex = index + 1; nextIndex < rows.length; nextIndex++) {
-                                let nextRowExists = rows[nextIndex].length > 0;
-                                if (nextRowExists) {
-                                    Logger.logger().info("Next row exists");
-                                    let isNextRowANewUser = rows[nextIndex][1].length > 0;
-                                    let isNextRowATotal = rows[nextIndex][2].includes("Total Main");
-                                    if (!isNextRowANewUser) {
-                                        Logger.logger().info("Next row is not a new user");
-                                        if (!isNextRowATotal) {
-                                            Logger.logger().info("Next row is not totals");
-                                            let nextChoiceValue = rows[nextIndex][day.columnNumber];
-                                            let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
-                                            let nextChoiceMenuName = nextChoiceValue.charAt(1);
-                                            let nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, day, user, nextIndex + 1);
-                                            choices.push(nextChoice);
-                                            Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, day.date);
-                                        } else {
-                                            Logger.logger().info('On the next row a totals');
-                                            break;
-                                        }
-                                    } else {
-                                        Logger.logger().info('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextIndex][1], user.skypeName);
-                                        break;
-                                    }
-
-                                } else {
-                                    Logger.logger().info('Next Row [%d] is empty. Next user', nextIndex);
-                                    break;
-                                }
-                            }
-                            user.addListOfChoicesPerDay(day, choices);
-                            day.insertChoices(choices);
-                        });
+                        let user = ModelBuilder.createUser(row, index, rows, workingDays);
                         users.push(user);
                     } else {
                         Logger.logger().info('Row [%d] has id but skype account[%s] is not valid', index, skypeAccount);
@@ -146,8 +110,83 @@ class ModelBuilder {
                 Logger.logger().info('Row [%d] is empty. Next user', index);
             }
         });
+        return new ChoicesSheet(workingDays,users);
+    }
 
-        return users;
+    /**
+     * Creates User
+     * @param row google sheet row
+     * @param index index of current row
+     * @param rows array
+     * @param workingWeekDays working days
+     * @returns {User}
+     */
+    static createUser(row, index, rows, workingWeekDays) {
+        let id = row[0];
+        let skypeAccount = row[1];
+        let fullName = row[2];
+        Logger.logger().info("Skype account is valid");
+        let user = new User(id, skypeAccount, fullName);
+        Logger.logger().info("User created with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
+        Logger.logger().info("Determining choices for user[%s]..", user.skypeName);
+        workingWeekDays.forEach(function (workingDay) {
+            let choices = ModelBuilder.getUserChoices(user, workingDay, row, index, rows);
+            user.addListOfChoicesPerDay(workingDay, choices);
+            workingDay.insertChoices(choices);
+        });
+        return user;
+    }
+
+    /**
+     * Gets user choices per a working day, and check if there are more choices for the same user on the next row
+     * @param user
+     * @param workingDay
+     * @param row
+     * @param currentRowIndex
+     * @param rows
+     * @returns {Array}
+     */
+    static getUserChoices(user, workingDay, row, currentRowIndex, rows) {
+        let choices = [];
+        Logger.logger().info("Determining choices for user[%s] for day [%s]", user.skypeName, workingDay.date);
+        let firstChoice = row[workingDay.columnNumber];
+        let choiceMenuNumber = firstChoice.charAt(0);
+        let choiceMenuName = firstChoice.charAt(1);
+        let choice = new Choice(choiceMenuNumber, choiceMenuName, workingDay, user, currentRowIndex + 1);
+        choices.push(choice);
+        Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, firstChoice, workingDay.date);
+        Logger.logger().info("Check next row for new choices for user[%s] and working day[%s]", user.skypeName, workingDay.date);
+        for (let nextRowIndex = currentRowIndex + 1; nextRowIndex < rows.length; nextRowIndex++) {
+            let nextRowExists = rows[nextRowIndex].length > 0;
+            if (nextRowExists) {
+                Logger.logger().info("Next row exists");
+                let isNextRowANewUser = rows[nextRowIndex][1].length > 0;
+                let isNextRowATotal = rows[nextRowIndex][2].includes("Total Main");
+                if (!isNextRowANewUser) {
+                    Logger.logger().info("Next row is not a new user");
+                    if (!isNextRowATotal) {
+                        Logger.logger().info("Next row is not totals");
+                        let nextChoiceValue = rows[nextRowIndex][workingDay.columnNumber];
+                        let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
+                        let nextChoiceMenuName = nextChoiceValue.charAt(1);
+                        let nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1);
+                        choices.push(nextChoice);
+                        Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, workingDay.date);
+                    } else {
+                        Logger.logger().info('On the next row a totals');
+                        break;
+                    }
+                } else {
+                    Logger.logger().info('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][1], user.skypeName);
+                    break;
+                }
+
+            } else {
+                Logger.logger().info('Next Row [%d] is empty. Next user', nextRowIndex);
+                break;
+            }
+        }
+        return choices;
     }
 
     static  isNumeric(n) {

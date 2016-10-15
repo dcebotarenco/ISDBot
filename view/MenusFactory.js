@@ -3,11 +3,11 @@
  */
 var Button = require('../view/Button');
 var Menu = require('../view/Menu');
-var Day = require('../view/Day');
+var MenusView = require('../view/MenusView');
 var Logger = require('../logger/logger');
 
-class DayFactory {
-    static buildDay(session,day) {
+class MenusFactory {
+    static buildMenus(session,day) {
         Logger.logger().info("Building Day Menus");
         let menuList = [];
         day.menuList.forEach(function(menu,index){
@@ -18,10 +18,10 @@ class DayFactory {
             });
             menuList.push(new Menu(session, menu.name, menu.constructor.name, menu.mealsList, buttonList));
         });
-        let dayMenu = new Day(session, menuList);
+        let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("Building Day Menus Done");
         return dayMenu;
     }
 }
 
-module.exports = DayFactory
+module.exports = MenusFactory
