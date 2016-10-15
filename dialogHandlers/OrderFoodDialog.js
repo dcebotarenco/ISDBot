@@ -48,7 +48,7 @@ class OrderFoodDialog {
                 Logger.logger().info('Update date is OK!');
             } else {
                 Logger.logger().info('Today is weekend');
-                session.endDialog("Seems that this is weekend :) Nobody is working now. See you on Monday");
+                session.endDialog("Seems that is weekend :) Nobody is working now. See you on Monday");
             }
         } else {
             Logger.logger().info('Sheet week[%s] is not in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
