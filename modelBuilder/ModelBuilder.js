@@ -166,11 +166,21 @@ class ModelBuilder {
                     if (!isNextRowATotal) {
                         Logger.logger().info("Next row is not totals");
                         let nextChoiceValue = rows[nextRowIndex][workingDay.columnNumber];
-                        let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
-                        let nextChoiceMenuName = nextChoiceValue.charAt(1);
-                        let nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1);
+                        let nextChoice = null;
+                        if (nextChoiceValue) {
+                            Logger.logger().info('Next choice exists in row');
+                            let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
+                            let nextChoiceMenuName = nextChoiceValue.charAt(1);
+                            nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
+                            Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, workingDay.date);
+                        } else {
+                            Logger.logger().info('Next choice does not exists in row.Creating a dummy empty choice');
+                            let nextChoiceMenuNumber = "";
+                            let nextChoiceMenuName = "";
+                            nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
+                        }
+                        ;
                         choices.push(nextChoice);
-                        Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, workingDay.date);
                     } else {
                         Logger.logger().info('On the next row a totals');
                         break;

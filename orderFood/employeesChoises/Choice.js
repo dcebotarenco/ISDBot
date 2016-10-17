@@ -36,7 +36,7 @@ class Choice {
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
         var choiceSheetName = month + " " + year;
-        GoogleConnection.updateValue(this._choiceDay.columnNumber, this._rowNumber, value, choiceSheetName, function (response) {
+        GoogleConnection.updateValue(this._choiceDay.columnLetter, this._rowNumber, value, choiceSheetName, function (response) {
             Logger.logger().info("Choice updated");
         });
         this._numberOfUpdates++;

@@ -8,12 +8,16 @@ var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var moment = require('moment');
 var SheetUtil = require('../util/SheetUtil');
+var google = require('../google/googleConnection');
+var ModelBuilder = require('../modelBuilder/ModelBuilder');
+var moment = require('moment');
 
 class PlaceOrderDialog {
     constructor() {
         Logger.logger().info("Creating PlaceOrderDialog Dialog");
         this.dialogs = [
             PlaceOrderDialog.askUserForMeal,
+            PlaceOrderDialog.fetchEmployeeChoices,
             PlaceOrderDialog.placeOrder,
         ];
     }
@@ -25,43 +29,61 @@ class PlaceOrderDialog {
         if (menuForDay !== undefined) {
             let menusForDayView = MenusFactory.buildMenus(session, menuForDay);
             session.send("Here is " + dayName + " menu:");
+            Logger.logger().info("Asking for meal");
             builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises);
         } else {
-            //Clear choice sheet, because of circular JSON parsing.
-            session.userData.choicesSheet = null;
             session.endDialog("There is no menu for " + dayName);
         }
     }
 
+    static fetchEmployeeChoices(session, results, next) {
+        var month = new Date().toLocaleString("en-us", {month: "long"});
+        var year = new Date().getFullYear();
+        var choiceSheetName = month + " " + year;
+        Logger.logger().info("Gather all data from [%s]", choiceSheetName);
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => PlaceOrderDialog.onChoicesReceived(session, results, next, response.values));
+    }
+
+    static onChoicesReceived(session, results, next, rows) {
+        Logger.logger().info("Choices Received");
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
+        session.dialogData.choicesSheet = choicesSheet;
+        next();
+    }
+
     static placeOrder(session, results, next) {
-        let choiceSheet = session.userData.choicesSheet;
+        let choiceSheet = session.dialogData.choicesSheet;
+        let actionDate = moment(session.userData.orderActionDate);
         let user = choiceSheet.getUsersById(session.message.user.id);
         Logger.logger().info('Placing order[%s] for id[%s]', session.message.text, session.message.user.id);
         if (user.length > 0) {
             Logger.logger().info('User found');
             let userChoice = SheetUtil.resolveMenuType(session.message.text);
             Logger.logger().info('Resolved choice[%s]', userChoice);
-            let choices = user[0].getChoicesByDate(new Date());
-            let emptyChoices = choices.filter(function (choice) {
-                return choice.choiceMenuNumber.length === 0;
-            });
-            if (emptyChoices.length > 0) {
-                Logger.logger().info('User has empty choices. Updating one..');
-                emptyChoices[0].update(userChoice);
+            let choicesObj = user[0].getChoicesByDate(actionDate.toDate());
+            if (choicesObj) {
+                let emptyChoices = choicesObj.choices.filter(function (choice) {
+                    return choice.choiceMenuNumber.length === 0;
+                });
+                if (emptyChoices.length > 0) {
+                    Logger.logger().info('User has empty choices. Updating one..');
+                    emptyChoices[0].update(userChoice);
+                }
+                else {
+                    Logger.logger().info('User has no empty choices.');
+                    Logger.logger().info('Sorting choices by update numbers to get the least updated choice');
+                    if (choicesObj.choices.length > 1) {
+                        session.endDialog("Dude sorry :( , seems that you have more than 1 choice and all are completed. Can you delete one via !orderfood cancel (today|mo|tu|we|th|fr).");
+                    }
+                    else {
+                        choicesObj.choices[0].update(userChoice);
+                        session.endDialog("Order Placed \"" + userChoice + "\". Thank you for choosing our airline ;) .");
+                    }
+                }
+
             }
             else {
-                Logger.logger().info('User has no empty choices.');
-                Logger.logger().info('Sorting choices by update numbers to get the least updated choice');
-                let sortedByUpdatedChoices = choices.sort(function (choice1, choice2) {
-                    var keyA = new Date(choice1.numberOfUpdates),
-                        keyB = new Date(choice2.numberOfUpdates);
-                    if (keyA < keyB) return -1;
-                    if (keyA > keyB) return 1;
-                    return 0;
-                });
-                Logger.logger().info('choices sorted');
-                Logger.logger().info('Updating the least updated one..');
-                sortedByUpdatedChoices[0].update(userChoice);
+                session.endDialog("There is no such date [%s] in the menu" + actionDate.toDate());
             }
         }
         else {

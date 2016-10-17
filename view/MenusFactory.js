@@ -8,7 +8,7 @@ var Logger = require('../logger/logger');
 
 class MenusFactory {
     static buildMenus(session,day) {
-        Logger.logger().info("Building Day Menus");
+        Logger.logger().info("Building Day Menus View");
         let menuList = [];
         day.menuList.forEach(function(menu,index){
             let buttonList = [];
@@ -19,7 +19,7 @@ class MenusFactory {
             menuList.push(new Menu(session, menu.name, menu.constructor.name, menu.mealsList, buttonList));
         });
         let dayMenu = new MenusView(session, menuList);
-        Logger.logger().info("Building Day Menus Done");
+        Logger.logger().info("View of Menus created");
         return dayMenu;
     }
 }

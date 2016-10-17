@@ -87,14 +87,14 @@ class GoogleConnection {
         });
     }
 
-    static updateValue(column, row, value, sheetName, callback) {
+    static updateValue(columnLetter, row, value, sheetName, callback) {
         var sheets = google.sheets('v4');
         var spreadsheetId = process.env.G_SPREADSHEET_ID;
-        Logger.logger().info("Writing value[%s] on [%s]![%s][%s]", value, sheetName, column, row);
+        Logger.logger().info("Writing value[%s] on [%s]![%s][%s]", value, sheetName, columnLetter, row);
         sheets.spreadsheets.values.update({
             auth: this.getConnection(),
             spreadsheetId: spreadsheetId,
-            range: sheetName + '!' + column + row,
+            range: sheetName + '!' + columnLetter + row,
             valueInputOption: 'USER_ENTERED',
             resource: {
                 values: [

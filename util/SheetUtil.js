@@ -38,8 +38,8 @@ class SheetUtil {
             case 'DietMenu':
                 menuType = '4';
                 break;
-                return menuType + array[1];
         }
+        return menuType + array[1];
     }
 }
 module.exports = SheetUtil;

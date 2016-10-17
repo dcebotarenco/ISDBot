@@ -12,7 +12,6 @@ class OrderFoodDialog {
         this.dialogs = [
             OrderFoodDialog.isUserRegistered,
             OrderFoodDialog.fetchMenu,
-            OrderFoodDialog.fetchEmployeeChoices,
             OrderFoodDialog.resolveAction
         ];
     }
@@ -60,7 +59,7 @@ class OrderFoodDialog {
 
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
-        let cancelOrderRegex = /(!orderfood cancel (mo|tu|we|th|fr))/i;
+        let cancelOrderRegex = /(!orderfood cancel (today|mo|tu|we|th|fr))/i;
         let isCancelOrder = cancelOrderRegex.exec(session.message.text);
         let placeOrderOnCurrentDayRegex = /(!orderfood)/i;
         let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
@@ -91,21 +90,6 @@ class OrderFoodDialog {
             session.userData.orderActionDate = moment(new Date());
             session.beginDialog(PlaceOrderDialog.name());
         }
-    }
-
-    static fetchEmployeeChoices(session, results, next) {
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
-        var choiceSheetName = month + " " + year;
-        Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => OrderFoodDialog.onChoicesReceived(session, results, next, response.values));
-    }
-
-    static onChoicesReceived(session, results, next, rows) {
-        Logger.logger().info("Choices Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
-        session.userData.choicesSheet = choicesSheet;
-        next();
     }
 
     get dialog() {
