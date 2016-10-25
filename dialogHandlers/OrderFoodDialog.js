@@ -3,6 +3,7 @@ var google = require('../google/googleConnection');
 var CalendarUtil = require('../util/CalendarUtil');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
 var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog');
+var CancelOrderDialog = require('../dialogHandlers/CancelOrderDialog');
 var moment = require('moment');
 var menuSheetName = 'Lunch Menu';
 class OrderFoodDialog {
@@ -43,7 +44,7 @@ class OrderFoodDialog {
 
         if (sheet.updateDate.getWeek() === today.getWeek()) {
             Logger.logger().info('Sheet week[%s] is in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
-            if (today.getDay() < 5) {
+            if (today.getDay() <= 5) {
                 Logger.logger().info('Update date is OK!');
             } else {
                 Logger.logger().info('Today is weekend');
@@ -76,14 +77,20 @@ class OrderFoodDialog {
                 session.userData.choicesSheet = null;
                 session.endDialog("Hey Dude, look at the calendar. You cannot place an order in the past. Come on.. |-(")
             }
+        }  else if (isCancelOrder) {
+            Logger.logger().info("Cancel order for a specific day");
+            let date = CalendarUtil.resolveDate(isCancelOrder[2]);
+            if (date.isSameOrAfter(moment(new Date()), 'day')) {
+                session.userData.orderActionDate = date;
+                session.beginDialog(CancelOrderDialog.name());
+            } else {
+                session.userData.choicesSheet = null;
+                session.endDialog("Hey Dude, look at the calendar. You cannot cancel an order in the past. Come on.. |-(")
+            }
         } else if (isPlaceOrderOnCurrentDay) {
             Logger.logger().info("Place order for current day");
             session.userData.orderActionDate = moment(new Date());
             session.beginDialog(PlaceOrderDialog.name());
-        } else if (isCancelOrder) {
-            Logger.logger().info("Cancel order for a specific day");
-            let date = CalendarUtil.resolveDate(isCancelOrder[3]);
-            session.userData.orderActionDate = date;
         } else {
             Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
             Logger.logger().info("Place order for current day");

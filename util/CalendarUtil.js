@@ -12,7 +12,7 @@ class CalendarUtil {
 
     static resolveDate(userChoice)
     {
-        //mo|tu|we|th|fr
+        //mo|tu|we|th|fr|today
         let weekNumber;
         switch (userChoice)
         {
@@ -31,6 +31,9 @@ class CalendarUtil {
             case 'fr':
                 weekNumber = 5;
                 break;
+            case 'today':
+                return moment();
+                break;
         }
         return moment().day(weekNumber);
     }
@@ -48,4 +51,4 @@ Date.prototype.getWeek = function () {
     return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 }
 
-module.exports = CalendarUtil
+module.exports = CalendarUtil;

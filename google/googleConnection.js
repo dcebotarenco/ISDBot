@@ -40,7 +40,7 @@ class GoogleConnection {
                 Logger.logger().error('The API returned an error: ' + err);
                 return;
             }
-            Logger.logger().info('Fetchedgoogle sheet [%s]', sheetName);
+            Logger.logger().info('Fetched google sheet [%s]', sheetName);
             callback(response)
         });
     }
@@ -110,5 +110,30 @@ class GoogleConnection {
             callback(response);
         });
     }
+
+    static deleteValue(columnLetter, row, sheetName, callback) {
+        var sheets = google.sheets('v4');
+        var spreadsheetId = process.env.G_SPREADSHEET_ID;
+        Logger.logger().info("Deleting value on [%s]![%s][%s]",  sheetName, columnLetter, row);
+        sheets.spreadsheets.values.update({
+            auth: this.getConnection(),
+            spreadsheetId: spreadsheetId,
+            range: sheetName + '!' + columnLetter + row,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: [
+                    ['']
+                ]
+            }
+        }, function (err, response) {
+            if (err) {
+                Logger.logger().error('The API returned an error: ' + err);
+                return;
+            }
+            Logger.logger().info('Range[%s] cleared for spreadsheetId[%s]', response.clearedRange, response.spreadsheetId);
+            callback(response);
+        });
+    }
+
 }
 module.exports = GoogleConnection;

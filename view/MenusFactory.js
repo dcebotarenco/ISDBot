@@ -28,4 +28,4 @@ class MenusFactory {
     }
 }
 
-module.exports = MenusFactory
+module.exports = MenusFactory;
