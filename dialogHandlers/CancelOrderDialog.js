@@ -108,7 +108,7 @@ class CancelOrderDialog {
             });
 
             let menusForDayView = MenusFactory.buildMenus(session, menuList);
-            session.send("Here is " + dayName + " menu:");
+            session.send("Here is your " + dayName + " choices:");
             Logger.logger().info("Asking for meal");
             /*cleaning up session, otherwise we get "TypeError: Converting circular structure to JSON"*/
             session.userData.availableUserChoicesPerDay = null;
