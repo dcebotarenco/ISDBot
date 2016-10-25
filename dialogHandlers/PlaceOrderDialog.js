@@ -68,6 +68,7 @@ class PlaceOrderDialog {
                 if (emptyChoices.length > 0) {
                     Logger.logger().info('User has empty choices. Updating one..');
                     emptyChoices[0].update(userChoice);
+                    session.endDialog("Order Placed \"" + userChoice + "\". Thank you for choosing our airline ;) .");
                 }
                 else {
                     Logger.logger().info('User has no empty choices.');

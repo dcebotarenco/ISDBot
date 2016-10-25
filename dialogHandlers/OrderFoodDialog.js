@@ -60,42 +60,47 @@ class OrderFoodDialog {
 
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
-        let cancelOrderRegex = /(!orderfood cancel (today|mo|tu|we|th|fr))/i;
-        let isCancelOrder = cancelOrderRegex.exec(session.message.text);
-        let placeOrderOnCurrentDayRegex = /(!orderfood)/i;
-        let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
-        let placeOrderOnSpecificDayRegex = /(!orderfood (mo|tu|we|th|fr))/i;
-        let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(session.message.text);
 
-        if (isPlaceOrderOnSpecificDay) {
-            Logger.logger().info("Place order for a specific day");
-            let userDay = CalendarUtil.resolveDate(isPlaceOrderOnSpecificDay[2]);
-            if (userDay.isSameOrAfter(moment(new Date()), 'day')) {
-                session.userData.orderActionDate = userDay;
+        if (session.message.text.includes('orderfood') && session.message.text.includes('cancel')) {
+            let cancelOrderRegex = /(!orderfood cancel (today|mo|tu|we|th|fr))/i;
+            let isCancelOrder = cancelOrderRegex.exec(session.message.text);
+            if (isCancelOrder) {
+                Logger.logger().info("Cancel order for a specific day");
+                let date = CalendarUtil.resolveDate(isCancelOrder[2]);
+                if (date.isSameOrAfter(moment(new Date()), 'day')) {
+                    session.userData.orderActionDate = date;
+                    session.beginDialog(CancelOrderDialog.name());
+                } else {
+                    session.userData.choicesSheet = null;
+                    session.endDialog("Hey Dude, look at the calendar. You cannot cancel an order in the past. Come on.. |-(")
+                }
+            }
+        }
+        else {
+            let placeOrderOnCurrentDayRegex = /(!orderfood)/i;
+            let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
+            let placeOrderOnSpecificDayRegex = /(!orderfood (mo|tu|we|th|fr))/i;
+            let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(session.message.text);
+            if (isPlaceOrderOnSpecificDay) {
+                Logger.logger().info("Place order for a specific day");
+                let userDay = CalendarUtil.resolveDate(isPlaceOrderOnSpecificDay[2]);
+                if (userDay.isSameOrAfter(moment(new Date()), 'day')) {
+                    session.userData.orderActionDate = userDay;
+                    session.beginDialog(PlaceOrderDialog.name());
+                } else {
+                    session.userData.choicesSheet = null;
+                    session.endDialog("Hey Dude, look at the calendar. You cannot place an order in the past. Come on.. |-(")
+                }
+            } else if (isPlaceOrderOnCurrentDay) {
+                Logger.logger().info("Place order for current day");
+                session.userData.orderActionDate = moment(new Date());
                 session.beginDialog(PlaceOrderDialog.name());
             } else {
-                session.userData.choicesSheet = null;
-                session.endDialog("Hey Dude, look at the calendar. You cannot place an order in the past. Come on.. |-(")
+                Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
+                Logger.logger().info("Place order for current day");
+                session.userData.orderActionDate = moment(new Date());
+                session.beginDialog(PlaceOrderDialog.name());
             }
-        }  else if (isCancelOrder) {
-            Logger.logger().info("Cancel order for a specific day");
-            let date = CalendarUtil.resolveDate(isCancelOrder[2]);
-            if (date.isSameOrAfter(moment(new Date()), 'day')) {
-                session.userData.orderActionDate = date;
-                session.beginDialog(CancelOrderDialog.name());
-            } else {
-                session.userData.choicesSheet = null;
-                session.endDialog("Hey Dude, look at the calendar. You cannot cancel an order in the past. Come on.. |-(")
-            }
-        } else if (isPlaceOrderOnCurrentDay) {
-            Logger.logger().info("Place order for current day");
-            session.userData.orderActionDate = moment(new Date());
-            session.beginDialog(PlaceOrderDialog.name());
-        } else {
-            Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
-            Logger.logger().info("Place order for current day");
-            session.userData.orderActionDate = moment(new Date());
-            session.beginDialog(PlaceOrderDialog.name());
         }
     }
 
