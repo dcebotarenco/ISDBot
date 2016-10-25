@@ -75,6 +75,9 @@ class OrderFoodDialog {
                     session.endDialog("Hey Dude, look at the calendar. You cannot cancel an order in the past. Come on.. |-(")
                 }
             }
+            else {
+                session.endDialog("Invalid input. Use !orderfood cancel (today|mo|tu|we|th|fr)");
+            }
         }
         else {
             let placeOrderOnCurrentDayRegex = /(!orderfood)/i;
