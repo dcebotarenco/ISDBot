@@ -132,7 +132,7 @@ class CancelOrderDialog {
             }
         });
         Choice.delete(choiceToDelete.rowNumber, choiceToDelete.columnLetter);
-        session.endDialog("Order Canceled \"" + choiceToDelete.menuNumber + choiceToDelete.menuType + +"\". Thank you for choosing our service ;) .");
+        session.endDialog("Order Canceled \"" + choiceToDelete.choiceMenuNumber + choiceToDelete.choiceMenuName + +"\". Thank you for choosing our service ;) .");
     }
 
     static name() {
