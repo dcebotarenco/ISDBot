@@ -22,7 +22,7 @@ class GreetingDialog {
             .subtitle("Hi! I'm the ISD Bot for Skype.")
             .text("I can order some food for you.")
             .images([
-                builder.CardImage.create(session, "http://isd-soft.com/wp-content/uploads/2016/10/256x96.png")
+                builder.CardImage.create(session, "http://isd-soft.com/wp-content/themes/isd/images/logo.png")
             ]);
         var msg = new builder.Message(session).attachments([card]);
         session.send(msg);
