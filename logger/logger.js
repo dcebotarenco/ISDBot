@@ -15,15 +15,14 @@ class Logger
     {
         //console log is loaded by default, so you won't normally need to do this
         //log4js.loadAppender('console');
-        log4js.loadAppender('file');
+        // log4js.loadAppender('file');
 //        log4js.replaceConsole();
-        //log4js.addAppender(log4js.appenders.console());
-        if(!fs.existsSync('./logs'))
-        {
-            fs.mkdir('./logs');
-        }
-        log4js.addAppender(log4js.appenders.file('logs/main.log'), 'main');
-        
+        // if(!fs.existsSync('./logs'))
+        // {
+        //     fs.mkdir('./logs');
+        // }
+        // log4js.addAppender(log4js.appenders.file('logs/main.log'), 'main');
+
         logger = log4js.getLogger('main');
         logger.setLevel('ALL');
         logger.trace('Test Trace...');
