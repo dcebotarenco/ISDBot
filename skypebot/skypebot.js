@@ -49,17 +49,27 @@ class SkypeBot {
         Logger.logger().info("Creating order food cron at [%s]", orderFoodCron);
         Cron.schedule(orderFoodCron, function (bot) {
             Logger.logger().info("Running order food cron");
-            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
-                ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
-                    if (employee.id) {
-                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.name, employee.id);
-                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.name, OrderFoodDialog.name());
+            var month = new Date().toLocaleString("en-us", {month: "long"});
+            var year = new Date().getFullYear();
+            var choiceSheetName = month + " " + year;
+            GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response) {
+                let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values);
+                choicesSheet.employees.forEach(function (employee) {
+                    let todayChoices = employee.getChoicesByDate(new Date());
+                    let emptyChoices = todayChoices.choices.filter(function (choice) {
+                        return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+                    });
+                    if (emptyChoices.length > 0) {
+                        Logger.logger().info("User[%s] has at least one empty choice for today. Asking him for food",employee.fullName);
+                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.skypeName, employee.id);
+                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name());
                     }
                     else {
-                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', OrderFoodDialog.name(), employee.name);
+                        Logger.logger().info("User[%s] has all choices completed for today, skipping asking him today for food",employee.fullName);
                     }
                 });
-            }(bot, response.values));
+
+            }(bot, response));
         }.bind(null, this));
     }
 
