@@ -150,7 +150,12 @@ class SkypeBot {
             session.message.address.user.name,
             session.message.address.user.id,
             session.message.address.useAuth);
-        next();
+        if (session.message.text === "bye") {
+            session.endConversation("Bye ;)");
+        }
+        else {
+            next();
+        }
     }
 
     beginDialogForUser(serviceUrl, userId, userName, dialog) {

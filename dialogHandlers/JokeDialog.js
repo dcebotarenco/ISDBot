@@ -28,7 +28,7 @@ class JokeDialog {
     }
 
     static match() {
-        return /!jokes/i;
+        return /jokes/i;
     }
 }
 module.exports = JokeDialog;

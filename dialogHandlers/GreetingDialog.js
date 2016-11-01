@@ -7,26 +7,26 @@ var HelpDialog = require('../dialogHandlers/HelpDialog.js');
 
 
 class GreetingDialog {
-    constructor()
-    {
+    constructor() {
         Logger.logger().info("Creating Greeting Dialog");
         this.dialogs = [
             GreetingDialog.showGreeting
         ];
     }
 
-    static showGreeting(session)
-    {
-        var card = new builder.HeroCard(session)
+    static showGreeting(session) {
+        var logo = new builder.HeroCard(session)
             .title("ISD Bot")
             .subtitle("Hi! I'm the ISD Bot for Skype.")
             .text("I can order some food for you.")
             .images([
                 builder.CardImage.create(session, "http://isd-soft.com/wp-content/themes/isd/images/logo.png")
             ]);
-        var msg = new builder.Message(session).attachments([card]);
+        var id = new builder.HeroCard(session)
+            .subtitle("Your ID")
+            .text("Please provide this key [%s] to Administrator", session.message.user.id);
+        var msg = new builder.Message(session).attachments([logo,id]);
         session.send(msg);
-        session.send("Please provide this key [%s] to Administrator",session.message.user.id);
         session.beginDialog(HelpDialog.name());
     }
 
@@ -39,7 +39,7 @@ class GreetingDialog {
     }
 
     static match() {
-        return /!greeting/i;
+        return /hi/i;
     }
 }
 module.exports = GreetingDialog;

@@ -74,7 +74,7 @@ class PlaceOrderDialog {
                     Logger.logger().info('User has no empty choices.');
                     Logger.logger().info('Sorting choices by update numbers to get the least updated choice');
                     if (choicesObj.choices.length > 1) {
-                        session.endDialog("Dude sorry :( , seems that you have more than 1 choice and all are completed. Can you delete one via !orderfood cancel (today|mo|tu|we|th|fr).");
+                        session.endDialog("Dude sorry :( , seems that you have more than 1 choice and all are completed. Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
                     }
                     else {
                         choicesObj.choices[0].update(userChoice);

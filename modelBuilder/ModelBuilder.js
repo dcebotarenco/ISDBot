@@ -97,8 +97,10 @@ class ModelBuilder {
                     let skypeAccountIsValid = skypeAccount.startsWith('live:') || skypeAccount.startsWith('inther_');
                     Logger.logger().info("Found Row with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
                     if (skypeAccountIsValid) {
+                        Logger.logger().info("Creating user");
                         let user = ModelBuilder.createUser(row, index, rows, workingDays);
                         users.push(user);
+                        Logger.logger().info("User[%s] pushed", user.fullName);
                     } else {
                         Logger.logger().info('Row [%d] has id but skype account[%s] is not valid', index, skypeAccount);
                     }
@@ -159,7 +161,7 @@ class ModelBuilder {
             let nextRowExists = rows[nextRowIndex].length > 0;
             if (nextRowExists) {
                 Logger.logger().info("Next row exists");
-                let isNextRowANewUser = rows[nextRowIndex][1].length > 0;
+                let isNextRowANewUser = rows[nextRowIndex][2].length > 0;
                 let isNextRowATotal = rows[nextRowIndex][2].includes("Total Main");
                 if (!isNextRowANewUser) {
                     Logger.logger().info("Next row is not a new user");
@@ -186,7 +188,7 @@ class ModelBuilder {
                         break;
                     }
                 } else {
-                    Logger.logger().info('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][1], user.skypeName);
+                    Logger.logger().info('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][2], user.skypeName);
                     break;
                 }
 

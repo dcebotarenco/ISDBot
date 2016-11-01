@@ -61,8 +61,8 @@ class OrderFoodDialog {
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
 
-        if (session.message.text.includes('orderfood') && session.message.text.includes('cancel')) {
-            let cancelOrderRegex = /(!orderfood cancel (today|mo|tu|we|th|fr))/i;
+        if (session.message.text.includes('food') && session.message.text.includes('cancel')) {
+            let cancelOrderRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
             let isCancelOrder = cancelOrderRegex.exec(session.message.text);
             if (isCancelOrder) {
                 Logger.logger().info("Cancel order for a specific day");
@@ -76,13 +76,13 @@ class OrderFoodDialog {
                 }
             }
             else {
-                session.endDialog("Invalid input. Use !orderfood cancel (today|mo|tu|we|th|fr)");
+                session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
             }
         }
         else {
-            let placeOrderOnCurrentDayRegex = /(!orderfood)/i;
+            let placeOrderOnCurrentDayRegex = /(food)/i;
             let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
-            let placeOrderOnSpecificDayRegex = /(!orderfood (mo|tu|we|th|fr))/i;
+            let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr))/i;
             let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(session.message.text);
             if (isPlaceOrderOnSpecificDay) {
                 Logger.logger().info("Place order for a specific day");
@@ -116,7 +116,7 @@ class OrderFoodDialog {
     }
 
     static match() {
-        return /(!orderfood cancel (mo|tu|we|th|fr))|(!orderfood (mo|tu|we|th|fr))|(!orderfood)/i;
+        return /(food cancel (mo|tu|we|th|fr))|(food (mo|tu|we|th|fr))|(food)/i;
     }
 }
 module.exports = OrderFoodDialog;
