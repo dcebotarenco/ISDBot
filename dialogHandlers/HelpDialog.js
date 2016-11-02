@@ -16,11 +16,25 @@ class HelpDialog {
         var msg = new builder.Message(session)
             .attachments([
                 new builder.HeroCard(session)
-                    .title('Help')
-                    .subtitle('Commands you can run')
-                    .text('hi,bye,help,food,food (today|mo|tu|we|th|fr),food cancel (today|mo|tu|we|th|fr)')
+                    .title('hi')
+                    .text('Say \'hi\' when you what to see the greeting message'),
+                new builder.HeroCard(session)
+                    .title('bye')
+                    .text('Say \'bye\' when you want to end current conversation'),
+                new builder.HeroCard(session)
+                    .title('help')
+                    .text('Say \'help\' when you forgot the commands')
+                , new builder.HeroCard(session)
+                    .title('food')
+                    .text('Say \'food\' when you want to order meal for today')
+                , new builder.HeroCard(session)
+                    .title('food (today|mo|tu|we|th|fr)')
+                    .text('Say \'food fr\' when you want to order meal for Friday')
+                , new builder.HeroCard(session)
+                    .title('food cancel (today|mo|tu|we|th|fr)')
+                    .text('Say \'food cancel mo\' when you want to cancel your meal for Monday')
             ]);
-        session.endDialog("Commands you can run:\n1.hi\n2.bye\n3.help\n4.food\n5.food (today|mo|tu|we|th|fr)\n6.food cancel (today|mo|tu|we|th|fr)");
+        session.endDialog(msg);
     }
 
     get dialog() {
