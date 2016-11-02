@@ -18,7 +18,7 @@ class HelpDialog {
                 new builder.HeroCard(session)
                     .title('Help')
                     .subtitle('Commands you can run')
-                    .text('hi,bye,food,food (today|mo|tu|we|th|fr),food cancel (today|mo|tu|we|th|fr)')
+                    .text('hi,bye,help,food,food (today|mo|tu|we|th|fr),food cancel (today|mo|tu|we|th|fr)')
             ]);
         session.endDialog(msg);
     }
