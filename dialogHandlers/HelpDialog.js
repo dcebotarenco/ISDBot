@@ -20,7 +20,7 @@ class HelpDialog {
                     .subtitle('Commands you can run')
                     .text('hi,bye,help,food,food (today|mo|tu|we|th|fr),food cancel (today|mo|tu|we|th|fr)')
             ]);
-        session.endDialog(msg);
+        session.endDialog("Commands you can run:\n1.hi\n2.bye\n3.help\n4.food\n5.food (today|mo|tu|we|th|fr)\n6.food cancel (today|mo|tu|we|th|fr)");
     }
 
     get dialog() {
