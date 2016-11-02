@@ -29,7 +29,7 @@ class Choice {
         return this._user;
     }
 
-    get rowNumber(){
+    get rowNumber() {
         return this._rowNumber;
     }
 
@@ -37,13 +37,11 @@ class Choice {
         return this._numberOfUpdates;
     }
 
-    update(value) {
+    update(value, cb) {
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
         var choiceSheetName = month + " " + year;
-        GoogleConnection.updateValue(this._choiceDay.columnLetter, this._rowNumber, value, choiceSheetName, function (response) {
-            Logger.logger().info("Choice updated");
-        });
+        GoogleConnection.updateValue(this._choiceDay.columnLetter, this._rowNumber, value, choiceSheetName, cb);
         this._numberOfUpdates++;
     }
 
@@ -51,7 +49,7 @@ class Choice {
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
         var choiceSheetName = month + " " + year;
-        GoogleConnection.deleteValue(columnLetter, rowNumber,  choiceSheetName, function (response) {
+        GoogleConnection.deleteValue(columnLetter, rowNumber, choiceSheetName, function (response) {
             Logger.logger().info("Choice deleted");
         });
         this._numberOfDeletes++;

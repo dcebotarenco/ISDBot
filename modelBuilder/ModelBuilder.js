@@ -151,49 +151,46 @@ class ModelBuilder {
         let choices = [];
         Logger.logger().info("Determining choices for user[%s] for day [%s]", user.skypeName, workingDay.date);
         let firstChoice = row[workingDay.columnNumber];
-        let choiceMenuNumber = firstChoice.charAt(0);
-        let choiceMenuName = firstChoice.charAt(1);
-        let choice = new Choice(choiceMenuNumber, choiceMenuName, workingDay, user, currentRowIndex + 1);
-        choices.push(choice);
+        if (firstChoice) {
+            let choiceMenuNumber = firstChoice.charAt(0);
+            let choiceMenuName = firstChoice.charAt(1);
+            let choice = new Choice(choiceMenuNumber, choiceMenuName, workingDay, user, currentRowIndex + 1);
+            choices.push(choice);
+        }
+        else {
+            let choice = new Choice("", "", workingDay, user, currentRowIndex + 1);
+            choices.push(choice);
+        }
         Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, firstChoice, workingDay.date);
         Logger.logger().info("Check next row for new choices for user[%s] and working day[%s]", user.skypeName, workingDay.date);
         for (let nextRowIndex = currentRowIndex + 1; nextRowIndex < rows.length; nextRowIndex++) {
-            let nextRowExists = rows[nextRowIndex].length > 0;
-            if (nextRowExists) {
-                Logger.logger().info("Next row exists");
-                let isNextRowANewUser = rows[nextRowIndex][2].length > 0;
-                let isNextRowATotal = rows[nextRowIndex][2].includes("Total Main");
-                if (!isNextRowANewUser) {
-                    Logger.logger().info("Next row is not a new user");
-                    if (!isNextRowATotal) {
-                        Logger.logger().info("Next row is not totals");
-                        let nextChoiceValue = rows[nextRowIndex][workingDay.columnNumber];
-                        let nextChoice = null;
-                        if (nextChoiceValue) {
-                            Logger.logger().info('Next choice exists in row');
-                            let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
-                            let nextChoiceMenuName = nextChoiceValue.charAt(1);
-                            nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
-                            Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, workingDay.date);
-                        } else {
-                            Logger.logger().info('Next choice does not exists in row.Creating a dummy empty choice');
-                            let nextChoiceMenuNumber = "";
-                            let nextChoiceMenuName = "";
-                            nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
-                        }
-                        ;
-                        choices.push(nextChoice);
+            let isNextRowANewUser = rows[nextRowIndex][2] && rows[nextRowIndex][2].length > 0;
+            let isNextRowATotal = rows[nextRowIndex][2] && rows[nextRowIndex][2].includes("Total Main");
+            if (!isNextRowANewUser) {
+                Logger.logger().info("Next row is not a new user");
+                if (!isNextRowATotal) {
+                    Logger.logger().info("Next row is not totals");
+                    let nextChoiceValue = rows[nextRowIndex][workingDay.columnNumber];
+                    let nextChoice = null;
+                    if (nextChoiceValue) {
+                        Logger.logger().info('Next choice exists in row');
+                        let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
+                        let nextChoiceMenuName = nextChoiceValue.charAt(1);
+                        nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
+                        Logger.logger().info("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, workingDay.date);
                     } else {
-                        Logger.logger().info('On the next row a totals');
-                        break;
+                        Logger.logger().info('Next choice does not exists in row.Creating a dummy empty choice');
+                        let nextChoiceMenuNumber = "";
+                        let nextChoiceMenuName = "";
+                        nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
                     }
+                    choices.push(nextChoice);
                 } else {
-                    Logger.logger().info('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][2], user.skypeName);
+                    Logger.logger().info('On the next row a totals');
                     break;
                 }
-
             } else {
-                Logger.logger().info('Next Row [%d] is empty. Next user', nextRowIndex);
+                Logger.logger().info('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][2], user.skypeName);
                 break;
             }
         }

@@ -102,19 +102,14 @@ class GoogleConnection {
                 ]
             }
         }, function (err, response) {
-            if (err) {
-                Logger.logger().error('The API returned an error: ' + err);
-                return;
-            }
-            Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
-            callback(response);
+            callback(response, err, value);
         });
     }
 
     static deleteValue(columnLetter, row, sheetName, callback) {
         var sheets = google.sheets('v4');
         var spreadsheetId = process.env.G_SPREADSHEET_ID;
-        Logger.logger().info("Deleting value on [%s]![%s][%s]",  sheetName, columnLetter, row);
+        Logger.logger().info("Deleting value on [%s]![%s][%s]", sheetName, columnLetter, row);
         sheets.spreadsheets.values.update({
             auth: this.getConnection(),
             spreadsheetId: spreadsheetId,

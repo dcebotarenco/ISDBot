@@ -131,8 +131,18 @@ class CancelOrderDialog {
                 choiceToDelete = choice;
             }
         });
-        Choice.delete(choiceToDelete.rowNumber, choiceToDelete.columnLetter);
-        session.endDialog("Order Canceled \"" + choiceToDelete.choiceMenuNumber + choiceToDelete.choiceMenuName  +"\". Thank you for choosing our service ;) .");
+        var month = new Date().toLocaleString("en-us", {month: "long"});
+        var year = new Date().getFullYear();
+        var choiceSheetName = month + " " + year;
+        google.updateValue(choiceToDelete.columnLetter, choiceToDelete.rowNumber, '', choiceSheetName, (response, err, value)=>function (response, err, value, session) {
+            if (err) {
+                session.endDialog(err.message);
+            }
+            else {
+                session.endDialog("Order Canceled \"" + choiceToDelete.choiceMenuNumber + choiceToDelete.choiceMenuName + "\". Thank you for choosing our service ;) .");
+            }
+        }(response, err, value, session));
+
     }
 
     static name() {
