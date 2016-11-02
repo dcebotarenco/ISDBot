@@ -4,6 +4,7 @@ var CalendarUtil = require('../util/CalendarUtil');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
 var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog');
 var CancelOrderDialog = require('../dialogHandlers/CancelOrderDialog');
+var UserChoisesStatusDialog = require('../dialogHandlers/UserChoisesStatusDialog');
 var moment = require('moment');
 var menuSheetName = 'Lunch Menu';
 class OrderFoodDialog {
@@ -78,6 +79,18 @@ class OrderFoodDialog {
             else {
                 session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
             }
+        } else if (session.message.text.includes('food') && session.message.text.includes('status')) {
+            let cancelOrderRegex = /(food status (today|mo|tu|we|th|fr))/i;
+            let isCancelOrder = cancelOrderRegex.exec(session.message.text);
+            if (isCancelOrder) {
+                Logger.logger().info("User choises status for a specific day");
+                let date = CalendarUtil.resolveDate(isCancelOrder[2]);
+                session.userData.orderActionDate = date;
+                session.beginDialog(UserChoisesStatusDialog.name());
+            }
+            else {
+                session.endDialog("Invalid input. Use food status (today|mo|tu|we|th|fr)");
+            }
         }
         else {
             let placeOrderOnCurrentDayRegex = /(food)/i;
@@ -116,7 +129,7 @@ class OrderFoodDialog {
     }
 
     static match() {
-        return /(food cancel (mo|tu|we|th|fr))|(food (mo|tu|we|th|fr))|(food)/i;
+        return /(food cancel (today|mo|tu|we|th|fr))|(food status (today|mo|tu|we|th|fr))|(food (mo|tu|we|th|fr))|(food)/i;
     }
 }
 module.exports = OrderFoodDialog;
