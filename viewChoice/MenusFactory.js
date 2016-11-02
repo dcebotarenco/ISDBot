@@ -14,15 +14,12 @@ class MenusFactory {
 
         menus.forEach(function (menuObj) {
             let buttonList = [];
-            // buttonList.push(new Button(session, menuObj.menu.constructor.name, 'Cancel'));
-            // let meals = MealGroupUtil.getMealsByGroupName(menuObj.menu.mealGroups, menuObj.menuName);
             let mealGroup = menuObj.menu.mealGroups.filter(function (mealGroup) {
                return mealGroup.groupName ==  menuObj.menuName;
             });
             /*not so nice with index, to be changed later : mealGroup[0].meals*/
-            // session.userData.availableUserChoicesPerDay = null;
             buttonList.push(new Button(session, menuObj.menu.constructor.name, menuObj.menuName));
-            menuList.push(new Menu(session, menuObj.menu.name, menuObj.menu.constructor.name, mealGroup[0].meals, buttonList));
+            menuList.push(new Menu(session, menuObj.menu.name, menuObj.menuNumber.concat(menuObj.menuName), menuObj.menu.constructor.name, mealGroup[0].meals, buttonList));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

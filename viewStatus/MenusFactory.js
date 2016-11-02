@@ -15,7 +15,7 @@ class MenusFactory {
                 return mealGroup.groupName ==  menuObj.menuName;
             });
             /*not so nice with index, to be changed later : mealGroup[0].meals*/
-            menuList.push(new Menu(session, menuObj.menu.name, menuObj.menuNumber.concat(menuObj.menuName) ,menuObj.menu.constructor.name, mealGroup[0].meals));
+            menuList.push(new Menu(session, menuObj.menu.name, menuObj.menuNumber.concat(menuObj.menuName), menuObj.menu.constructor.name, mealGroup[0].meals));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

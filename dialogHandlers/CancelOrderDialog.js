@@ -99,7 +99,7 @@ class CancelOrderDialog {
                 let menuName = SheetUtil.resolveMenuNumber(item.choiceMenuNumber);
                 menuForDay.menuList.forEach(function (menu) {
                     if (menu.constructor.name == menuName) {
-                        menuList.push({menu: menu, menuName: item.choiceMenuName});
+                        menuList.push({menu: menu, menuName: item.choiceMenuName, menuNumber: item.choiceMenuNumber});
                         Logger.logger().info("Added menu[%s]", menu.constructor.name);
                     }
                 });

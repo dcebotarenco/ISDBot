@@ -7,19 +7,21 @@ var builder = require('botbuilder');
 class Menu {
     constructor(session,
                 title,
+                subtitle,
                 type,
                 mealList,
                 buttons) {
         this.menuType = type;
         this.buttons = buttons;
         this.title = title;
+        this.subtitle = subtitle;
         this.mealList = mealList;
         this.session = session;
         this.mealCard = this._buildMealCard();
     }
 
     _buildMealCard() {
-        return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
+        return new builder.HeroCard(this.session).title(this.title).subtitle(this.subtitle).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
     }
 
     _formatMealsName() {
