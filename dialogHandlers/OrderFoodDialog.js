@@ -48,7 +48,7 @@ class OrderFoodDialog {
             if (today.getDay() <= 5) {
                 Logger.logger().info('Update date is OK!');
             } else {
-                Logger.logger().info('Today is weekend');
+                Logger.logger().warn('Today is weekend');
                 session.endDialog("Seems that is weekend (o) Nobody is working now. See you on Monday |-)");
             }
         } else {
@@ -113,7 +113,6 @@ class OrderFoodDialog {
                 session.beginDialog(PlaceOrderDialog.name());
             } else {
                 Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
-                Logger.logger().info("Place order for current day");
                 session.userData.orderActionDate = moment(new Date());
                 session.beginDialog(PlaceOrderDialog.name());
             }
