@@ -63,11 +63,13 @@ class OrderFoodDialog {
         Logger.logger().info("Resolving Orderfood Dialog");
 
         if (session.message.text.includes('food') && session.message.text.includes('cancel')) {
-            let cancelOrderRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
-            let isCancelOrder = cancelOrderRegex.exec(session.message.text);
-            if (isCancelOrder) {
+            let foodCancelOnSpecificDayRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
+            let isfoodCancelOnSpecificDay = foodCancelOnSpecificDayRegex.exec(session.message.text);
+            let foodCancelOnCurrentDayRegex = /(food cancel)/i;
+            let isfoodCancelOnCurrentDay = foodCancelOnCurrentDayRegex.exec(session.message.text);
+            if (isfoodCancelOnSpecificDay) {
                 Logger.logger().info("Cancel order for a specific day");
-                let date = CalendarUtil.resolveDate(isCancelOrder[2]);
+                let date = CalendarUtil.resolveDate(isfoodCancelOnSpecificDay[2]);
                 if (date.isSameOrAfter(moment(new Date()), 'day')) {
                     session.userData.orderActionDate = date;
                     session.beginDialog(CancelOrderDialog.name());
@@ -75,20 +77,28 @@ class OrderFoodDialog {
                     session.userData.choicesSheet = null;
                     session.endDialog("Hey Dude, look at the calendar. You cannot cancel an order in the past. Come on.. |-(")
                 }
-            }
-            else {
+            } else if (isfoodCancelOnCurrentDay) {
+                Logger.logger().info("Cancel order for current day");
+                session.userData.orderActionDate = moment(new Date());
+                session.beginDialog(CancelOrderDialog.name());
+            } else {
                 session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
             }
         } else if (session.message.text.includes('food') && session.message.text.includes('status')) {
-            let cancelOrderRegex = /(food status (today|mo|tu|we|th|fr))/i;
-            let isCancelOrder = cancelOrderRegex.exec(session.message.text);
-            if (isCancelOrder) {
+            let foodStatusOnSpecificDayRegex = /(food status (today|mo|tu|we|th|fr))/i;
+            let isFoodStatusOnSpecificDay = foodStatusOnSpecificDayRegex.exec(session.message.text);
+            let foodStatusOnCurrentDayRegex = /(food status)/i;
+            let isFoodStatusOnCurrentDay = foodStatusOnCurrentDayRegex.exec(session.message.text);
+            if (isFoodStatusOnSpecificDay) {
                 Logger.logger().info("User choises status for a specific day");
-                let date = CalendarUtil.resolveDate(isCancelOrder[2]);
+                let date = CalendarUtil.resolveDate(isFoodStatusOnSpecificDay[2]);
                 session.userData.orderActionDate = date;
                 session.beginDialog(UserChoisesStatusDialog.name());
-            }
-            else {
+            } else if (isFoodStatusOnCurrentDay) {
+                Logger.logger().info("User choises status for current day");
+                session.userData.orderActionDate = moment(new Date());
+                session.beginDialog(UserChoisesStatusDialog.name());
+            } else {
                 session.endDialog("Invalid input. Use food status (today|mo|tu|we|th|fr)");
             }
         }
