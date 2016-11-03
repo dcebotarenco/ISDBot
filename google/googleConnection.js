@@ -27,7 +27,7 @@ class GoogleConnection {
     }
 
     static fetchGoogleSheet(spreadsheetId, sheetName, majorDimension, callback) {
-        Logger.logger().info('Fetching google sheet [%s]', sheetName);
+        Logger.logger().debug('Fetching google sheet [%s]', sheetName);
         var sheets = google.sheets('v4');
 
         sheets.spreadsheets.values.get({
@@ -40,13 +40,13 @@ class GoogleConnection {
                 Logger.logger().error('The API returned an error: ' + err);
                 return;
             }
-            Logger.logger().info('Fetched google sheet [%s]', sheetName);
+            Logger.logger().debug('Fetched google sheet [%s]', sheetName);
             callback(response)
         });
     }
 
     static fetchRegisteredEmployees(c) {
-        Logger.logger().info('Fetching registered employees from dialog');
+        Logger.logger().debug('Fetching registered employees from dialog');
         var sheets = google.sheets('v4');
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
@@ -62,13 +62,13 @@ class GoogleConnection {
                 Logger.logger().error('The API returned an error: ' + err);
                 return;
             }
-            Logger.logger().info('Registered employees fetched');
+            Logger.logger().debug('Registered employees fetched');
             c(response);
         });
     }
 
     static fetchBotSettings(callback) {
-        Logger.logger().info('Fetching Bot settings');
+        Logger.logger().debug('Fetching Bot settings');
         var sheets = google.sheets('v4');
         var choiceSheetName = "bot_settings";
         var spreadsheetId = process.env.G_SPREADSHEET_ID;
@@ -82,7 +82,7 @@ class GoogleConnection {
                 Logger.logger().error('The API returned an error: ' + err);
                 return;
             }
-            Logger.logger().info('Bot settings fetched');
+            Logger.logger().debug('Bot settings fetched');
             callback(response);
         });
     }
@@ -90,7 +90,7 @@ class GoogleConnection {
     static updateValue(columnLetter, row, value, sheetName, callback) {
         var sheets = google.sheets('v4');
         var spreadsheetId = process.env.G_SPREADSHEET_ID;
-        Logger.logger().info("Writing value[%s] on [%s]![%s][%s]", value, sheetName, columnLetter, row);
+        Logger.logger().debug("Writing value[%s] on [%s]![%s][%s]", value, sheetName, columnLetter, row);
         sheets.spreadsheets.values.update({
             auth: this.getConnection(),
             spreadsheetId: spreadsheetId,

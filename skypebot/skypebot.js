@@ -28,6 +28,9 @@ class SkypeBot {
             appPassword: this.PSW
         });
         this.bot = new botbuilder.UniversalBot(this.botConnection);
+        this.bot.on('error', function (error) {
+            Logger.logger().error("ERROR[%s]", error);
+        });
         this.bot.on('contactRelationUpdate', SkypeBot.onBotAddedInContacts);
         this.bot.use({botbuilder: SkypeBot.proxy});
         this.bot.dialog(RootIntent.name(), new RootIntent().intent);
@@ -62,12 +65,12 @@ class SkypeBot {
                         return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
                     });
                     if (emptyChoices.length > 0) {
-                        Logger.logger().info("User[%s] has at least one empty choice for today. Asking him for food",employee.fullName);
+                        Logger.logger().info("User[%s] has at least one empty choice for today. Asking him for food", employee.fullName);
                         Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.skypeName, employee.id);
                         bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name());
                     }
                     else {
-                        Logger.logger().info("User[%s] has all choices completed for today, skipping asking him today for food",employee.fullName);
+                        Logger.logger().info("User[%s] has all choices completed for today, skipping asking him today for food", employee.fullName);
                     }
                 });
 

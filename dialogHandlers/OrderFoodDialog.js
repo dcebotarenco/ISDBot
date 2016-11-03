@@ -62,7 +62,7 @@ class OrderFoodDialog {
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
 
-        if (session.message.text.includes('food') && session.message.text.includes('cancel')) {
+        if (session.message.text.include('food') && session.message.text.includes('cancel')) {
             let cancelOrderRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
             let isCancelOrder = cancelOrderRegex.exec(session.message.text);
             if (isCancelOrder) {
