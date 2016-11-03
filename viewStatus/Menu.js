@@ -1,7 +1,6 @@
 /**
- * Created by charea on 20.10.2016.
+ * Created by charea on 02.11.2016.
  */
-
 var builder = require('botbuilder');
 
 class Menu {
@@ -9,10 +8,8 @@ class Menu {
                 title,
                 subtitle,
                 type,
-                mealList,
-                buttons) {
+                mealList) {
         this.menuType = type;
-        this.buttons = buttons;
         this.title = title;
         this.subtitle = subtitle;
         this.mealList = mealList;
@@ -21,7 +18,7 @@ class Menu {
     }
 
     _buildMealCard() {
-        return new builder.HeroCard(this.session).title(this.title).subtitle(this.subtitle).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
+        return new builder.HeroCard(this.session).title(this.title).subtitle(this.subtitle).text(this._formatMealsName())
     }
 
     _formatMealsName() {
@@ -34,20 +31,10 @@ class Menu {
         return lis.join('');
     }
 
-    _getButtonsActionCards() {
-        let array = this.buttons.map(function (button) {
-            return button.actionCard;
-        });
-        return array;
-    }
-
     get card() {
         return this.mealCard;
     }
 
-    get btns() {
-        return this.buttons;
-    }
 
     get type() {
         return this.menuType;

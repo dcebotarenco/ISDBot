@@ -1,7 +1,10 @@
 /**
+ * Created by charea on 26.10.2016.
+ */
+/**
  * Created by charea on 17.10.2016.
  */
-var MenusFactory = require('../viewChoice/MenusFactory');
+var MenusFactory = require('../viewStatus/MenusFactory');
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var moment = require('moment');
@@ -13,14 +16,13 @@ let MenuFactory = require('../orderFood/factory/MenuFactory');
 let Day = require('../orderFood/lunchList/Day');
 let Choice = require('../orderFood/employeesChoises/Choice');
 
-class CancelOrderDialog {
+class UserChoisesStatusDialog {
     constructor() {
-        Logger.logger().info("Creating CancelOrderDialog Dialog");
+        Logger.logger().info("Creating UserChoisesStatusDialog Dialog");
         this.dialogs = [
-            CancelOrderDialog.fetchEmployeeChoices,
-            CancelOrderDialog.fetchChoicesPerUserPerDay,
-            CancelOrderDialog.fetchMenuForDay,
-            CancelOrderDialog.cancelOrder
+            UserChoisesStatusDialog.fetchEmployeeChoices,
+            UserChoisesStatusDialog.fetchChoicesPerUserPerDay,
+            UserChoisesStatusDialog.fetchMenuForDay
         ];
     }
 
@@ -28,32 +30,32 @@ class CancelOrderDialog {
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
         var choiceSheetName = month + " " + year;
-        Logger.logger().info("CancelOrderDialog: Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => CancelOrderDialog.onChoicesReceived(session, results, next, response.values));
+        Logger.logger().info("UserChoisesStatusDialog: Gather all data from [%s]", choiceSheetName);
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => UserChoisesStatusDialog.onChoicesReceived(session, results, next, response.values));
     }
 
     static onChoicesReceived(session, results, next, rows) {
-        Logger.logger().info("CancelOrderDialog: Choises Received");
+        Logger.logger().info("UserChoisesStatusDialog: Choises Received");
         let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
         session.dialogData.choicesSheet = choicesSheet;
         next();
     }
 
     static fetchChoicesPerUserPerDay(session, results, next) {
-        Logger.logger().info("CancelOrderDialog.fetchChoicesPerUserPerDay");
+        Logger.logger().info("UserChoisesStatusDialog.fetchChoicesPerUserPerDay");
         let choicesSheet = session.dialogData.choicesSheet;
         let actionDate = moment(session.userData.orderActionDate);
         let user = choicesSheet.getUsersById(session.message.user.id);
         let availableUserChoicesPerDay;
         Logger.logger().info('Cancel order for id[%s]', session.message.user.id);
         if (user.length > 0) {
-            Logger.logger().debug('User found');
+            Logger.logger().info('User found');
             let choicesObj = user[0].getChoicesByDate(actionDate.toDate());
             if (choicesObj) {
                 let emptyChoices = choicesObj.choices.filter(function (choice) {
                     return choice.choiceMenuNumber.length === 0;
                 });
-                /*checking length of emptyChoices and choicesObj. If they are equal, there is nothing to cancel*/
+                /*checking length of emptyChoices and choicesObj. If they are equal, there are no choises for user*/
                 if (choicesObj.choices.length !== emptyChoices.length) {
                     availableUserChoicesPerDay = choicesObj.choices.filter(function (choice) {
                         return choice.choiceMenuNumber.length !== 0;
@@ -73,8 +75,8 @@ class CancelOrderDialog {
                     session.userData.userChoicesNonCircular = userChoicesNonCircular;
                     next();
                 } else {
-                    Logger.logger().info('There are not available choices(notEmpty) to cancel for users [%s] and date[%s]', session.message.user.id, actionDate.format("YYYY-MM-DD"));
-                    session.endDialog("There is nothing to cancel on %s", actionDate.format("D MMM YYYY"));
+                    Logger.logger().info('There are not choices(notEmpty) for users [%s] and date[%s]', session.message.user.id, actionDate.format("YYYY-MM-DD"));
+                    session.endDialog("Seems that there are no choises for %s", actionDate.format("D MMM YYYY"));
                 }
 
             }
@@ -108,48 +110,22 @@ class CancelOrderDialog {
 
             let menusForDayView = MenusFactory.buildMenus(session, menuList);
             session.send("Here are your choices for " + dayName + ":");
-            Logger.logger().info("Asking for meal");
             /*cleaning up session, otherwise we get "TypeError: Converting circular structure to JSON"*/
             session.userData.availableUserChoicesPerDay = null;
             session.dialogData.choicesSheet = null;
-            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises);
+            // builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises);
+            session.endDialog(menusForDayView.msg);
         } else {
             session.endDialog("There is no menu for  " + dayName);
         }
     }
 
-    static cancelOrder(session, results, next) {
-        Logger.logger().info('Canceling order[%s] for id[%s]', session.message.text, session.message.user.id);
-        let userChoicesNonCircular = session.userData.userChoicesNonCircular;
-        let menuToCancel = SheetUtil.resolveCancelMenuType(session.message.text);
-        Logger.logger().info('Resolved choice[%s][%s]', menuToCancel.menuNumber, menuToCancel.menuType);
-        let choiceToDelete;
-        userChoicesNonCircular.forEach(function (choice) {
-            /*if there are more then one menu, the last one is going to be chosen*/
-            if (choice.choiceMenuNumber == menuToCancel.menuNumber && choice.choiceMenuName == menuToCancel.menuType) {
-                choiceToDelete = choice;
-            }
-        });
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
-        var choiceSheetName = month + " " + year;
-        google.updateValue(choiceToDelete.columnLetter, choiceToDelete.rowNumber, '', choiceSheetName, (response, err, value)=>function (response, err, value, session) {
-            if (err) {
-                session.endDialog(err.message);
-            }
-            else {
-                session.endDialog("Order Canceled \"" + choiceToDelete.choiceMenuNumber + choiceToDelete.choiceMenuName + "\". Thank you for choosing our service ;) .");
-            }
-        }(response, err, value, session));
-
-    }
-
     static name() {
-        return "/cancelOrder";
+        return "/status";
     }
 
     get dialog() {
         return this.dialogs;
     }
 }
-module.exports = CancelOrderDialog;
+module.exports = UserChoisesStatusDialog;
