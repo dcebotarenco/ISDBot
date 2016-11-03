@@ -97,7 +97,7 @@ class ModelBuilder {
                     let skypeAccountIsValid = skypeAccount.startsWith('live:') || skypeAccount.startsWith('inther_');
                     Logger.logger().debug("Found Row with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
                     if (skypeAccountIsValid) {
-                        Logger.logger().info("Creating user");
+                        Logger.logger().debug("Creating user");
                         let user = ModelBuilder.createUser(row, index, rows, workingDays);
                         users.push(user);
                         Logger.logger().debug("User[%s] pushed", user.fullName);
