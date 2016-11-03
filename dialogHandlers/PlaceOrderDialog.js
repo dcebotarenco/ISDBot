@@ -57,7 +57,7 @@ class PlaceOrderDialog {
         let user = choiceSheet.getUsersById(session.message.user.id);
         Logger.logger().info('Placing order[%s] for id[%s]', session.message.text, session.message.user.id);
         if (user.length > 0) {
-            Logger.logger().info('User found');
+            Logger.logger().debug('User found');
             let userChoice = SheetUtil.resolveMenuType(session.message.text);
             Logger.logger().info('Resolved choice[%s]', userChoice);
             let choicesObj = user[0].getChoicesByDate(actionDate.toDate());
@@ -66,7 +66,7 @@ class PlaceOrderDialog {
                     return choice.choiceMenuNumber.length === 0;
                 });
                 if (emptyChoices.length > 0) {
-                    Logger.logger().info('User has empty choices. Updating one..');
+                    Logger.logger().debug('User has empty choices. Updating one..');
                     emptyChoices[0].update(userChoice, (response, err, value)=>function (response, err, value, session) {
                         if (err) {
                             Logger.logger().error('The API returned an error: ' + err);
@@ -80,7 +80,7 @@ class PlaceOrderDialog {
                 }
                 else {
                     Logger.logger().info('User has no empty choices.');
-                    Logger.logger().info('Sorting choices by update numbers to get the least updated choice');
+                    Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
                     if (choicesObj.choices.length > 1) {
                         session.endDialog("Dude sorry :( , seems that you have all choices completed. Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
                     }

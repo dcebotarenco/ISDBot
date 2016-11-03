@@ -48,7 +48,7 @@ class CancelOrderDialog {
         let availableUserChoicesPerDay;
         Logger.logger().info('Cancel order for id[%s]', session.message.user.id);
         if (user.length > 0) {
-            Logger.logger().info('User found');
+            Logger.logger().debug('User found');
             let choicesObj = user[0].getChoicesByDate(actionDate.toDate());
             if (choicesObj) {
                 let emptyChoices = choicesObj.choices.filter(function (choice) {
