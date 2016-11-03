@@ -29,7 +29,7 @@ class SkypeBot {
         });
         this.bot = new botbuilder.UniversalBot(this.botConnection);
         this.bot.on('error', function (error) {
-            Logger.logger().error("ERROR[%s]", error);
+            Logger.logger().error("ERROR[%s]", error.message);
         });
         this.bot.on('contactRelationUpdate', SkypeBot.onBotAddedInContacts);
         this.bot.use({botbuilder: SkypeBot.proxy});
