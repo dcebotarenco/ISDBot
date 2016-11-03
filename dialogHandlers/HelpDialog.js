@@ -35,7 +35,7 @@ class HelpDialog {
                     .text('Say \'food cancel mo\' when you want to cancel your meal for Monday')
                 , new builder.HeroCard(session)
                     .title('food status (today|mo|tu|we|th|fr)')
-                    .text('Say \'food status today\' when you want to cancel your meal for Today')
+                    .text('Say \'food status today\' when you want to see your choises for Today')
             ]);
         session.endDialog(msg);
     }

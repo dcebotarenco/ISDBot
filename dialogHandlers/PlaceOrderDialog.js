@@ -28,7 +28,7 @@ class PlaceOrderDialog {
         let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
         if (menuForDay !== undefined) {
             let menusForDayView = MenusFactory.buildMenus(session, menuForDay);
-            session.send("Here is " + dayName + " menu:");
+            session.send("Here is menu for " + dayName + ":");
             Logger.logger().info("Asking for meal");
             builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises);
         } else {
