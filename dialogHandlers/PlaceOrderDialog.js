@@ -47,55 +47,50 @@ class PlaceOrderDialog {
     static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("Choices Received");
         let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
-        session.dialogData.choicesSheet = choicesSheet;
+        let users = choicesSheet.getUsersById(session.message.user.id);
+        let actionDate = moment(session.userData.orderActionDate);
+        let choicesObj = users[0].getChoicesByDate(actionDate.toDate());
+        session.dialogData.userchoicesObj = choicesObj;
         next();
     }
 
     static placeOrder(session, results, next) {
-        let choiceSheet = session.dialogData.choicesSheet;
-        let actionDate = moment(session.userData.orderActionDate);
-        let user = choiceSheet.getUsersById(session.message.user.id);
+
+        let choicesObj = session.dialogData.userchoicesObj;
         Logger.logger().info('Placing order[%s] for id[%s]', session.message.text, session.message.user.id);
-        if (user.length > 0) {
-            Logger.logger().debug('User found');
-            let userChoice = SheetUtil.resolveMenuType(session.message.text);
-            Logger.logger().info('Resolved choice[%s]', userChoice);
-            let choicesObj = user[0].getChoicesByDate(actionDate.toDate());
-            if (choicesObj) {
-                let emptyChoices = choicesObj.choices.filter(function (choice) {
-                    return choice.choiceMenuNumber.length === 0;
-                });
-                if (emptyChoices.length > 0) {
-                    Logger.logger().debug('User has empty choices. Updating one..');
-                    emptyChoices[0].update(userChoice, (response, err, value)=>function (response, err, value, session) {
-                        if (err) {
-                            Logger.logger().error('The API returned an error: ' + err);
-                            session.endDialog(err.message);
-                        }
-                        else {
-                            Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
-                            session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
-                        }
-                    }(response, err, value, session));
-                }
-                else {
-                    Logger.logger().info('User has no empty choices.');
-                    Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
-                    if (choicesObj.choices.length > 1) {
-                        session.endDialog("Dude sorry :( , seems that you have all choices completed. Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
+        let userChoice = SheetUtil.resolveMenuType(session.message.text);
+        Logger.logger().info('Resolved choice[%s]', userChoice);
+        if (choicesObj) {
+            let emptyChoices = choicesObj.choices.filter(function (choice) {
+                return choice.choiceMenuNumber.length === 0;
+            });
+            if (emptyChoices.length > 0) {
+                Logger.logger().debug('User has empty choices. Updating one..');
+                emptyChoices[0].update(userChoice, (response, err, value)=>function (response, err, value, session) {
+                    if (err) {
+                        Logger.logger().error('The API returned an error: ' + err);
+                        session.endDialog(err.message);
                     }
                     else {
-                        choicesObj.choices[0].update(userChoice);
-                        session.endDialog("Order Placed \"" + userChoice + "\". Thank you for choosing our airline ;) .");
+                        Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
+                        session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
                     }
-                }
+                }(response, err, value, session));
             }
             else {
-                session.endDialog("There is no such date [%s] in the menu" + actionDate.toDate());
+                Logger.logger().info('User has no empty choices.');
+                Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
+                if (choicesObj.choices.length > 1) {
+                    session.endDialog("Dude sorry :( , seems that you have all choices completed. Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
+                }
+                else {
+                    choicesObj.choices[0].update(userChoice);
+                    session.endDialog("Order Placed \"" + userChoice + "\". Thank you for choosing our airline ;) .");
+                }
             }
         }
         else {
-            Logger.logger().info('No user found.');
+            session.endDialog("There is no such date [%s] in the menu" + actionDate.toDate());
         }
     }
 
