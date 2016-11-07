@@ -25,17 +25,14 @@ class HelpDialog {
                     .title('help')
                     .text('Say \'help\' when you forgot the commands')
                 , new builder.HeroCard(session)
-                    .title('food')
-                    .text('Say \'food\' when you want to order meal for today')
-                , new builder.HeroCard(session)
-                    .title('food (today|mo|tu|we|th|fr)')
+                    .title('food [today|mo|tu|we|th|fr]')
                     .text('Say \'food fr\' when you want to order meal for Friday')
                 , new builder.HeroCard(session)
-                    .title('food cancel (today|mo|tu|we|th|fr)')
+                    .title('food cancel [today|mo|tu|we|th|fr]')
                     .text('Say \'food cancel mo\' when you want to cancel your meal for Monday')
                 , new builder.HeroCard(session)
-                    .title('food status (today|mo|tu|we|th|fr)')
-                    .text('Say \'food status today\' when you want to see your choises for Today')
+                    .title('food status [today|mo|tu|we|th|fr]')
+                    .text('Say \'food status\' when you want to see your choises for Today')
             ]);
         session.endDialog(msg);
     }
