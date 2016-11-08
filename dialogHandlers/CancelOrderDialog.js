@@ -89,7 +89,7 @@ class CancelOrderDialog {
     }
 
     static fetchMenuForDay(session, results, next) {
-        let userSelectedMenuDate = session.userData.orderActionDate;
+        let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
         let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
         let availableUserChoicesPerDay = session.userData.availableUserChoicesPerDay;
