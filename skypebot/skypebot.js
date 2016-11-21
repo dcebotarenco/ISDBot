@@ -66,13 +66,13 @@ class SkypeBot {
                     let emptyChoices = todayChoices.choices.filter(function (choice) {
                         return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
                     });
-                    if (emptyChoices.length > 0) {
-                        Logger.logger().info("User[%s] has at least one empty choice for today. Asking him for food", employee.fullName);
+                    if (todayChoices.choices.length - emptyChoices.length === 0) {
+                        Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", employee.fullName);
                         Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.skypeName, employee.id);
                         bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name(), PlaceOrderDialog.name());
                     }
                     else {
-                        Logger.logger().info("User[%s] has all choices completed for today, skipping asking him today for food", employee.fullName);
+                        Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", employee.fullName);
                     }
                 });
 
