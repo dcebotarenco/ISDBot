@@ -46,7 +46,7 @@ class UserChoisesStatusDialog {
         let actionDate = moment(session.userData.orderActionDate);
         let user = choicesSheet.getUsersById(session.message.user.id);
         let availableUserChoicesPerDay;
-        Logger.logger().info('Cancel order for id[%s]', session.message.user.id);
+        Logger.logger().info('Show food status for id[%s]', session.message.user.id);
         if (user.length > 0) {
             Logger.logger().info('User found');
             let choicesObj = user[0].getChoicesByDate(actionDate.toDate());
@@ -60,7 +60,7 @@ class UserChoisesStatusDialog {
                         return choice.choiceMenuNumber.length !== 0;
                     });
                     session.userData.availableUserChoicesPerDay = availableUserChoicesPerDay;
-                    Logger.logger().info('User [%s] has [%d] choice(s) available for deleting on [%s]', session.message.user.id, availableUserChoicesPerDay.length, actionDate.format("YYYY-MM-DD"));
+                    Logger.logger().info('User [%s] has [%d] choice(s) available on [%s]', session.message.user.id, availableUserChoicesPerDay.length, actionDate.format("YYYY-MM-DD"));
                     /*adding in session non circular variable*/
                     let userChoicesNonCircular = [];
                     availableUserChoicesPerDay.forEach(function (choice) {

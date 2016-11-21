@@ -104,7 +104,7 @@ class OrderFoodDialog {
                 session.endDialog("Invalid input. Use food status (today|mo|tu|we|th|fr)");
             }
         }
-        else {
+        else if (session.message.text.includes('food')) {
             let placeOrderOnCurrentDayRegex = /(food)/i;
             let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
             let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr))/i;
@@ -123,12 +123,21 @@ class OrderFoodDialog {
                 Logger.logger().info("Place order for current day");
                 session.userData.orderActionDate = new Date();
                 session.beginDialog(PlaceOrderDialog.name());
-            } else {
-                Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
-                session.userData.orderActionDate = new Date();
-                session.beginDialog(PlaceOrderDialog.name());
+            }
+        } else {
+            Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
+            if (session.options.dialogArgs === PlaceOrderDialog.name()) {
+                OrderFoodDialog.startCronDialog(session, PlaceOrderDialog.name());
+            }else if(session.options.dialogArgs === UserChoisesStatusDialog.name()){
+                OrderFoodDialog.startCronDialog(session, UserChoisesStatusDialog.name());
             }
         }
+    }
+
+    static startCronDialog(session, dialogName){
+        Logger.logger().info('Begin Cron Dialog [%s]', dialogName);
+        session.userData.orderActionDate = new Date();
+        session.beginDialog(dialogName);
     }
 
     get dialog() {

@@ -16,6 +16,7 @@ var GoogleConnection = require('../google/googleConnection.js');
 var ModelBuilder = require('../modelBuilder/ModelBuilder.js');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
+var moment = require('moment');
 
 class SkypeBot {
     constructor(settings) {
@@ -45,6 +46,7 @@ class SkypeBot {
         // GoogleConnection.updateValue('C', 10, 'test2', 'bot_settings', function () {});
 
         this._initOrderFoodCron();
+        this._initOrderFoodStatusCron();
         this._initUpdateMenuCron();
         this._initJokesCron();
     }
@@ -67,10 +69,40 @@ class SkypeBot {
                     if (emptyChoices.length > 0) {
                         Logger.logger().info("User[%s] has at least one empty choice for today. Asking him for food", employee.fullName);
                         Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.skypeName, employee.id);
-                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name());
+                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name(), PlaceOrderDialog.name());
                     }
                     else {
                         Logger.logger().info("User[%s] has all choices completed for today, skipping asking him today for food", employee.fullName);
+                    }
+                });
+
+            }(bot, response));
+        }.bind(null, this));
+    }
+
+    _initOrderFoodStatusCron() {
+        let orderFoodStatusCron = this.settings.getValueByKey('cron_orderFoodStatus');
+        Logger.logger().info("Creating order food status cron at [%s]", orderFoodStatusCron);
+        Cron.schedule(orderFoodStatusCron, function (bot) {
+            Logger.logger().info("Running order food status cron");
+            var month = new Date().toLocaleString("en-us", {month: "long"});
+            var year = new Date().getFullYear();
+            var choiceSheetName = month + " " + year;
+            GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response) {
+                let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values);
+                choicesSheet.employees.forEach(function (employee) {
+                    let todayChoices = employee.getChoicesByDate(new Date());
+                    let emptyChoices = todayChoices.choices.filter(function (choice) {
+                        return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+                    });
+                    if (emptyChoices.length !== todayChoices.choices.length) {
+                        Logger.logger().info("User[%s] has at least one choice for today. Sending food status dialog", employee.fullName);
+                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", UserChoisesStatusDialog.name(), employee.skypeName, employee.id);
+                        // session.userData.orderActionDate = moment(new Date());
+                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name(), UserChoisesStatusDialog.name());
+                    }
+                    else {
+                        Logger.logger().info('There are not choices for user [%s] and date[%s]', employee.fullName, moment(new Date()).format("YYYY-MM-DD"));
                     }
                 });
 
@@ -137,7 +169,7 @@ class SkypeBot {
         }
         if (!this._isJokeCronTheSame(newSettings)) {
             Logger.logger().info("Update menu cron is not the same");
-            this._initUpdateMenuCron();
+            this._initJokesCron();
         }
     }
 
@@ -173,7 +205,7 @@ class SkypeBot {
         }
     }
 
-    beginDialogForUser(serviceUrl, userId, userName, dialog) {
+    beginDialogForUser(serviceUrl, userId, userName, dialogToGetDataFrom, dialogToStart) {
         var address =
         {
             bot: {
@@ -189,7 +221,7 @@ class SkypeBot {
             serviceUrl: serviceUrl,
             useAuth: true
         };
-        this.bot.beginDialog(address, dialog);
+        this.bot.beginDialog(address, dialogToGetDataFrom, dialogToStart);
     }
 
 }
