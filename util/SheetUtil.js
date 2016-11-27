@@ -92,5 +92,9 @@ class SheetUtil {
         Logger.logger().info("The meals where not found for group Name []", groupName);
         return null;
     }
+
+    static allTrim(text){
+        return text.replace(/\s+/g,' ').trim();
+    }
 }
 module.exports = SheetUtil;

@@ -2,6 +2,7 @@
  * Created by charea on 02.11.2016.
  */
 var builder = require('botbuilder');
+var SheetUtil = require('../util/SheetUtil');
 
 class Menu {
     constructor(session,
@@ -25,10 +26,11 @@ class Menu {
         let lis = [];
         this.mealList.forEach(function (meal, index) {
             let li;
-            if(lis.length == 0){
-                li = "*" + meal.name;
-            }else{
-                li = "\n*" + meal.name;
+            let newMeal = SheetUtil.allTrim(meal.name);
+            if (lis.length == 0) {
+                li = "*" + newMeal;
+            } else {
+                li = "\n*" + newMeal;
             }
             lis.push(li);
         });
