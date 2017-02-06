@@ -200,8 +200,6 @@ class ModelBuilder {
       return row.length != 0;
     }).map(function (row) {
       return new Employee(row[0], row[1], row[2]);
-    }).filter(function (employee) {
-      return employee.skypeAccount.startsWith('inther_') || employee.skypeAccount.startsWith('live:')
     });
   }
 
