@@ -219,7 +219,10 @@ class SkypeBot {
             },
             id: 'service_url_id',
             serviceUrl: serviceUrl,
-            useAuth: true
+            useAuth: true,
+            conversation:{
+                id: userId
+            }
         };
         this.bot.beginDialog(address, dialogToGetDataFrom, dialogToStart);
     }
