@@ -12,6 +12,7 @@ var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog.js');
 var CancelOrderDialog = require('../dialogHandlers/CancelOrderDialog.js');
 var UserChoisesStatusDialog = require('../dialogHandlers/UserChoisesStatusDialog.js');
 var JokeDialog = require('../dialogHandlers/JokeDialog.js');
+var BooksDialog = require('../dialogHandlers/Books.js');
 var GoogleConnection = require('../google/googleConnection.js');
 var ModelBuilder = require('../modelBuilder/ModelBuilder.js');
 var Logger = require('../logger/logger');
@@ -42,6 +43,7 @@ class SkypeBot {
         this.bot.dialog(CancelOrderDialog.name(), new CancelOrderDialog().dialog);
         this.bot.dialog(UserChoisesStatusDialog.name(), new UserChoisesStatusDialog().dialog);
         this.bot.dialog(JokeDialog.name(), new JokeDialog(this._settings).dialog);
+        this.bot.dialog(BooksDialog.name(), new BooksDialog().dialog);
 
         // GoogleConnection.updateValue('C', 10, 'test2', 'bot_settings', function () {});
 
