@@ -45,6 +45,14 @@ class Choice {
         this._numberOfUpdates++;
     }
 
+    static updateChoice(value, columnLetter, rowNumber, cb) {
+        var month = new Date().toLocaleString("en-us", {month: "long"});
+        var year = new Date().getFullYear();
+        var choiceSheetName = month + " " + year;
+        GoogleConnection.updateValue(columnLetter, rowNumber, value, choiceSheetName, cb);
+        this._numberOfUpdates++;
+    }
+
     static delete(rowNumber, columnLetter) {
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
