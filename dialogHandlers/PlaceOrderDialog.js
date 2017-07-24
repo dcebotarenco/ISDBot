@@ -51,7 +51,6 @@ class PlaceOrderDialog {
         let users = choicesSheet.getUsersById(session.message.user.id);
         let actionDate = moment(session.userData.orderActionDate);
         let choicesObj = users[0].getChoicesByDate(actionDate.toDate());
-        session.dialogData.userchoicesObj = choicesObj;
         /*adding in session non circular variable*/
         let userChoicesNonCircular = [];
         choicesObj.choices.forEach(function (choice) {
