@@ -94,7 +94,7 @@ class ModelBuilder {
                     let id = row[0];
                     let skypeAccount = row[1];
                     let fullName = row[2];
-                    let skypeAccountIsValid = skypeAccount.startsWith('live:') || skypeAccount.startsWith('inther_');
+                    let skypeAccountIsValid = skypeAccount.startsWith('live:') || skypeAccount.startsWith('inther');
                     Logger.logger().debug("Found Row with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
                     if (skypeAccountIsValid) {
                         Logger.logger().debug("Creating user");
@@ -207,7 +207,7 @@ class ModelBuilder {
         }).map(function (row) {
             return new Employee(row[0], row[1], row[2]);
         }).filter(function (employee) {
-            return employee.skypeAccount.startsWith('inther_') || employee.skypeAccount.startsWith('live:')
+            return employee.skypeAccount.startsWith('inther') || employee.skypeAccount.startsWith('live:')
         });
     }
 
