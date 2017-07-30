@@ -5,6 +5,7 @@
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var request = require('request');
+<<<<<<< HEAD
 class Books {
     constructor() {
         Logger.logger().info("Creating Books Dialog");
@@ -264,4 +265,5 @@ class Books {
         return /books/i;
     }
 }
-module.exports = Books;
+
+module.exports = BooksDialog;
