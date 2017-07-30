@@ -7,7 +7,7 @@ var botbuilder = require('botbuilder');
 var OrderFoodDialog = require('./OrderFoodDialog.js');
 var HelpDialog = require('./HelpDialog.js');
 var GreetingDialog = require('./GreetingDialog.js');
-var BooksDialog = require('./Books.js');
+var BooksDialog = require('./BooksDialog.js');
 var Logger = require('../logger/logger');
 
 class RootIntent {
