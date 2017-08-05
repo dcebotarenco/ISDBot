@@ -23,12 +23,9 @@ class BooksDialog {
 
     static onBooksReceived(session, results, next, rows) {
         Logger.logger().info("BooksDialog: Books Received");
-        let choicesSheet = ModelBuilder.createBooksModelSheet(rows);
-        // session.dialogData.choicesSheet = choicesSheet;
-
-        // next();
+        let books = ModelBuilder.createBooksModel(rows);
+        session.endDialog("There are %d books.", books.length);
     }
-
 
     get dialog() {
         return this.dialogs;
