@@ -16,43 +16,43 @@ class Book{
 
     }
 
-    get id{
+    get id(){
         return this._id;
     }
 
-    get title{
+    get title(){
         return this._title;
     }
 
-    get author{
+    get author(){
         return this._author;
     }
 
-    get publisher{
+    get publisher(){
         return this._publisher;
     }
 
-    get year{
+    get year(){
         return this._year;
     }
 
-    get reader{
+    get reader(){
         return this._reader;
     }
 
-    get queue{
+    get queue(){
         return this._queue;
     }
 
-    get urlInfo{
+    get urlInfo(){
         return this._urlInfo;
     }
 
-    get urlImg{
+    get urlImg(){
         return this._urlImg;
     }
 
-    get comments{
+    get comments(){
         return this._comments;
     }
 }

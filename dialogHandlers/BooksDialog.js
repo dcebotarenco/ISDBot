@@ -5,7 +5,6 @@
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var request = require('request');
-<<<<<<< HEAD
 class Books {
     constructor() {
         Logger.logger().info("Creating Books Dialog");
@@ -18,7 +17,7 @@ class Books {
         session.send("test");
     }
 
-    static showBooks(session){
+    static showBooks(session) {
         var card = {
             'contentType': 'application/vnd.microsoft.card.adaptive',
             'content': {
@@ -37,10 +36,10 @@ class Books {
                                         "type": "TextBlock",
                                         "horizontalAlignment": "center",
                                         "wrap": false,
-                                        "weight":"bolder",
-                                        "size":"medium",
+                                        "weight": "bolder",
+                                        "size": "medium",
                                         "text": "Title",
-                                        "separation":"strong"
+                                        "separation": "strong"
                                     }
                                 ]
                             },
@@ -52,10 +51,10 @@ class Books {
                                         "type": "TextBlock",
                                         "horizontalAlignment": "center",
                                         "wrap": false,
-                                        "weight":"bolder",
-                                        "size":"medium",
+                                        "weight": "bolder",
+                                        "size": "medium",
                                         "text": "Year",
-                                        "separation":"strong"
+                                        "separation": "strong"
                                     }
                                 ]
                             },
@@ -67,10 +66,10 @@ class Books {
                                         "type": "TextBlock",
                                         "horizontalAlignment": "center",
                                         "wrap": false,
-                                        "weight":"bolder",
-                                        "size":"medium",
+                                        "weight": "bolder",
+                                        "size": "medium",
                                         "text": "Action",
-                                        "separation":"strong"
+                                        "separation": "strong"
                                     }
                                 ]
                             }
@@ -87,7 +86,7 @@ class Books {
                                         "type": "TextBlock",
                                         "wrap": false,
                                         "text": "Warehouse Management: A Complete Guide to Improving Efficiency and Minimizing Costs in the Modern Warehouse 2nd Edition",
-                                        "horizontalAlignment":"left"
+                                        "horizontalAlignment": "left"
                                     }
                                 ]
                             },
@@ -113,7 +112,7 @@ class Books {
                                         "horizontalAlignment": "center",
                                         "wrap": false,
                                         "text": "Info",
-                                        "color" : "accent"
+                                        "color": "accent"
                                     }
                                 ],
                                 "selectAction": {
@@ -134,7 +133,7 @@ class Books {
                                         "type": "TextBlock",
                                         "wrap": false,
                                         "text": "Test-Driven Development",
-                                        "horizontalAlignment":"left"
+                                        "horizontalAlignment": "left"
                                     }
                                 ]
                             },
@@ -160,7 +159,7 @@ class Books {
                                         "horizontalAlignment": "center",
                                         "wrap": false,
                                         "text": "Info",
-                                        "color" : "accent"
+                                        "color": "accent"
                                     }
                                 ],
                                 "selectAction": {
@@ -252,6 +251,11 @@ class Books {
         session.send(msg);
     }
 
+    static onBooksReceived(session, results, next, rows) {
+        Logger.logger().info("BooksDialog: Books Received");
+        let books = ModelBuilder.createBooksModel(rows);
+        session.endDialog("There are %d books.", books.length);
+    }
 
     get dialog() {
         return this.dialogs;

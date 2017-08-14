@@ -10,6 +10,7 @@ let WorkingDay = require('../orderFood/employeesChoises/WorkingDay');
 let User = require('../orderFood/employeesChoises/User');
 let ChoicesSheet = require('../orderFood/employeesChoises/ChoicesSheet');
 let SheetUtil = require('../util/SheetUtil');
+let Book = require('../viewBooks/Book');
 class ModelBuilder {
     constructor() {
     }
@@ -219,6 +220,40 @@ class ModelBuilder {
             settingsMap.set(row[0], row[1]);
         });
         return new BotSettings(settingsMap);
+    }
+
+    static createBooksModel(rows){
+        Logger.logger().debug("Creating books model");
+        var firstBook = 2;
+        let bookObjects = [];
+        let numberOfItems = rows[1].length;
+        let rowsWithBooks = rows.slice(firstBook, rows.length);
+        let stopLoop = false;
+
+        rowsWithBooks.forEach(function (row, columnIndex, allRows) {
+            //stop processing when get "NON-TECHNICAL", 'break' doesn't works :)
+            if(row[0] === "NON-TECHNICAL") {
+                stopLoop = true;
+            }
+            if(stopLoop){
+                return;
+            }
+
+            //we get rows of different length, and we need to make sure they are the same
+            if(row.length < numberOfItems){
+                ModelBuilder.addEmptyValues(row, numberOfItems);
+            }
+            let book = new Book(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
+            bookObjects.push(book);
+        });
+        return bookObjects;
+    }
+
+    //adding to the array empty values till specified length
+    static addEmptyValues(row, nr){
+        while(row.length < nr){
+            row.push("");
+        }
     }
 }
 
