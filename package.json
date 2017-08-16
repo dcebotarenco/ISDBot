@@ -20,11 +20,11 @@
     "node": "6.4.0"
   },
   "dependencies": {
-    "botbuilder": "^3.8.4",
+    "botbuilder": "^3.9.0",
     "googleapis": "^12.4.0",
     "log4js": "^0.6.38",
-    "node-cron": "^1.1.2",
-    "restify": "^4.1.1",
-    "moment": "^2.15.1"
+    "moment": "^2.15.1",
+    "node-cron": "^1.2.1",
+    "restify": "^4.1.1"
   }
 }
