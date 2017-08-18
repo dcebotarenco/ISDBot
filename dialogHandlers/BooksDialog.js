@@ -29,6 +29,7 @@ class BooksDialog {
     static onBooksReceived(session, rows) {
         Logger.logger().info("BooksDialog: Books Received");
         let books = ModelBuilder.createBooksModel(rows);
+        session.userData = {'books': books};
         var msg = new builder.Message(session).addAttachment(new BooksView(session, books).message);
         session.endDialog(msg);
     }

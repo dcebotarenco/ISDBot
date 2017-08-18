@@ -73,6 +73,11 @@ class BooksView {
         };
 
         this.bookList.forEach(function(book){
+            var color = "http://i.imgur.com/gDRUIPN.jpg";//"warning";
+            if(book.reader == "") {
+                color = "http://i.imgur.com/AzVUbUD.jpg";//"accent";
+            }
+
             var bookRow = {
                 "type": "ColumnSet",//--------------------
                 "columns": [
@@ -104,13 +109,18 @@ class BooksView {
                     "type": "Column",
                     "size": "10",
                     "items": [
-                        {
+                        /*{
                             "type": "TextBlock",
                             "size": "larger",
                             "horizontalAlignment": "center",
                             "wrap": false,
                             "text": "Info",
-                            "color": "accent"
+                            "color": color
+                        }*/
+                        {
+                            "type": "Image",
+                            "size": "auto",
+                            "url": color//"http://www.downloadclipart.net/svg/16146-yellow-rectangle-button-svg.svg"
                         }
                     ],
                     "selectAction": {
@@ -123,25 +133,8 @@ class BooksView {
             message.content.body.push(bookRow);
         });
         return message;
-    }
 
-    createColumnSet(book){
-        var columnSet;
-        columnSet.type = "ColumnSet";
-        columnSet.column.appendChild(createColumn(60, "left", "normal", book.title));
-        columnSet.column.appendChild(createColumn(60, "left", "normal", book.author));
-        columnSet.column.appendChild(createColumn(60, "left", "normal", "Info"));
-        return columnSet;
-    }
-
-    createColumn(size, txtAlignment, wight, text){
-        column.type = "Column";
-        column.size = size;
-        column.itemType = "TextBlock";
-        column.horizontalAlignment = txtAlignment;
-        column.weight = wight;
-        column.text = text;
-        return column ;
+        //http://www.downloadclipart.net/svg/16146-yellow-rectangle-button-svg.svg
     }
 
     get msg() {

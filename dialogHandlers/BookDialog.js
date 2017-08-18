@@ -2,13 +2,12 @@
  * Created by charea on 23.07.2017.
  */
 var book = require('../viewBooks/Book');
-var booksView = require('../viewBooks/BooksView');
+var bookView = require('../viewBooks/BookView');
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var request = require('request');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
 var google = require('../google/googleConnection');
-var booksSheetName = "Physical library";
 
 class BookDialog {
     constructor() {
@@ -19,7 +18,10 @@ class BookDialog {
     }
 
     static showBook(session, results, next) {
-        session.endDialog(session.message.value);
+        var bookId = session.message.text;
+        bookId = bookId.substr(4);
+        var msg = new builder.Message(session).addAttachment(new bookView(session, bookId).message);
+        session.endDialog(msg);
     }
 
     get dialog() {
