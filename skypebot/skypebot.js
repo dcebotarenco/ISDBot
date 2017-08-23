@@ -16,6 +16,7 @@ var BooksDialog = require('../dialogHandlers/BooksDialog');
 var BookDialog = require('../dialogHandlers/BookDialog');
 var GoogleConnection = require('../google/googleConnection');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
+var NotificationDialog = require('../dialogHandlers/NotificationDialog');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 var moment = require('moment');
@@ -46,8 +47,7 @@ class SkypeBot {
         this.bot.dialog(JokeDialog.name(), new JokeDialog(this._settings).dialog);
         this.bot.dialog(BooksDialog.name(), new BooksDialog().dialog);
         this.bot.dialog(BookDialog.name(), new BookDialog().dialog);
-
-        // GoogleConnection.updateValue('C', 10, 'test2', 'bot_settings', function () {});
+        this.bot.dialog(NotificationDialog.name(), new NotificationDialog().dialog);
 
         this._initOrderFoodCron();
         this._initOrderFoodStatusCron();
@@ -63,23 +63,34 @@ class SkypeBot {
             var month = new Date().toLocaleString("en-us", {month: "long"});
             var year = new Date().getFullYear();
             var choiceSheetName = month + " " + year;
-            GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response) {
-                let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values);
-                choicesSheet.employees.forEach(function (employee) {
-                    let todayChoices = employee.getChoicesByDate(new Date());
-                    let emptyChoices = todayChoices.choices.filter(function (choice) {
-                        return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
+                let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
+                GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
+                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList);
+                    choicesSheet.employees.forEach(function (user) {
+                        let employee = employeeList.filter(function (emp) {
+                            return emp.id === user.id;
+                        });
+                        //checking if food notifications are turned on for this user
+                        if (employee[0].notifications.foodNotification == 'YES') {
+                            let todayChoices = user.getChoicesByDate(new Date());
+                            let emptyChoices = todayChoices.choices.filter(function (choice) {
+                                return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+                            });
+                            if (todayChoices.choices.length - emptyChoices.length === 0) {
+                                Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
+                                Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), PlaceOrderDialog.name());
+                            }
+                            else {
+                                Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", user.fullName);
+                            }
+                        } else {
+                            Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
+                        }
                     });
-                    if (todayChoices.choices.length - emptyChoices.length === 0) {
-                        Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", employee.fullName);
-                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), employee.skypeName, employee.id);
-                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name(), PlaceOrderDialog.name());
-                    }
-                    else {
-                        Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", employee.fullName);
-                    }
-                });
 
+                }(bot, response, employeeList));
             }(bot, response));
         }.bind(null, this));
     }
@@ -92,24 +103,35 @@ class SkypeBot {
             var month = new Date().toLocaleString("en-us", {month: "long"});
             var year = new Date().getFullYear();
             var choiceSheetName = month + " " + year;
-            GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response) {
-                let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values);
-                choicesSheet.employees.forEach(function (employee) {
-                    let todayChoices = employee.getChoicesByDate(new Date());
-                    let emptyChoices = todayChoices.choices.filter(function (choice) {
-                        return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
+                let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
+                GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
+                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList);
+                    choicesSheet.employees.forEach(function (user) {
+                        let employee = employeeList.filter(function (emp) {
+                            return emp.id === user.id;
+                        });
+                        //checking if food notifications are turned on for this user
+                        if (employee[0].notifications.foodNotification == 'YES') {
+                            let todayChoices = user.getChoicesByDate(new Date());
+                            let emptyChoices = todayChoices.choices.filter(function (choice) {
+                                return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+                            });
+                            if (emptyChoices.length !== todayChoices.choices.length) {
+                                Logger.logger().info("User[%s] has at least one choice for today. Sending food status dialog", user.fullName);
+                                Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", UserChoisesStatusDialog.name(), user.skypeName, user.id);
+                                // session.userData.orderActionDate = moment(new Date());
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), UserChoisesStatusDialog.name());
+                            }
+                            else {
+                                Logger.logger().info('There are not choices for user [%s] and date[%s]', user.fullName, moment(new Date()).format("YYYY-MM-DD"));
+                            }
+                        } else {
+                            Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
+                        }
                     });
-                    if (emptyChoices.length !== todayChoices.choices.length) {
-                        Logger.logger().info("User[%s] has at least one choice for today. Sending food status dialog", employee.fullName);
-                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", UserChoisesStatusDialog.name(), employee.skypeName, employee.id);
-                        // session.userData.orderActionDate = moment(new Date());
-                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.skypeName, OrderFoodDialog.name(), UserChoisesStatusDialog.name());
-                    }
-                    else {
-                        Logger.logger().info('There are not choices for user [%s] and date[%s]', employee.fullName, moment(new Date()).format("YYYY-MM-DD"));
-                    }
-                });
 
+                }(bot, response, employeeList));
             }(bot, response));
         }.bind(null, this));
     }
@@ -120,13 +142,19 @@ class SkypeBot {
         Cron.schedule(jokes_cron, function (bot) {
             Logger.logger().info("Running jokes cron");
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
-                ModelBuilder.createRegisteredEmployees(rows).forEach(function (employee) {
-                    if (employee.id) {
-                        Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", JokeDialog.name(), employee.name, employee.id);
-                        bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), employee.id, employee.name, JokeDialog.name());
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
+                    if (user.id) {
+                        //checking if joke notifications are turned on for this user
+                        if (user.notifications.jokeNotification == 'YES') {
+                            Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", JokeDialog.name(), user.name, user.id);
+                            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.name, JokeDialog.name());
+                        }
+                        else {
+                            Logger.logger().info('Joke notifications are turned off for user[%s]', user.name);
+                        }
                     }
                     else {
-                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', JokeDialog.name(), employee.name);
+                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', JokeDialog.name(), user.name);
                     }
                 });
             }(bot, response.values));
@@ -211,24 +239,30 @@ class SkypeBot {
 
     beginDialogForUser(serviceUrl, userId, userName, dialogToGetDataFrom, dialogToStart) {
         var address =
-        {
-            bot: {
-                id: 'ISD',
-                name: 'ISD'
-            },
-            channelId: 'skype',
-            user: {
-                id: userId,
-                name: userName
-            },
-            id: 'service_url_id',
-            serviceUrl: serviceUrl,
-            useAuth: true,
-            conversation:{
-                id: userId
-            }
-        };
+            {
+                bot: {
+                    id: 'ISD',
+                    name: 'ISD'
+                },
+                channelId: 'skype',
+                user: {
+                    id: userId,
+                    name: userName
+                },
+                id: 'service_url_id',
+                serviceUrl: serviceUrl,
+                useAuth: true,
+                conversation: {
+                    id: userId
+                }
+            };
         this.bot.beginDialog(address, dialogToGetDataFrom, dialogToStart);
+    }
+
+    static getEmployeeById(id, employeeList) {
+        return employeeList.filter(function (emp) {
+            return emp.id === id;
+        });
     }
 
 }

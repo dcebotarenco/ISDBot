@@ -34,7 +34,7 @@ class CancelOrderDialog {
 
     static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("CancelOrderDialog: Choises Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows, session.userData.employeesList);
         session.dialogData.choicesSheet = choicesSheet;
         next();
     }

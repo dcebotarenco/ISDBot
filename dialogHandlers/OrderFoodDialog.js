@@ -24,6 +24,7 @@ class OrderFoodDialog {
 
     static onEmployeesFetched(session, results, next, rows) {
         let employeeList = ModelBuilder.createRegisteredEmployees(rows);
+        session.userData.employeesList = employeeList;
         if (employeeList.filter(function (employee) {
                 return session.message.address.user.id === employee.id;
             }).length === 0) {
