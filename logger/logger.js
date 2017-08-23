@@ -24,7 +24,7 @@ class Logger
         // log4js.addAppender(log4js.appenders.file('logs/main.log'), 'main');
 
         logger = log4js.getLogger('main');
-        logger.setLevel('DEBUG');
+        logger.setLevel('INFO');
         logger.trace('Test Trace...');
         logger.debug('Test Debug...');
         logger.info('Test Info...');
