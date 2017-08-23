@@ -11,6 +11,7 @@ var SheetUtil = require('../util/SheetUtil');
 var google = require('../google/googleConnection');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
 var Choice = require('../orderFood/employeesChoises/Choice.js');
+var Employee = require('../registration/Employee');
 
 class PlaceOrderDialog {
     constructor() {
@@ -47,7 +48,7 @@ class PlaceOrderDialog {
 
     static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("Choices Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows, session.userData.employeesList);
         let users = choicesSheet.getUsersById(session.message.user.id);
         let actionDate = moment(session.userData.orderActionDate);
         let choicesObj = users[0].getChoicesByDate(actionDate.toDate());

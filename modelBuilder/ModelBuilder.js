@@ -10,6 +10,7 @@ let WorkingDay = require('../orderFood/employeesChoises/WorkingDay');
 let User = require('../orderFood/employeesChoises/User');
 let ChoicesSheet = require('../orderFood/employeesChoises/ChoicesSheet');
 let SheetUtil = require('../util/SheetUtil');
+let Notifications = require('../registration/Notifications');
 class ModelBuilder {
     constructor() {
     }
@@ -69,7 +70,7 @@ class ModelBuilder {
      * @param sheetRows
      * @returns {ChoicesSheet}
      */
-    static createChoiceModelSheet(sheetRows) {
+    static createChoiceModelSheet(sheetRows, employees) {
         Logger.logger().debug("Creating choice model");
 
         let workingDays = [];
@@ -84,31 +85,32 @@ class ModelBuilder {
         });
 
         let users = [];
+        sheetRows.filter(function (row) {
+            return row.length > 0;
+        });
         sheetRows.forEach(function (row, index, rows) {
-            let doesRowExists = row.length > 0;
-            if (doesRowExists) {
-                Logger.logger().debug("Row Exists");
-                let doesRowHaveIdWithAValue = row[0].length > 0;
-                if (doesRowHaveIdWithAValue) {
-                    Logger.logger().debug("Row has an Id");
-                    let id = row[0];
-                    let skypeAccount = row[1];
-                    let fullName = row[2];
-                    let skypeAccountIsValid = skypeAccount.startsWith('live:') || skypeAccount.startsWith('inther');
-                    Logger.logger().debug("Found Row with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
-                    if (skypeAccountIsValid) {
-                        Logger.logger().debug("Creating user");
-                        let user = ModelBuilder.createUser(row, index, rows, workingDays);
-                        users.push(user);
-                        Logger.logger().debug("User[%s] pushed", user.fullName);
-                    } else {
-                        Logger.logger().debug('Row [%d] has id but skype account[%s] is not valid', index, skypeAccount);
-                    }
-                } else {
-                    Logger.logger().debug('Row [%d] has no id', index);
+            //checking if we have an employee with this name
+            let employee;
+            employees.forEach(function (e) {
+                if (e._name == row[0]) {//TO DO: check why getters doesn't work
+                    employee = e;
+                    Logger.logger().debug("Found employee [%s] in the list of registered employees", e._name);
+
+
+                }
+            });
+            if (employee) {
+                if (employee._id.length > 0) {
+                    Logger.logger().debug("Creating user");
+                    let user = ModelBuilder.createUser(row, index, rows, workingDays, employee);
+                    users.push(user);
+                    Logger.logger().debug("User[%s] pushed", user.fullName);
+                }
+                else {
+                    Logger.logger().debug('Employee [%s] has no id', employee._name);
                 }
             } else {
-                Logger.logger().debug('Row [%d] is empty. Next user', index);
+                Logger.logger().debug('Employee [%s] is not in the list of registered employees', row[0]);
             }
         });
         return new ChoicesSheet(workingDays, users);
@@ -122,10 +124,10 @@ class ModelBuilder {
      * @param workingWeekDays working days
      * @returns {User}
      */
-    static createUser(row, index, rows, workingWeekDays) {
-        let id = row[0];
-        let skypeAccount = row[1];
-        let fullName = row[2];
+    static createUser(row, index, rows, workingWeekDays, registeredEmployee) {
+        let id = registeredEmployee._id;
+        let skypeAccount = registeredEmployee._skypeAccount;
+        let fullName = registeredEmployee._name;
         Logger.logger().debug("Skype account is valid");
         let user = new User(id, skypeAccount, fullName);
         Logger.logger().debug("User created with id[%s],skypeName[%s],fullname[%s]", id, skypeAccount, fullName);
@@ -149,6 +151,7 @@ class ModelBuilder {
      */
     static getUserChoices(user, workingDay, row, currentRowIndex, rows) {
         let choices = [];
+        let namesAndTotalMainColumnNumber = 0;//or workingDay.columnNumber - 2
         Logger.logger().debug("Determining choices for user[%s] for day [%s]", user.skypeName, workingDay.date);
         let firstChoice = row[workingDay.columnNumber];
         if (firstChoice) {
@@ -164,8 +167,8 @@ class ModelBuilder {
         Logger.logger().debug("User has [%s] choice [%s] for [%s]", choices.length, firstChoice, workingDay.date);
         Logger.logger().debug("Check next row for new choices for user[%s] and working day[%s]", user.skypeName, workingDay.date);
         for (let nextRowIndex = currentRowIndex + 1; nextRowIndex < rows.length; nextRowIndex++) {
-            let isNextRowANewUser = rows[nextRowIndex][2] && rows[nextRowIndex][2].length > 0;
-            let isNextRowATotal = rows[nextRowIndex][2] && rows[nextRowIndex][2].includes("Total Main");
+            let isNextRowANewUser = rows[nextRowIndex][namesAndTotalMainColumnNumber] && rows[nextRowIndex][namesAndTotalMainColumnNumber].length > 0;
+            let isNextRowATotal = rows[nextRowIndex][namesAndTotalMainColumnNumber] && rows[nextRowIndex][namesAndTotalMainColumnNumber].includes("Total Main");
             if (!isNextRowANewUser) {
                 Logger.logger().debug("Next row is not a new user");
                 if (!isNextRowATotal) {
@@ -190,7 +193,7 @@ class ModelBuilder {
                     break;
                 }
             } else {
-                Logger.logger().debug('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][2], user.skypeName);
+                Logger.logger().debug('On the next row is a new skype account[%s]. Taking next day for [%s]', rows[nextRowIndex][namesAndTotalMainColumnNumber], user.skypeName);
                 break;
             }
         }
@@ -205,10 +208,11 @@ class ModelBuilder {
         return rows.filter(function (row) {
             return row.length != 0;
         }).map(function (row) {
-            return new Employee(row[0], row[1], row[2]);
-        }).filter(function (employee) {
-            return employee.skypeAccount.startsWith('inther') || employee.skypeAccount.startsWith('live:')
+            return new Employee(row[0], row[1], row[2], row[3], row[4], new Notifications(row[5], row[6]));
         });
+        /*.filter(function (employee) {
+         return employee.skypeAccount.startsWith('inther') || employee.skypeAccount.startsWith('live:')
+         });*/
     }
 
     static createBotSettings(rows) {

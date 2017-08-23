@@ -50,12 +50,14 @@ class GoogleConnection {
         var sheets = google.sheets('v4');
         var month = new Date().toLocaleString("en-us", {month: "long"});
         var year = new Date().getFullYear();
-        var choiceSheetName = month + " " + year;
+        // var choiceSheetName = month + " " + year;
+        var SheetName = 'BotUsers';
         var spreadsheetId = process.env.G_SPREADSHEET_ID;
         sheets.spreadsheets.values.get({
             auth: this.getConnection(),
             spreadsheetId: spreadsheetId,
-            range: choiceSheetName + '!A5:C50',
+            // range: choiceSheetName + '!A5:C50',
+            range: SheetName,
             majorDimension: 'ROWS'
         }, function (err, response) {
             if (err) {
@@ -63,6 +65,8 @@ class GoogleConnection {
                 return;
             }
             Logger.logger().debug('Registered employees fetched');
+            //removing first row from the result
+            response.values.splice(0,1);
             c(response);
         });
     }
