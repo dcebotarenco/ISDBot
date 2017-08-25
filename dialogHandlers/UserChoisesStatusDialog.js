@@ -35,7 +35,7 @@ class UserChoisesStatusDialog {
 
     static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("UserChoisesStatusDialog: Choises Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows, session.userData.employeesList);
         session.dialogData.choicesSheet = choicesSheet;
         next();
     }

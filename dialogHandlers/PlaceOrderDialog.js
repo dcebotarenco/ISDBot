@@ -10,6 +10,8 @@ var moment = require('moment');
 var SheetUtil = require('../util/SheetUtil');
 var google = require('../google/googleConnection');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
+var Choice = require('../orderFood/employeesChoises/Choice.js');
+var Employee = require('../registration/Employee');
 
 class PlaceOrderDialog {
     constructor() {
@@ -46,27 +48,36 @@ class PlaceOrderDialog {
 
     static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("Choices Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows);
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows, session.userData.employeesList);
         let users = choicesSheet.getUsersById(session.message.user.id);
         let actionDate = moment(session.userData.orderActionDate);
         let choicesObj = users[0].getChoicesByDate(actionDate.toDate());
-        session.dialogData.userchoicesObj = choicesObj;
+        /*adding in session non circular variable*/
+        let userChoicesNonCircular = [];
+        choicesObj.choices.forEach(function (choice) {
+            userChoicesNonCircular.push({
+                choiceMenuNumber: choice.choiceMenuNumber,
+                choiceMenuName: choice.choiceMenuName,
+                columnLetter: choice.choiceDay.columnLetter,
+                rowNumber: choice.rowNumber
+            });
+        });
+        session.userData.userChoicesNonCircular = userChoicesNonCircular;
         next();
     }
 
     static placeOrder(session, results, next) {
-
-        let choicesObj = session.dialogData.userchoicesObj;
+        let choicesObjNonCircular = session.userData.userChoicesNonCircular;
         Logger.logger().info('Placing order[%s] for id[%s]', session.message.text, session.message.user.id);
         let userChoice = SheetUtil.resolveMenuType(session.message.text);
         Logger.logger().info('Resolved choice[%s]', userChoice);
-        if (choicesObj) {
-            let emptyChoices = choicesObj.choices.filter(function (choice) {
+        if (choicesObjNonCircular) {
+            let emptyChoicesNonCircular = choicesObjNonCircular.filter(function (choice) {
                 return choice.choiceMenuNumber.length === 0;
             });
-            if (emptyChoices.length > 0) {
+            if (emptyChoicesNonCircular.length > 0) {
                 Logger.logger().debug('User has empty choices. Updating one..');
-                emptyChoices[0].update(userChoice, (response, err, value)=>function (response, err, value, session) {
+                Choice.updateChoice(userChoice, emptyChoicesNonCircular[0].columnLetter, emptyChoicesNonCircular[0].rowNumber, (response, err, value)=>function (response, err, value, session) {
                     if (err) {
                         Logger.logger().error('The API returned an error: ' + err);
                         session.userData.choicesSheet = null;
@@ -82,12 +93,12 @@ class PlaceOrderDialog {
             else {
                 Logger.logger().info('User has no empty choices.');
                 Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
-                if (choicesObj.choices.length > 1) {
+                if (choicesObjNonCircular.length > 1) {
                     session.userData.choicesSheet = null;
                     session.endDialog("Dude sorry :( , seems that you have all choices completed. Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
                 }
                 else {
-                    choicesObj.choices[0].update(userChoice, (response, err, value)=>function (response, err, value, session) {
+                    Choice.updateChoice(userChoice, choicesObjNonCircular[0].columnLetter, choicesObjNonCircular[0].rowNumber, (response, err, value)=>function (response, err, value, session) {
                         if (err) {
                             Logger.logger().error('The API returned an error: ' + err);
                             session.userData.choicesSheet = null;
