@@ -5,7 +5,9 @@
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 var request = require('request');
+var BookView = require('../viewBooks/BookView');
 var BooksView = require('../viewBooks/BooksView');
+var BookStatusView = require('../viewBooks/bookStatusView');
 var google = require('../google/googleConnection');
 var booksSheetName = "Physical library";
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
@@ -22,19 +24,39 @@ class BooksDialog {
 
     static resolveAction(session){
         Logger.logger().info("Resolving BooksDialog Dialog");
-        if (session.message.text.match(/books/i)){
+        if(session.message.text.match(/books status/i)){
+            BooksDialog.showBooksForCurrentUser(session);
+        }else if(session.message.text.match(/books[\d]+/i)){
+            BooksDialog.showBook(session);
+        }else if (session.message.text.match(/books/i)){
             BooksDialog.showAllBooks(session);
-        }else if(session.message.text.match(/books status/i)){
-
         }
+    }
 
+    static showAllBooks(session) {
+        var msg = new builder.Message(session).addAttachment(new BooksView(session, session.userData.books).message);
+        session.endDialog(msg);
+    }
+
+    static showBooksForCurrentUser(session) {
+        var books = session.userData.books;
+        var cards = new BookStatusView(session, books).message;
+        var msg = new builder.Message(session).attachmentLayout(builder.AttachmentLayout.carousel).attachments(cards);
+        session.endDialog(msg);
+    }
+
+    static showBook(session) {
+        let bookId = session.message.text.substr(5);
+        let book = session.userData.books[bookId-1];
+        let msg = new builder.Message(session).addAttachment(new BookView(session, book).message);
+        session.endDialog(msg);
     }
 
     static isUserRegistered(session, results, next) {
         google.fetchRegisteredEmployees((response) => BooksDialog.onEmployeesFetched(session, results, next, response.values));
     }
 
-    static onEmployeesFetched(session, next, rows) {
+    static onEmployeesFetched(session, results, next, rows) {
         let employeeList = ModelBuilder.createRegisteredEmployees(rows);
         if (employeeList.filter(function (employee) {
                 return session.message.address.user.id === employee.id;
@@ -44,21 +66,18 @@ class BooksDialog {
         next();
     }
 
-    static booksFetch(session, next) {
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, booksSheetName, 'ROWS', (response) => BooksDialog.saveBooksInSession(session, next));
+    static booksFetch(session, results, next) {
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, booksSheetName, 'ROWS', (response) => BooksDialog.onBooksReceived(session, next, response.values));
     }
 
-    static saveBooksInSession(session, next){
+    static onBooksReceived(session, next, rows){
         Logger.logger().info("BooksDialog: Books Received");
         let books = ModelBuilder.createBooksModel(rows);
-        session.userData = {'books': books};
+        session.userData.books = books;
         next();
     }
 
-    static showAllBooks(session, rows) {
-        var msg = new builder.Message(session).addAttachment(new BooksView(session, books).message);
-        session.endDialog(msg);
-    }
+
 
     get dialog() {
         return this.dialogs;

@@ -125,7 +125,7 @@ class BooksView {
                     ],
                     "selectAction": {
                         "type": "Action.Submit",
-                        "data": "book"+book.id
+                        "data": "books"+book.id
                     }
                 }
             ]
