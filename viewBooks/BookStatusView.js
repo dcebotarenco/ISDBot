@@ -3,19 +3,28 @@
  */
 var builder = require('botbuilder');
 
-class BookView {
-    constructor(session, book) {
+class BookStatusView {
+    constructor(session, books) {
         this.session = session;
-        this.book = book;
+        this.books = books;
         this.message = this._buildMessage();
     }
 
     _buildMessage() {
+        var message = [];
+        this.books.forEach(function (book) {
+            var oneBookView = BookStatusView._buildOneBookView(book);
+            message.push(oneBookView);
+        })
+        return message;
+    }
+
+    static _buildOneBookView(book) {
         var buttonText = "Get in queue";
-        if(this.book._reader == "")
+        if(book._reader == "")
             buttonText = "Barrow book";
 
-        var message = {
+        var bookView = {
             'contentType': 'application/vnd.microsoft.card.adaptive',
             'content': {
                 "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -25,7 +34,7 @@ class BookView {
                     {
                         "type": "TextBlock",
                         "wrap": "true",
-                        "text": this.book._title,
+                        "text": book._title,
                         "weight": "bolder",
                         "size": "large"
                     },
@@ -41,23 +50,23 @@ class BookView {
                                         "facts": [
                                             {
                                                 "title": "Author:",
-                                                "value": this.book._author
+                                                "value": book._author
                                             },
                                             {
                                                 "title": "Year:",
-                                                "value": this.book._year
+                                                "value": book._year
                                             },
                                             {
                                                 "title": "Publisher:",
-                                                "value": this.book._publisher
+                                                "value": book._publisher
                                             },
                                             {
                                                 "title": "People in queue:",
-                                                "value": this.book._queue
+                                                "value": book._queue
                                             },
                                             {
                                                 "title": "Now reading:",
-                                                "value": this.book._reader
+                                                "value": book._reader
                                             }
                                         ]
                                     }
@@ -70,12 +79,12 @@ class BookView {
                                     {
                                         "type": "Image",
                                         "size": "stretch",
-                                        "url": this.book._urlImg
+                                        "url": book._urlImg
                                     }
                                 ],
                                 "selectAction": {
                                     "type": "Action.OpenUrl",
-                                    "data": this.book._urlInfo
+                                    "data": book._urlInfo
                                 }
                             }
                         ]
@@ -90,7 +99,7 @@ class BookView {
                 ]
             }
         };
-        return message;
+        return bookView;
     }
 
     get msg() {
@@ -98,4 +107,4 @@ class BookView {
     }
 }
 
-module.exports = BookView;
+module.exports = BookStatusView;

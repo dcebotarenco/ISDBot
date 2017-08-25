@@ -9,6 +9,7 @@ var HelpDialog = require('./HelpDialog.js');
 var GreetingDialog = require('./GreetingDialog.js');
 var BooksDialog = require('./BooksDialog');
 var BookDialog = require('./BookDialog');
+var BookStatusDialog = require('./BookStatusDialog');
 var Logger = require('../logger/logger');
 
 class RootIntent {
@@ -19,7 +20,8 @@ class RootIntent {
         this.rootIntents.matches(HelpDialog.match(), HelpDialog.name());
         this.rootIntents.matches(GreetingDialog.match(), GreetingDialog.name());
         this.rootIntents.matches(BooksDialog.match(), BooksDialog.name());
-        this.rootIntents.matches(BookDialog.match(), BookDialog.name());
+        //this.rootIntents.matches(BookDialog.match(), BookDialog.name());
+        //this.rootIntents.matches(BookStatusDialog.match(), BookStatusDialog.name());
         this.rootIntents.onDefault([
             function (session) {
                 session.send("I'm sorry. I didn't understand. Bastard");

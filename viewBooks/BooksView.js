@@ -133,8 +133,6 @@ class BooksView {
             message.content.body.push(bookRow);
         });
         return message;
-
-        //http://www.downloadclipart.net/svg/16146-yellow-rectangle-button-svg.svg
     }
 
     get msg() {

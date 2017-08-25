@@ -14,22 +14,48 @@ class BooksDialog {
     constructor() {
         Logger.logger().info("Creating Books Dialog");
         this.dialogs = [
-            BooksDialog.showBooks
+            BooksDialog.isUserRegistered,
+            BooksDialog.booksFetch,
+            BooksDialog.resolveAction
         ];
     }
 
-    static showMsg(session){
-        session.send("test");
+    static resolveAction(session){
+        Logger.logger().info("Resolving BooksDialog Dialog");
+        if (session.message.text.match(/books/i)){
+            BooksDialog.showAllBooks(session);
+        }else if(session.message.text.match(/books status/i)){
+
+        }
+
     }
 
-    static showBooks(session) {
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, booksSheetName, 'ROWS', (response) => BooksDialog.onBooksReceived(session, response.values));
+    static isUserRegistered(session, results, next) {
+        google.fetchRegisteredEmployees((response) => BooksDialog.onEmployeesFetched(session, results, next, response.values));
     }
 
-    static onBooksReceived(session, rows) {
+    static onEmployeesFetched(session, next, rows) {
+        let employeeList = ModelBuilder.createRegisteredEmployees(rows);
+        if (employeeList.filter(function (employee) {
+                return session.message.address.user.id === employee.id;
+            }).length === 0) {
+            session.endDialog("Sorry. You are not registered. Contact Administrator")
+        }
+        next();
+    }
+
+    static booksFetch(session, next) {
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, booksSheetName, 'ROWS', (response) => BooksDialog.saveBooksInSession(session, next));
+    }
+
+    static saveBooksInSession(session, next){
         Logger.logger().info("BooksDialog: Books Received");
         let books = ModelBuilder.createBooksModel(rows);
         session.userData = {'books': books};
+        next();
+    }
+
+    static showAllBooks(session, rows) {
         var msg = new builder.Message(session).addAttachment(new BooksView(session, books).message);
         session.endDialog(msg);
     }
@@ -43,7 +69,7 @@ class BooksDialog {
     }
 
     static match() {
-        return /books/i;
+        return /books| (books[\d]+) | (books status)/i;
     }
 }
 
