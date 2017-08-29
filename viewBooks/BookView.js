@@ -12,10 +12,10 @@ class BookView {
 
     _buildMessage() {
         var buttonText = "Get in queue";
-        if(this.book._reader == "")
+        if(this.book.reader === "")
             buttonText = "Barrow book";
 
-        var message = {
+        return {
             'contentType': 'application/vnd.microsoft.card.adaptive',
             'content': {
                 "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -90,7 +90,6 @@ class BookView {
                 ]
             }
         };
-        return message;
     }
 
     get msg() {
