@@ -12,6 +12,7 @@ var moment = require('moment');
 let MenuFactory = require('../orderFood/factory/MenuFactory');
 let Day = require('../orderFood/lunchList/Day');
 let Choice = require('../orderFood/employeesChoises/Choice');
+let Sheet = require('../orderFood/lunchList/Sheet');
 
 class CancelOrderDialog {
     constructor() {
@@ -91,14 +92,15 @@ class CancelOrderDialog {
     static fetchMenuForDay(session, results, next) {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
-        let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
+        let sheet = new Sheet(session.userData.sheet);
+        let menuForDay = sheet.getMenusForDate(userSelectedMenuDate.toDate());
         let availableUserChoicesPerDay = session.userData.availableUserChoicesPerDay;
         let menuList = [];
         if (menuForDay !== undefined) {
             availableUserChoicesPerDay.forEach(function (item) {
                 let menuName = SheetUtil.resolveMenuNumber(item.choiceMenuNumber);
-                menuForDay.menuList.forEach(function (menu) {
-                    if (menu.constructor.name == menuName) {
+                menuForDay.forEach(function (menu) {
+                    if (menu._number == item.choiceMenuNumber) {
                         menuList.push({menu: menu, menuName: item.choiceMenuName, menuNumber: item.choiceMenuNumber});
                         Logger.logger().info("Added menu[%s]", menu.constructor.name);
                     }
@@ -121,12 +123,12 @@ class CancelOrderDialog {
     static cancelOrder(session, results, next) {
         Logger.logger().info('Canceling order[%s] for id[%s]', session.message.text, session.message.user.id);
         let userChoicesNonCircular = session.userData.userChoicesNonCircular;
-        let menuToCancel = SheetUtil.resolveCancelMenuType(session.message.text);
-        Logger.logger().info('Resolved choice[%s][%s]', menuToCancel.menuNumber, menuToCancel.menuType);
+        let menuToCancel = session.message.text;
+        Logger.logger().info('Resolved choice[%s]',menuToCancel);
         let choiceToDelete;
         userChoicesNonCircular.forEach(function (choice) {
             /*if there are more then one menu, the last one is going to be chosen*/
-            if (choice.choiceMenuNumber == menuToCancel.menuNumber && choice.choiceMenuName == menuToCancel.menuType) {
+            if ((choice.choiceMenuNumber+choice.choiceMenuName) === menuToCancel) {
                 choiceToDelete = choice;
             }
         });

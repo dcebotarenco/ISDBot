@@ -5,11 +5,7 @@ var builder = require('botbuilder');
 var SheetUtil = require('../util/SheetUtil');
 
 class Menu {
-    constructor(session,
-                title,
-                type,
-                mealList,
-                buttons) {
+    constructor(session, title, type, mealList, buttons) {
         this.menuType = type;
         this.buttons = buttons;
         this.title = title;
@@ -19,14 +15,15 @@ class Menu {
     }
 
     _buildMealCard() {
-        return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
+        return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this.buttons)
+        //return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
     }
 
     _formatMealsName() {
         let lis = [];
-        this.mealList.forEach(function (meal, index) {
+        this.mealList.forEach(function (meal) {
             let li;
-            let newMeal = SheetUtil.allTrim(meal.name);
+            let newMeal = SheetUtil.allTrim(meal);
             if (lis.length == 0) {
                 li = "*" + newMeal;
             } else {
@@ -38,7 +35,7 @@ class Menu {
     }
 
     _getButtonsActionCards() {
-        let array = this.buttons.map(function (button, index, array) {
+        let array = this.buttons.map(function (button) {
             return button.actionCard;
         });
         return array;

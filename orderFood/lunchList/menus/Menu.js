@@ -3,12 +3,18 @@
 let MealsGroupFactory = require('../../factory/MealsGroupFactory');
 
 class Menu {
-  constructor(menuName,meals) {
-    this.menuName = menuName;
-    this.meals = meals;
-    this.groups =[];
-    this.groups.push(MealsGroupFactory.getMealGroup("MMealGroup",meals));
-    this.groups.push(MealsGroupFactory.getMealGroup("SMealGroup",meals.slice(1,3)));
+  constructor(menuName, meals, groups) {
+    if(arguments.length == 2) {
+        this.menuName = menuName;
+        this.meals = meals;
+        this.groups =[];
+        this.groups.push(MealsGroupFactory.getMealGroup("MMealGroup",meals));
+        this.groups.push(MealsGroupFactory.getMealGroup("SMealGroup",meals.slice(1,3)));
+    } else {
+        this.menuName = menuName;
+        this.meals = meals;
+        this.groups = groups;
+    }
   }
 
   get mealsList() {

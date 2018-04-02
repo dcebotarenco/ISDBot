@@ -14,6 +14,7 @@ var moment = require('moment');
 let MenuFactory = require('../orderFood/factory/MenuFactory');
 let Day = require('../orderFood/lunchList/Day');
 let Choice = require('../orderFood/employeesChoises/Choice');
+let Sheet = require('../orderFood/lunchList/Sheet');
 
 class UserChoisesStatusDialog {
     constructor() {
@@ -92,19 +93,18 @@ class UserChoisesStatusDialog {
     static fetchMenuForDay(session, results, next) {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
-        let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
-        let availableUserChoicesPerDay = session.userData.availableUserChoicesPerDay;
+        let sheet = new Sheet(session.userData.sheet);
+        let menuForDay = sheet.getMenusForDate(userSelectedMenuDate.toDate());
+        var availableUserChoicesPerDay = session.userData.availableUserChoicesPerDay;
         let menuList = [];
         if (menuForDay !== undefined) {
             availableUserChoicesPerDay.forEach(function (item) {
-                let menuName = SheetUtil.resolveMenuNumber(item.choiceMenuNumber);
-                menuForDay.menuList.forEach(function (menu) {
-                    if (menu.constructor.name == menuName) {
+                menuForDay.forEach(function (menu) {
+                    if (menu._number == item.choiceMenuNumber) {
                         menuList.push({menu: menu, menuName: item.choiceMenuName, menuNumber: item.choiceMenuNumber});
                         Logger.logger().info("Added menu[%s]", menu.constructor.name);
                     }
                 });
-
             });
 
             let menusForDayView = MenusFactory.buildMenus(session, menuList);

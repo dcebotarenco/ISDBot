@@ -35,15 +35,16 @@ class OrderFoodDialog {
 
     static fetchMenu(session, results, next) {
         Logger.logger().info("Gather all data from [%s]", menuSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, menuSheetName, 'COLUMNS', (response) => OrderFoodDialog.onMenuReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, menuSheetName, 'ROWS', (response) => OrderFoodDialog.onMenuReceived(session, results, next, response.values));
     }
 
     static onMenuReceived(session, results, next, columns) {
-        let sheet = ModelBuilder.createMenuModelSheet(columns);
+        let sheet = ModelBuilder.createMenuModelSheet(columns,session);
         session.userData.sheet = sheet;
         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
         Logger.logger().info('Today: %s', today);
 
+        //check if menu was updated
         if (sheet.updateDate.getWeek() === today.getWeek()) {
             Logger.logger().info('Sheet week[%s] is in today week[%s]', sheet.updateDate.getWeek(), today.getWeek());
             if (today.getDay() <= 5) {
@@ -63,6 +64,7 @@ class OrderFoodDialog {
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
 
+        //user entered food cancel
         if (session.message.text.includes('food') && session.message.text.includes('cancel')) {
             let foodCancelOnSpecificDayRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
             let isfoodCancelOnSpecificDay = foodCancelOnSpecificDayRegex.exec(session.message.text);
@@ -86,6 +88,7 @@ class OrderFoodDialog {
                 session.userData.choicesSheet = null;
                 session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
             }
+        //user entered food status
         } else if (session.message.text.includes('food') && session.message.text.includes('status')) {
             let foodStatusOnSpecificDayRegex = /(food status (today|mo|tu|we|th|fr))/i;
             let isFoodStatusOnSpecificDay = foodStatusOnSpecificDayRegex.exec(session.message.text);
@@ -105,7 +108,8 @@ class OrderFoodDialog {
                 session.endDialog("Invalid input. Use food status (today|mo|tu|we|th|fr)");
             }
         }
-        else if (session.message.text.includes('food')) {
+        //user entered food
+        else if (session.message.text.includes('food')) { //TODO change so it accepts only "food"
             let placeOrderOnCurrentDayRegex = /(food)/i;
             let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
             let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr))/i;

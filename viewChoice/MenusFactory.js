@@ -14,13 +14,13 @@ class MenusFactory {
 
         menus.forEach(function (menuObj) {
             let buttonList = [];
-            let mealGroup = menuObj.menu.mealGroups.filter(function (mealGroup) {
-               return mealGroup.groupName ==  menuObj.menuName;
-            });
-            let title = "" + menuObj.menu.name + " (" + menuObj.menuNumber + menuObj.menuName + ")";
-            /*not so nice with index, to be changed later : mealGroup[0].meals*/
-            buttonList.push(new Button(session, menuObj.menu.constructor.name, menuObj.menuName));
-            menuList.push(new Menu(session, title, /*menuObj.menu.name, menuObj.menuNumber.concat(menuObj.menuName),*/ menuObj.menu.constructor.name, mealGroup[0].meals, buttonList));
+            let mealGroup = [menuObj.menu._firstMeal, menuObj.menu._secondMeal];
+            if(menuObj.menuName === 'M') mealGroup.push(menuObj.menu._garnish);
+            let name = menuObj.menu._provider + " " + menuObj.menu._title;
+            let nr = menuObj.menuNumber + menuObj.menuName;
+            let title = name + " (" + nr + ")";
+            buttonList.push(new Button(session, nr, nr));
+            menuList.push(new Menu(session, title, nr, mealGroup, buttonList));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

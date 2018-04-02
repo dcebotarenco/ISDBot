@@ -9,7 +9,7 @@ class Button {
         this.session = session;
         this.menuName = menuName;
         this.menuGroupName = menuGroupName;
-        this.buttonChoice = this.menuName + "-" + this.menuGroupName;
+        this.buttonChoice = this.menuName;
         this.cardAction = this._buildCardAction();
     }
 
