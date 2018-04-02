@@ -7,10 +7,6 @@ var Logger = require('../logger/logger');
 
 class Menu {
     constructor(session, title, type, mealList, buttons) {
-        Logger.logger().info("Menu items:");
-        mealList.forEach(function (item) {
-            Logger.logger().debug(item);
-        });
         this.menuType = type;
         this.buttons = buttons;
         this.title = title;
@@ -26,9 +22,7 @@ class Menu {
 
     _formatMealsName() {
         let lis = [];
-        Logger.logger().info("Menu from formatMealsName:");
         this.mealList.forEach(function (meal) {
-            Logger.logger().debug(meal);
             let li;
             let newMeal = SheetUtil.allTrim(meal);
             if (lis.length == 0) {
