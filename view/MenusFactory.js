@@ -38,6 +38,10 @@ class MenusFactory {
                 //buttonList.push(new Button(session, size, size));
             });
             let menuMealsWithName = [menu.firstMeal, menu.secondMeal, menu.garnish];
+            Logger.logger().info("Menu items:");
+            menuMealsWithName.forEach(function (item) {
+                Logger.logger().debug(item);
+            });
             if (menuMealsWithName.length > 0) {
                 let title = menu._title;
                 menuList.push(new Menu(session, menu.provider + " " + title , menuMealsWithName , menuMealsWithName, buttonList));
