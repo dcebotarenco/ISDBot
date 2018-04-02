@@ -113,7 +113,11 @@ class SheetUtil {
     }
 
     static allTrim(text){
-        return text.replace(/\s+/g,' ').trim();
+        if (typeof text !== 'undefined'){
+            return text.replace(/\s+/g,' ').trim();
+        }else{
+            return "";
+        }
     }
 
     static splitDigitsFromString(item) {

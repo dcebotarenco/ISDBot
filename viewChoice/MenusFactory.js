@@ -14,8 +14,8 @@ class MenusFactory {
 
         menus.forEach(function (menuObj) {
             let buttonList = [];
-            let mealGroup = [menuObj.menu._firstMeal, menuObj.menu._secondMeal];
-            if(menuObj.menuName === 'M') mealGroup.push(menuObj.menu._garnish);
+            let mealGroup = [menuObj.menu._secondMeal, menuObj.menu._garnish];
+            if(menuObj.menuName === 'M') mealGroup.push(menuObj.menu._firstMeal);
             let name = menuObj.menu._provider + " " + menuObj.menu._title;
             let nr = menuObj.menuNumber + menuObj.menuName;
             let title = name + " (" + nr + ")";

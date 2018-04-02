@@ -13,18 +13,8 @@ class Logger
 {
     static _init()
     {
-        //console log is loaded by default, so you won't normally need to do this
-        //log4js.loadAppender('console');
-        // log4js.loadAppender('file');
-//        log4js.replaceConsole();
-        // if(!fs.existsSync('./logs'))
-        // {
-        //     fs.mkdir('./logs');
-        // }
-        // log4js.addAppender(log4js.appenders.file('logs/main.log'), 'main');
-
         logger = log4js.getLogger('main');
-        logger.setLevel('TRACE');
+        logger.setLevel('INFO');
         logger.trace('Test Trace...');
         logger.debug('Test Debug...');
         logger.info('Test Info...');

@@ -35,12 +35,11 @@ class MenusFactory {
             let buttonList = [];
             menu.sizes.forEach(function (size) {
                 buttonList.push(builder.CardAction.imBack(session, menu.number+size, size));
-                //buttonList.push(new Button(session, size, size));
             });
             let menuMealsWithName = [menu.firstMeal, menu.secondMeal, menu.garnish];
             if (menuMealsWithName.length > 0) {
-                let title = menu._title;
-                menuList.push(new Menu(session, menu.provider + " " + title , menuMealsWithName , menuMealsWithName, buttonList));
+                let name = menu._provider + " " + menu._title + " (" +  menu._number + ")";
+                menuList.push(new Menu(session, name , menuMealsWithName , menuMealsWithName, buttonList));
             }
         });
         let dayMenu = new MenusView(session, menuList);

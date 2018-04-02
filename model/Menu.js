@@ -12,6 +12,7 @@ class Menu{
     //firstMeal
     //secondMeal
     //garnish --garnitura
+    //number 1...10
 
 
     constructor(title, provider, sizes, firstMeal, secondMeal, garnish, date, number) {
