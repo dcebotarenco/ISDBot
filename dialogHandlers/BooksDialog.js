@@ -8,6 +8,8 @@ var request = require('request');
 var BookView = require('../viewBooks/BookView');
 var BooksView = require('../viewBooks/BooksView');
 var BookStatusView = require('../viewBooks/bookStatusView');
+var BooksController = require('../google/BooksController');
+var UsersController = require('../google/UsersController');
 var google = require('../google/googleConnection');
 var booksSheetName = "Physical library";
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
@@ -39,8 +41,10 @@ class BooksDialog {
     }
 
     static showBooksForCurrentUser(session) {
-        var books = session.userData.books;
-        var cards = new BookStatusView(session, books).message;
+        var user = UsersController.getUserById(session.userData.users, session.message.user.id);
+        var userBooks = BooksController.getUsersCurrentBook(session.userData.books, user);
+        var userQueueBooks = BooksController.getUsersCurrentQueueBooks(session.userData.books, user);
+        var cards = new BookStatusView(session, userBooks).message;
         var msg = new builder.Message(session).attachmentLayout(builder.AttachmentLayout.carousel).attachments(cards);
         session.endDialog(msg);
     }
@@ -58,6 +62,7 @@ class BooksDialog {
 
     static onEmployeesFetched(session, results, next, rows) {
         let employeeList = ModelBuilder.createRegisteredEmployees(rows);
+        session.userData = {'users': employeeList};
         if (employeeList.filter(function (employee) {
                 return session.message.address.user.id === employee.id;
             }).length === 0) {
@@ -76,8 +81,6 @@ class BooksDialog {
         session.userData.books = books;
         next();
     }
-
-
 
     get dialog() {
         return this.dialogs;
