@@ -7,6 +7,7 @@ var botbuilder = require('botbuilder');
 var OrderFoodDialog = require('./OrderFoodDialog.js');
 var HelpDialog = require('./HelpDialog.js');
 var GreetingDialog = require('./GreetingDialog.js');
+var BooksDialog = require('./BooksDialog');
 var NotificationDialog = require('./NotificationDialog.js');
 var Logger = require('../logger/logger');
 
@@ -17,6 +18,7 @@ class RootIntent {
         this.rootIntents.matches(OrderFoodDialog.match(), OrderFoodDialog.name());
         this.rootIntents.matches(HelpDialog.match(), HelpDialog.name());
         this.rootIntents.matches(GreetingDialog.match(), GreetingDialog.name());
+        this.rootIntents.matches(BooksDialog.match(), BooksDialog.name());
         this.rootIntents.matches(NotificationDialog.match(), NotificationDialog.name());
         this.rootIntents.onDefault([
             function (session) {

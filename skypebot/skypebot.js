@@ -4,17 +4,18 @@
  * and open the template in the editor.
  */
 var botbuilder = require('botbuilder');
-var RootIntent = require('../dialogHandlers/RootIntent.js');
-var OrderFoodDialog = require('../dialogHandlers/OrderFoodDialog.js');
-var GreetingDialog = require('../dialogHandlers/GreetingDialog.js');
-var NotificationDialog = require('../dialogHandlers/NotificationDialog.js');
-var HelpDialog = require('../dialogHandlers/HelpDialog.js');
-var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog.js');
-var CancelOrderDialog = require('../dialogHandlers/CancelOrderDialog.js');
-var UserChoisesStatusDialog = require('../dialogHandlers/UserChoisesStatusDialog.js');
-var JokeDialog = require('../dialogHandlers/JokeDialog.js');
-var GoogleConnection = require('../google/googleConnection.js');
-var ModelBuilder = require('../modelBuilder/ModelBuilder.js');
+var RootIntent = require('../dialogHandlers/RootIntent');
+var OrderFoodDialog = require('../dialogHandlers/OrderFoodDialog');
+var GreetingDialog = require('../dialogHandlers/GreetingDialog');
+var HelpDialog = require('../dialogHandlers/HelpDialog');
+var PlaceOrderDialog = require('../dialogHandlers/PlaceOrderDialog');
+var CancelOrderDialog = require('../dialogHandlers/CancelOrderDialog');
+var UserChoisesStatusDialog = require('../dialogHandlers/UserChoisesStatusDialog');
+var JokeDialog = require('../dialogHandlers/JokeDialog');
+var BooksDialog = require('../dialogHandlers/BooksDialog');
+var GoogleConnection = require('../google/googleConnection');
+var ModelBuilder = require('../modelBuilder/ModelBuilder');
+var NotificationDialog = require('../dialogHandlers/NotificationDialog');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 var moment = require('moment');
@@ -43,9 +44,8 @@ class SkypeBot {
         this.bot.dialog(CancelOrderDialog.name(), new CancelOrderDialog().dialog);
         this.bot.dialog(UserChoisesStatusDialog.name(), new UserChoisesStatusDialog().dialog);
         this.bot.dialog(JokeDialog.name(), new JokeDialog(this._settings).dialog);
+        this.bot.dialog(BooksDialog.name(), new BooksDialog().dialog);
         this.bot.dialog(NotificationDialog.name(), new NotificationDialog().dialog);
-
-        // GoogleConnection.updateValue('C', 10, 'test2', 'bot_settings', function () {});
 
         this._initOrderFoodCron();
         this._initOrderFoodStatusCron();

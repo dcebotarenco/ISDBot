@@ -10,7 +10,10 @@ let WorkingDay = require('../orderFood/employeesChoises/WorkingDay');
 let User = require('../orderFood/employeesChoises/User');
 let ChoicesSheet = require('../orderFood/employeesChoises/ChoicesSheet');
 let SheetUtil = require('../util/SheetUtil');
+let Book = require('../viewBooks/Book');
 let Notifications = require('../registration/Notifications');
+let Menu = require('../model/Menu.js');
+
 class ModelBuilder {
     constructor() {
     }
@@ -20,7 +23,43 @@ class ModelBuilder {
      * @param columns
      * @returns {Sheet}
      */
-    static createMenuModelSheet(columns) {
+    static createMenuModelSheet(rows,session) {
+        let menus = [];
+        let pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
+        let updateDate = null;
+        let menuNr = 1;
+        let allMenuTypes = [];
+        for(let i = 0; i < rows.length; ){
+            if(rows[i][0].toLowerCase().substring(0, 4) === "menu"){
+                let split = rows[i][0].split("-");
+                let provider = split[1];
+                let title = split[2];
+                let sizes = split[3].split('');
+                sizes.forEach(function(size){
+                   allMenuTypes.push(menuNr+size);
+                });
+                for(let col = 1 ; col < 6 ; col++){
+                    let firstMeal = rows[i+1][col];
+                    let secondMeal = rows[i+2][col];
+                    let garnish = rows[i+3][col];
+                    let menuDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + (col - 1));
+                    menus.push(new Menu(title,provider,sizes,firstMeal,secondMeal,garnish,menuDate, menuNr));
+                }
+                i += 3;
+                menuNr++;
+            }else if(rows[i][0] === "Update date:"){
+                updateDate = new Date(rows[i][1].replace(pattern, '$3-$2-$1'));
+                i++;
+            }else{
+                i++;
+            }
+        }
+        Logger.logger().debug('Menu fetched from db');
+        session.userData.allMenuTypes = allMenuTypes;
+        return new Sheet(menus, updateDate);
+
+        /*
+        let columns = rows;
         let firstMealIndexes = [3, 7, 11, 15];
         let secondMealIndexes = [4, 8, 12, 16];
         let saladMealIndexes = [5, 9, 13, 17];
@@ -62,7 +101,7 @@ class ModelBuilder {
             let dayDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + index);
             days.push(new Day(dayDate, menu));
         });
-        return new Sheet(days, updateDate);
+        return new Sheet(days, updateDate); */
     }
 
     /**
@@ -155,8 +194,9 @@ class ModelBuilder {
         Logger.logger().debug("Determining choices for user[%s] for day [%s]", user.skypeName, workingDay.date);
         let firstChoice = row[workingDay.columnNumber];
         if (firstChoice) {
-            let choiceMenuNumber = firstChoice.charAt(0);
-            let choiceMenuName = firstChoice.charAt(1);
+            let fullChoice = SheetUtil.splitDigitsFromString(firstChoice);
+            let choiceMenuNumber = fullChoice[0];
+            let choiceMenuName = fullChoice[1];
             let choice = new Choice(choiceMenuNumber, choiceMenuName, workingDay, user, currentRowIndex + 1);
             choices.push(choice);
         }
@@ -177,8 +217,9 @@ class ModelBuilder {
                     let nextChoice = null;
                     if (nextChoiceValue) {
                         Logger.logger().debug('Next choice exists in row');
-                        let nextChoiceMenuNumber = nextChoiceValue.charAt(0);
-                        let nextChoiceMenuName = nextChoiceValue.charAt(1);
+                        let fullChice = SheetUtil.splitDigitsFromString(nextChoiceValue);
+                        let nextChoiceMenuNumber = fullChice[0];
+                        let nextChoiceMenuName = fullChice[1];
                         nextChoice = new Choice(nextChoiceMenuNumber, nextChoiceMenuName, workingDay, user, nextRowIndex + 1)
                         Logger.logger().debug("User has [%s] choice [%s] for [%s]", choices.length, nextChoiceValue, workingDay.date);
                     } else {
@@ -223,6 +264,40 @@ class ModelBuilder {
             settingsMap.set(row[0], row[1]);
         });
         return new BotSettings(settingsMap);
+    }
+
+    static createBooksModel(rows){
+        Logger.logger().debug("Creating books model");
+        var firstBook = 2;
+        let bookObjects = [];
+        let numberOfItems = rows[1].length;
+        let rowsWithBooks = rows.slice(firstBook, rows.length);
+        let stopLoop = false;
+
+        rowsWithBooks.forEach(function (row, columnIndex, allRows) {
+            //stop processing when get "NON-TECHNICAL", 'break' doesn't works :)
+            if(row[0] === "NON-TECHNICAL") {
+                stopLoop = true;
+            }
+            if(stopLoop){
+                return;
+            }
+
+            //we get rows of different length, and we need to make sure they are the same
+            if(row.length < numberOfItems){
+                ModelBuilder.addEmptyValues(row, numberOfItems);
+            }
+            let book = new Book(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
+            bookObjects.push(book);
+        });
+        return bookObjects;
+    }
+
+    //adding to the array empty values till specified length
+    static addEmptyValues(row, nr){
+        while(row.length < nr){
+            row.push("");
+        }
     }
 }
 

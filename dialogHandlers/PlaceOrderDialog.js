@@ -26,9 +26,11 @@ class PlaceOrderDialog {
     static askUserForMeal(session, results, next) {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
-        let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
+        //let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
+        let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
         if (menuForDay !== undefined) {
-            let menusForDayView = MenusFactory.buildMenus(session, menuForDay);
+            //let menusForDayView = MenusFactory.buildMenus(session, menuForDay);
+            let menusForDayView = MenusFactory.buildMenusForDay(session, menuForDay);
             session.send("Here is menu for " + dayName + ":");
             Logger.logger().info("Asking for meal");
             session.userData.choicesSheet = null;
@@ -69,13 +71,14 @@ class PlaceOrderDialog {
     static placeOrder(session, results, next) {
         let choicesObjNonCircular = session.userData.userChoicesNonCircular;
         Logger.logger().info('Placing order[%s] for id[%s]', session.message.text, session.message.user.id);
-        let userChoice = SheetUtil.resolveMenuType(session.message.text);
+        let userChoice = session.message.text;
         Logger.logger().info('Resolved choice[%s]', userChoice);
         if (choicesObjNonCircular) {
             let emptyChoicesNonCircular = choicesObjNonCircular.filter(function (choice) {
                 return choice.choiceMenuNumber.length === 0;
             });
             if (emptyChoicesNonCircular.length > 0) {
+                if(SheetUtil.contains(session.userData.allMenuTypes,userChoice)){
                 Logger.logger().debug('User has empty choices. Updating one..');
                 Choice.updateChoice(userChoice, emptyChoicesNonCircular[0].columnLetter, emptyChoicesNonCircular[0].rowNumber, (response, err, value)=>function (response, err, value, session) {
                     if (err) {
@@ -89,6 +92,9 @@ class PlaceOrderDialog {
                         session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
                     }
                 }(response, err, value, session));
+                }else{
+                    session.endDialog("The kitten has exploded, don't mess with us, or another kitten will die");
+                }
             }
             else {
                 Logger.logger().info('User has no empty choices.');

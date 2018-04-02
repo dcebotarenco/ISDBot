@@ -35,7 +35,8 @@ class CalendarUtil {
                 return moment();
                 break;
         }
-        return moment().day(weekNumber);
+        let ret = moment().day(weekNumber);
+        return ret;
     }
 }
 

@@ -27,18 +27,37 @@ class SheetUtil {
         var type = array[0];
         let menuType = null;
         switch (type) {
-            case 'FirstMenu':
+            case 'Bistro1':
                 menuType = '1';
                 break;
-            case 'SecondMenu':
+            case 'Bistro2':
                 menuType = '2';
                 break;
-            case 'PostMenu':
+            case 'Bistropost':
                 menuType = '3';
                 break;
-            case 'DietMenu':
+            case 'Bistrodieta':
                 menuType = '4';
                 break;
+            case 'Don Taco1':
+                menuType = '5';
+                break;
+            case 'Don Taco2':
+                menuType = '6';
+                break;
+            case 'Don Taco3':
+                menuType = '7';
+                break;
+            case 'Don Taco4':
+                menuType = '8';
+                break;
+            case 'Don Taco5':
+                menuType = '9';
+                break;
+            case 'Don Taco6':
+                menuType = '10';
+                break;
+
         }
         return menuType + array[1];
     }
@@ -95,6 +114,20 @@ class SheetUtil {
 
     static allTrim(text){
         return text.replace(/\s+/g,' ').trim();
+    }
+
+    static splitDigitsFromString(item) {
+        return (item.replace(/\'/g, '').split(/(\d+)/).filter(Boolean));
+    }
+
+    static contains(list, item) {
+        var i = list.length;
+        while (i--) {
+            if (list[i] === item) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 module.exports = SheetUtil;
