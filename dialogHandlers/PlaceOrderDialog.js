@@ -34,7 +34,7 @@ class PlaceOrderDialog {
             session.send("Here is menu for " + dayName + ":");
             Logger.logger().info("Asking for meal");
             session.userData.choicesSheet = null;
-            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises);
+            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, { retryPrompt: 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.' });
         } else {
             session.endDialog("There is no menu for " + dayName);
         }

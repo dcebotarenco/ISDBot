@@ -16,7 +16,7 @@ class MenusView {
     _buildDay() {
         return new builder.Message(this.session)
             .textFormat(builder.TextFormat.markdown)
-            .attachmentLayout(builder.AttachmentLayout.list)
+            .attachmentLayout(builder.AttachmentLayout.carousel)
             .attachments(this._getMenuCards());
     }
 

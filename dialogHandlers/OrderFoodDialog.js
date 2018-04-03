@@ -63,13 +63,14 @@ class OrderFoodDialog {
 
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
+        let userMsg = session.message.text.toLowerCase();
 
         //user entered food cancel
-        if (session.message.text.includes('food') && session.message.text.includes('cancel')) {
+        if (userMsg.includes('food') && userMsg.includes('cancel')) {
             let foodCancelOnSpecificDayRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
-            let isfoodCancelOnSpecificDay = foodCancelOnSpecificDayRegex.exec(session.message.text);
+            let isfoodCancelOnSpecificDay = foodCancelOnSpecificDayRegex.exec(userMsg);
             let foodCancelOnCurrentDayRegex = /(food cancel)/i;
-            let isfoodCancelOnCurrentDay = foodCancelOnCurrentDayRegex.exec(session.message.text);
+            let isfoodCancelOnCurrentDay = foodCancelOnCurrentDayRegex.exec(userMsg);
             if (isfoodCancelOnSpecificDay) {
                 Logger.logger().info("Cancel order for a specific day");
                 let date = CalendarUtil.resolveDate(isfoodCancelOnSpecificDay[2]);
@@ -89,11 +90,11 @@ class OrderFoodDialog {
                 session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
             }
         //user entered food status
-        } else if (session.message.text.includes('food') && session.message.text.includes('status')) {
+        } else if (userMsg.includes('food') && userMsg.includes('status')) {
             let foodStatusOnSpecificDayRegex = /(food status (today|mo|tu|we|th|fr))/i;
-            let isFoodStatusOnSpecificDay = foodStatusOnSpecificDayRegex.exec(session.message.text);
+            let isFoodStatusOnSpecificDay = foodStatusOnSpecificDayRegex.exec(userMsg);
             let foodStatusOnCurrentDayRegex = /(food status)/i;
-            let isFoodStatusOnCurrentDay = foodStatusOnCurrentDayRegex.exec(session.message.text);
+            let isFoodStatusOnCurrentDay = foodStatusOnCurrentDayRegex.exec(userMsg);
             if (isFoodStatusOnSpecificDay) {
                 Logger.logger().info("User choises status for a specific day");
                 let date = CalendarUtil.resolveDate(isFoodStatusOnSpecificDay[2]);
@@ -109,11 +110,11 @@ class OrderFoodDialog {
             }
         }
         //user entered food
-        else if (session.message.text.includes('food')) { //TODO change so it accepts only "food"
+        else if (userMsg.includes('food')) { //TODO change so it accepts only "food"
             let placeOrderOnCurrentDayRegex = /(food)/i;
-            let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(session.message.text);
+            let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(userMsg);
             let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr))/i;
-            let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(session.message.text);
+            let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(userMsg);
             if (isPlaceOrderOnSpecificDay) {
                 Logger.logger().info("Place order for a specific day");
                 let userDay = CalendarUtil.resolveDate(isPlaceOrderOnSpecificDay[2]);
