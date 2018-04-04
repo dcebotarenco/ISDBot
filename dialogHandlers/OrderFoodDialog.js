@@ -63,10 +63,13 @@ class OrderFoodDialog {
 
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
-        let userMsg = session.message.text.toLowerCase();
+        let userMsg = session.message.text.toLowerCase().trim();
+        let cancelRegex = /^food cancel( )?(today|mo|tu|we|th|fr)?$/;
+        let statusRegex = /^food status( )?(today|mo|tu|we|th|fr)?$/;
+        let foodRegex = /^food( )?(today|mo|tu|we|th|fr)?$/;
 
         //user entered food cancel
-        if (userMsg.includes('food') && userMsg.includes('cancel')) {
+        if (cancelRegex.test(userMsg)) {
             let foodCancelOnSpecificDayRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
             let isfoodCancelOnSpecificDay = foodCancelOnSpecificDayRegex.exec(userMsg);
             let foodCancelOnCurrentDayRegex = /(food cancel)/i;
@@ -90,7 +93,7 @@ class OrderFoodDialog {
                 session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
             }
         //user entered food status
-        } else if (userMsg.includes('food') && userMsg.includes('status')) {
+        } else if (statusRegex.test(userMsg)) {
             let foodStatusOnSpecificDayRegex = /(food status (today|mo|tu|we|th|fr))/i;
             let isFoodStatusOnSpecificDay = foodStatusOnSpecificDayRegex.exec(userMsg);
             let foodStatusOnCurrentDayRegex = /(food status)/i;
@@ -110,7 +113,7 @@ class OrderFoodDialog {
             }
         }
         //user entered food
-        else if (userMsg.includes('food')) { //TODO change so it accepts only "food"
+        else if (foodRegex.test(userMsg)) {
             let placeOrderOnCurrentDayRegex = /(food)/i;
             let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(userMsg);
             let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr))/i;
@@ -155,7 +158,7 @@ class OrderFoodDialog {
     }
 
     static match() {
-        return /(food cancel (today|mo|tu|we|th|fr))|(food status (today|mo|tu|we|th|fr))|(food (mo|tu|we|th|fr))|(food)/i;
+        return /(^food( )?(today|mo|tu|we|th|fr)?$)|(^food status( )?(today|mo|tu|we|th|fr)?$)|(^food cancel( )?(today|mo|tu|we|th|fr)?$)/i;
     }
 }
 module.exports = OrderFoodDialog;

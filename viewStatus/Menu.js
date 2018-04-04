@@ -23,9 +23,9 @@ class Menu {
             let li;
             let newMeal = SheetUtil.allTrim(meal);
             if (lis.length == 0) {
-                li = "*" + newMeal;
+                li = newMeal;
             } else {
-                li = "\n*" + newMeal;
+                li = "\n" + newMeal;
             }
             lis.push(li);
         });

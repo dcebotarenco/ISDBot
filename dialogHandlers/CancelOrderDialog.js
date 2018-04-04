@@ -112,9 +112,10 @@ class CancelOrderDialog {
             session.send("Here are your choices for " + dayName + ":");
             Logger.logger().info("Asking for meal");
             /*cleaning up session, otherwise we get "TypeError: Converting circular structure to JSON"*/
+            let responseStr = 'Don\'t mess with us, we know where you work.<br/>Choose what you want to cancel from your order or say "bye".';
             session.userData.availableUserChoicesPerDay = null;
             session.dialogData.choicesSheet = null;
-            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises);
+            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, { retryPrompt: responseStr, listStyle: builder.ListStyle.none });
         } else {
             session.endDialog("There is no menu for  " + dayName);
         }

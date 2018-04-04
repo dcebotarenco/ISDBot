@@ -1,6 +1,6 @@
-/**
- * Created by dcebotarenco on 10/6/2016.
- */
+/****
+ ** Created by dcebotarenco on 10/6/2016.
+ **/
 var builder = require('botbuilder');
 var Logger = require('../logger/logger');
 
@@ -14,26 +14,12 @@ class HelpDialog {
 
     static showHelpCommands(session) {
         var msg = new builder.Message(session)
-            .attachments([
-                new builder.HeroCard(session)
-                    .title('hi')
-                    .text('Say \'hi\' when you what to see the greeting message'),
-                new builder.HeroCard(session)
-                    .title('bye')
-                    .text('Say \'bye\' when you want to end current conversation'),
-                new builder.HeroCard(session)
-                    .title('help')
-                    .text('Say \'help\' when you forgot the commands')
-                , new builder.HeroCard(session)
-                    .title('food [today|mo|tu|we|th|fr]')
-                    .text('Say \'food fr\' when you want to order meal for Friday')
-                , new builder.HeroCard(session)
-                    .title('food cancel [today|mo|tu|we|th|fr]')
-                    .text('Say \'food cancel mo\' when you want to cancel your meal for Monday')
-                , new builder.HeroCard(session)
-                    .title('food status [today|mo|tu|we|th|fr]')
-                    .text('Say \'food status\' when you want to see your choises for Today')
-            ]);
+                    .text('Say \'**hi**\' when you what to see the greeting message<br/>' +
+                        'Say \'**bye**\' when you want to end current conversation<br/>' +
+                        'Say \'**help**\' when you forgot the commands<br/>' +
+                        'Say \'**food fr**\' when you want to order meal for Friday<br/>' +
+                        'Say \'**food cancel mo**\' when you want to cancel your meal for Monday<br/>' +
+                        'Say \'**food status**\' when you want to see your choises for Today');
         session.endDialog(msg);
     }
 

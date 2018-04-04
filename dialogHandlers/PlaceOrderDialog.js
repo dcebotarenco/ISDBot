@@ -28,13 +28,14 @@ class PlaceOrderDialog {
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
         //let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
         let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
+        let responseStr = 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.<br/>Choose what you want to order or say "bye"';
         if (menuForDay !== undefined) {
             //let menusForDayView = MenusFactory.buildMenus(session, menuForDay);
             let menusForDayView = MenusFactory.buildMenusForDay(session, menuForDay);
             session.send("Here is menu for " + dayName + ":");
             Logger.logger().info("Asking for meal");
             session.userData.choicesSheet = null;
-            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, { retryPrompt: 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.' });
+            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, { retryPrompt: responseStr, listStyle: builder.ListStyle.none });
         } else {
             session.endDialog("There is no menu for " + dayName);
         }
@@ -101,7 +102,7 @@ class PlaceOrderDialog {
                 Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
                 if (choicesObjNonCircular.length > 1) {
                     session.userData.choicesSheet = null;
-                    session.endDialog("Dude sorry :( , seems that you have all choices completed. Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
+                    session.endDialog("Dude sorry :( , seems that you have all choices completed.Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
                 }
                 else {
                     Choice.updateChoice(userChoice, choicesObjNonCircular[0].columnLetter, choicesObjNonCircular[0].rowNumber, (response, err, value)=>function (response, err, value, session) {

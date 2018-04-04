@@ -22,8 +22,7 @@ class RootIntent {
         this.rootIntents.matches(NotificationDialog.match(), NotificationDialog.name());
         this.rootIntents.onDefault([
             function (session) {
-                session.send("I'm sorry. I didn't understand. Bastard");
-                session.send("What would you like me to do?");
+                session.send("I'm sorry. I didn't understand. Bastard.<br/>What would you like me to do?");
                 session.beginDialog(HelpDialog.name());
             }
         ]);
