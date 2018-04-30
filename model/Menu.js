@@ -5,7 +5,6 @@ var builder = require('botbuilder');
  */
 
 class Menu{
-    //session
     //title --1,2,3,post,dieta...
     //provider -- bistro, don taco ...
     //sizes -- [s],[m],[s,m] ...
@@ -16,7 +15,6 @@ class Menu{
 
 
     constructor(title, provider, sizes, firstMeal, secondMeal, garnish, date, number) {
-        //this.session = session;
         this.title = title;
         this.provider = provider;
         this.sizes = sizes;

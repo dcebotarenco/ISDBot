@@ -5,8 +5,7 @@ var builder = require('botbuilder');
 var SheetUtil = require('../util/SheetUtil');
 
 class Menu {
-    constructor(session, title, type, mealList, buttons) {
-        this.menuType = type;
+    constructor(session, title, mealList, buttons) {
         this.buttons = buttons;
         this.title = title;
         this.mealList = mealList;
@@ -16,7 +15,6 @@ class Menu {
 
     _buildMealCard() {
         return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this.buttons)
-        //return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this._getButtonsActionCards())
     }
 
     _formatMealsName() {
@@ -34,23 +32,12 @@ class Menu {
         return lis.join('');
     }
 
-    _getButtonsActionCards() {
-        let array = this.buttons.map(function (button) {
-            return button.actionCard;
-        });
-        return array;
-    }
-
     get card() {
         return this.mealCard;
     }
 
     get btns() {
         return this.buttons;
-    }
-
-    get type() {
-        return this.menuType;
     }
 }
 module.exports = Menu;
