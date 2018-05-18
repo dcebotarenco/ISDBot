@@ -23,34 +23,34 @@ class ModelBuilder {
      * @param columns
      * @returns {Sheet}
      */
-    static createMenuModelSheet(rows,session) {
+    static createMenuModelSheet(rows, session) {
         let menus = [];
         let pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
         let updateDate = null;
         let menuNr;
         let allMenuTypes = [];
-        for(let i = 0; i < rows.length; ){
-            if(rows[i].length > 0 && rows[i][0].toLowerCase().substring(0, 4) === "menu"){
+        for (let i = 0; i < rows.length;) {
+            if (rows[i].length > 0 && rows[i][0].toLowerCase().substring(0, 4) === "menu") {
                 let split = rows[i][0].split("-");
                 let provider = split[1];
                 let title = split[2];
                 let sizes = split[3].split('');
                 menuNr = split[4];
-                sizes.forEach(function(size){
-                   allMenuTypes.push(menuNr+size);
+                sizes.forEach(function (size) {
+                    allMenuTypes.push(menuNr + size);
                 });
-                for(let col = 1 ; col < 6 ; col++){
-                    let firstMeal = rows[i+1][col];
-                    let secondMeal = rows[i+2][col];
-                    let garnish = rows[i+3][col];
+                for (let col = 1; col < 6; col++) {
+                    let firstMeal = rows[i + 1][col];
+                    let secondMeal = rows[i + 2][col];
+                    let garnish = rows[i + 3][col];
                     let menuDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + (col - 1));
                     menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr));
                 }
                 i += 3;
-            }else if(rows[i].length > 0 && rows[i][0] === "Update date:"){
+            } else if (rows[i].length > 0 && rows[i][0] === "Update date:") {
                 updateDate = new Date(rows[i][1].replace(pattern, '$3-$2-$1'));
                 i++;
-            }else{
+            } else {
                 i++;
             }
         }
@@ -201,10 +201,12 @@ class ModelBuilder {
     }
 
     static createRegisteredEmployees(rows) {
-        return rows.filter(function (row) {
-            return row.length != 0;
-        }).map(function (row) {
-            return new Employee(row[0], row[1], row[2], row[3], row[4], new Notifications(row[5], row[6]));
+        let rowNumber = 1;//starting from 2 since first row was excluded in fetchRegisteredEmployees(taking in account increment)
+        return rows.map(function (row) {
+            rowNumber++;
+            if (row.length != 0) {
+                return new Employee(row[0], row[1], row[2], row[3], row[4], new Notifications(row[5], row[6], row[7]), rowNumber);
+            }
         });
         /*.filter(function (employee) {
          return employee.skypeAccount.startsWith('inther') || employee.skypeAccount.startsWith('live:')
@@ -221,7 +223,7 @@ class ModelBuilder {
         return new BotSettings(settingsMap);
     }
 
-    static createBooksModel(rows){
+    static createBooksModel(rows) {
         Logger.logger().debug("Creating books model");
         var firstBook = 2;
         let bookObjects = [];
@@ -231,15 +233,15 @@ class ModelBuilder {
 
         rowsWithBooks.forEach(function (row, columnIndex, allRows) {
             //stop processing when get "NON-TECHNICAL", 'break' doesn't works :)
-            if(row[0] === "NON-TECHNICAL") {
+            if (row[0] === "NON-TECHNICAL") {
                 stopLoop = true;
             }
-            if(stopLoop){
+            if (stopLoop) {
                 return;
             }
 
             //we get rows of different length, and we need to make sure they are the same
-            if(row.length < numberOfItems){
+            if (row.length < numberOfItems) {
                 ModelBuilder.addEmptyValues(row, numberOfItems);
             }
             let book = new Book(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
@@ -249,8 +251,8 @@ class ModelBuilder {
     }
 
     //adding to the array empty values till specified length
-    static addEmptyValues(row, nr){
-        while(row.length < nr){
+    static addEmptyValues(row, nr) {
+        while (row.length < nr) {
             row.push("");
         }
     }

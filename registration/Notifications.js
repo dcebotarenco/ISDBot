@@ -4,9 +4,10 @@
 
 class Notifications
 {
-    constructor(foodNotification, jokeNotification)
+    constructor(foodNotification, startDate, jokeNotification)
     {
         this._foodNotification = foodNotification;
+        this._startDate = startDate;
         this._jokeNotification = jokeNotification;
     }
 
@@ -16,6 +17,10 @@ class Notifications
 
     get jokeNotification() {
         return this._jokeNotification;
+    }
+
+    get startDate() {
+        return this._startDate;
     }
 }
 module.exports=Notifications;

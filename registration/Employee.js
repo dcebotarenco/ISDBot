@@ -3,7 +3,7 @@
  */
 class Employee
 {
-    constructor(id,skypeAccount,name,initials,isAdmin,notifications)
+    constructor(id,skypeAccount,name,initials,isAdmin,notifications, rowNumber)
     {
         this._id = id;
         this._skypeAccount= skypeAccount

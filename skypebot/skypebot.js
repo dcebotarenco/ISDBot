@@ -16,9 +16,12 @@ var BooksDialog = require('../dialogHandlers/BooksDialog');
 var GoogleConnection = require('../google/googleConnection');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
 var NotificationDialog = require('../dialogHandlers/NotificationDialog');
+var SendMessageToUser = require('../dialogHandlers/SendMessageToUser');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 var moment = require('moment');
+var CalendarUtil = require('../util/CalendarUtil');
+var SheetUtil = require('../util/SheetUtil');
 
 class SkypeBot {
     constructor(settings) {
@@ -46,8 +49,10 @@ class SkypeBot {
         this.bot.dialog(JokeDialog.name(), new JokeDialog(this._settings).dialog);
         this.bot.dialog(BooksDialog.name(), new BooksDialog().dialog);
         this.bot.dialog(NotificationDialog.name(), new NotificationDialog().dialog);
+        this.bot.dialog(SendMessageToUser.name(), new SendMessageToUser().dialog);
 
         this._initOrderFoodCron();
+        this._initStartOrderFoodAgain();
         this._initOrderFoodStatusCron();
         this._initUpdateMenuCron();
         this._initJokesCron();
@@ -159,6 +164,61 @@ class SkypeBot {
         }.bind(null, this));
     }
 
+    _initStartOrderFoodAgain() {
+        let foodNotificationColumnNumber = 6; //TODO: find a way to get this dynamically
+        let columnLetter = SheetUtil.columnToLetter(foodNotificationColumnNumber);
+        let SheetName = 'BotUsers';
+        let foodNotificationValueToWrite = 'YES';
+        let startOrderFoodAgainCron = this.settings.getValueByKey('cron_startOrderFoodAgain');
+        Logger.logger().info("Creating startOrderFoodAgain cron at [%s]", startOrderFoodAgainCron);
+        Cron.schedule(startOrderFoodAgainCron, function (bot) {
+            Logger.logger().info("Running startOrderFoodAgain cron");
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
+                    if (user.id) {
+                        Logger.logger().info('Checking user [%s] with start date [%s].', user.name, user.notifications.startDate);
+                        //if food notification is turned off and StartDate is today, then turn on food notification
+                        if (CalendarUtil.isValidDate(user.notifications.startDate)) {
+                            let pattern = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
+                            let startDate = null;
+                            var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+                            today.setHours(0,0,0,0);//we need to compare date without time
+                            Logger.logger().info('Today: [%s]', today);
+                            startDate = new Date(user.notifications.startDate.replace(pattern, '$3-$2-$1'));
+                            startDate.setHours(0,0,0,0);//we need to compare date without time
+                            Logger.logger().info('Start Date: %s', startDate);
+                            if (user.notifications.foodNotification == 'NO' && today.getDate() === startDate.getDate()) {
+                                Logger.logger().info('Food notification needs to be turned on.');
+                                GoogleConnection.updateValue(columnLetter,user.rowNumber, foodNotificationValueToWrite, SheetName, (response, err, value)=>function (response, err, value) {
+                                    if (err) {
+                                        Logger.logger().error('The API returned an error: ' + err);
+                                    }
+                                    else {
+                                        Logger.logger().info('Range[%s] updated with value[%s] for user [%s]', response.updatedRange, value, user.name);
+                                    }
+                                }(response, err, value));
+
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'Did you miss me? I know you did ;) ... i\'m gonna send you food notifications again (noworries)');
+                            }
+                            else if (user.notifications.foodNotification == 'NO' && today.getDate() < startDate.getDate()) {
+                                Logger.logger().info('Food notification is going to be turned on2 [%s]' ,startDate.getDate()+'.'+(startDate.getMonth()+1)+'.'+startDate.getFullYear() );
+                            }else if (user.notifications.foodNotification == 'YES') {
+                                Logger.logger().info('Food notification is already on for user [%s]', user.name);
+                            }else{
+                                Logger.logger().info('Start Date [%s] is in the past, no further action needed', startDate);
+                            }
+                        } else {
+                            Logger.logger().warn('Invalid date:  [%s]', user.notifications.startDate);
+                        }
+                    }
+                    else {
+                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', JokeDialog.name(), user.name);
+                    }
+                });
+            }(bot, response.values));
+        }.bind(null, this));
+    }
+
     _initUpdateMenuCron() {
         let updateMenuCron = this.settings.getValueByKey('cron_updateMenu');
         Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
@@ -255,6 +315,43 @@ class SkypeBot {
                 }
             };
         this.bot.beginDialog(address, dialogToGetDataFrom, dialogToStart);
+    }
+
+    /**
+     * This method sends a message to user in case there is no session available. The downside is that it doesn't ends current active dialog if there is any.
+     * @param serviceUrl
+     * @param userId
+     * @param userName
+     * @param msg
+     */
+    sendMessageWithoutSession(serviceUrl, userId, userName, msg) {
+        var address =
+            {
+                bot: {
+                    id: 'ISD',
+                    name: 'ISD'
+                },
+                channelId: 'skype',
+                user: {
+                    id: userId,
+                    name: userName
+                },
+                id: 'service_url_id',
+                serviceUrl: serviceUrl,
+                useAuth: true,
+                conversation: {
+                    id: userId
+                }
+            };
+        let message = new botbuilder.Message()
+            .text(msg)
+            .address(address);
+
+        this.bot.send(message, (err) => {
+            if (err) {
+                Logger.logger().warn('Error when sending messages with universalBot:  [%s]', err);
+            }
+        });
     }
 
     static getEmployeeById(id, employeeList) {
