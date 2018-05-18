@@ -34,13 +34,11 @@ class MenusFactory {
         dayMenus.forEach(function (menu) {
             let buttonList = [];
             menu.sizes.forEach(function (size) {
-                buttonList.push(builder.CardAction.imBack(session, menu.number+size, size));
+                buttonList.push(builder.CardAction.imBack(session, menu.number + size, size));
             });
             let menuMealsWithName = [menu.firstMeal, menu.secondMeal, menu.garnish];
-            if (menuMealsWithName.length > 0) {
-                let name = menu._provider + " " + menu._title + " (" +  menu._number + ")";
-                menuList.push(new Menu(session, name , menuMealsWithName , menuMealsWithName, buttonList));
-            }
+            let name = menu.provider + " " + menu.title + " (" +  menu.number + ")";
+            menuList.push(new Menu(session, name , menuMealsWithName, buttonList));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

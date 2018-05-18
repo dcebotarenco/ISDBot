@@ -26,11 +26,9 @@ class PlaceOrderDialog {
     static askUserForMeal(session, results, next) {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
-        //let menuForDay = session.userData.sheet.getDayByDate(userSelectedMenuDate.toDate());
         let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
         let responseStr = 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.<br/>Choose what you want to order or say "bye"';
         if (menuForDay !== undefined) {
-            //let menusForDayView = MenusFactory.buildMenus(session, menuForDay);
             let menusForDayView = MenusFactory.buildMenusForDay(session, menuForDay);
             session.send("Here is menu for " + dayName + ":");
             Logger.logger().info("Asking for meal");

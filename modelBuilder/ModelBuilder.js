@@ -39,12 +39,15 @@ class ModelBuilder {
                 sizes.forEach(function (size) {
                     allMenuTypes.push(menuNr + size);
                 });
-                for (let col = 1; col < 6; col++) {
-                    let firstMeal = rows[i + 1][col];
-                    let secondMeal = rows[i + 2][col];
-                    let garnish = rows[i + 3][col];
+
+                for(let col = 1 ; col < 6 ; col++){
+                    let firstMeal = (rows[i+1][col]);
+                    let secondMeal = (rows[i+2][col]);
+                    let garnish = (rows[i+3][col]);
                     let menuDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + (col - 1));
-                    menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr));
+                    if(firstMeal.trim() !== "" || secondMeal.trim() !== "" || garnish.trim() !== ""){
+                        menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr));
+                    }
                 }
                 i += 3;
             } else if (rows[i].length > 0 && rows[i][0] === "Update date:") {
