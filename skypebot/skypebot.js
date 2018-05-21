@@ -166,7 +166,9 @@ class SkypeBot {
 
     _initStartOrderFoodAgain() {
         let foodNotificationColumnNumber = 6; //TODO: find a way to get this dynamically
-        let columnLetter = SheetUtil.columnToLetter(foodNotificationColumnNumber);
+        let startDateColumnNumber = 7; //TODO: find a way to get this dynamically
+        let foodNotificationColumnLetter = SheetUtil.columnToLetter(foodNotificationColumnNumber);
+        let startDateColumnLetter = SheetUtil.columnToLetter(startDateColumnNumber);
         let SheetName = 'BotUsers';
         let foodNotificationValueToWrite = 'YES';
         let startOrderFoodAgainCron = this.settings.getValueByKey('cron_startOrderFoodAgain');
@@ -189,7 +191,15 @@ class SkypeBot {
                             Logger.logger().info('Start Date: %s', startDate);
                             if (user.notifications.foodNotification == 'NO' && today.getDate() === startDate.getDate()) {
                                 Logger.logger().info('Food notification needs to be turned on.');
-                                GoogleConnection.updateValue(columnLetter,user.rowNumber, foodNotificationValueToWrite, SheetName, (response, err, value)=>function (response, err, value) {
+                                GoogleConnection.updateValue(foodNotificationColumnLetter,user.rowNumber, foodNotificationValueToWrite, SheetName, (response, err, value)=>function (response, err, value) {
+                                    if (err) {
+                                        Logger.logger().error('The API returned an error: ' + err);
+                                    }
+                                    else {
+                                        Logger.logger().info('Range[%s] updated with value[%s] for user [%s]', response.updatedRange, value, user.name);
+                                    }
+                                }(response, err, value));
+                                GoogleConnection.updateValue(startDateColumnLetter, user.rowNumber, '', SheetName, (response, err, value)=>function (response, err, value) {
                                     if (err) {
                                         Logger.logger().error('The API returned an error: ' + err);
                                     }
