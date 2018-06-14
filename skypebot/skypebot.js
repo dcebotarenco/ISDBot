@@ -33,7 +33,8 @@ class SkypeBot {
             appId: this.APP_ID,
             appPassword: this.PSW
         });
-        this.bot = new botbuilder.UniversalBot(this.botConnection);
+        var inMemoryStorage = new botbuilder.MemoryBotStorage();
+        this.bot = new botbuilder.UniversalBot(this.botConnection).set('storage', inMemoryStorage);
         this.bot.on('error', function (error) {
             Logger.logger().error("Proxy Caught ERROR[%s] [%s] ", error.message, error.stack);
         });
