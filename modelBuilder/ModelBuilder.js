@@ -45,7 +45,7 @@ class ModelBuilder {
                     let secondMeal = (rows[i+2][col]);
                     let garnish = (rows[i+3][col]);
                     let menuDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + (col - 1));
-                    if(firstMeal.trim() !== "" || secondMeal.trim() !== "" || garnish.trim() !== ""){
+                    if( (firstMeal && firstMeal.trim() !== "")  || (secondMeal && secondMeal.trim() !== "") || (garnish && garnish.trim() !== "")){
                         menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr));
                     }
                 }
