@@ -99,12 +99,12 @@ class OrderFoodDialog {
             let foodStatusOnCurrentDayRegex = /(food status)/i;
             let isFoodStatusOnCurrentDay = foodStatusOnCurrentDayRegex.exec(userMsg);
             if (isFoodStatusOnSpecificDay) {
-                Logger.logger().info("User choises status for a specific day");
+                Logger.logger().info("User choices status for a specific day");
                 let date = CalendarUtil.resolveDate(isFoodStatusOnSpecificDay[2]);
                 session.userData.orderActionDate = date.toDate();
                 session.beginDialog(UserChoisesStatusDialog.name());
             } else if (isFoodStatusOnCurrentDay) {
-                Logger.logger().info("User choises status for current day");
+                Logger.logger().info("User choices status for current day");
                 session.userData.orderActionDate = new Date();
                 session.beginDialog(UserChoisesStatusDialog.name());
             } else {

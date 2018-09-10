@@ -33,7 +33,7 @@ class Employee
     }
 
     get isAdmin() {
-        return this._isAdmin;
+        return this._isAdmin == 'YES';
     }
 
     get notifications() {

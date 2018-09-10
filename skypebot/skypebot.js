@@ -57,7 +57,8 @@ class SkypeBot {
         this._initEveningOrderFoodCron();
         this._initStartOrderFoodAgain();
         this._initOrderFoodStatusCron();
-        this._initUpdateMenuCron();
+        this._initUpdateBistroMenusCron();
+        this._initUpdateMicoMenusCron();
         this._initJokesCron();
     }
 
@@ -268,22 +269,58 @@ class SkypeBot {
                         }
                     }
                     else {
-                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', JokeDialog.name(), user.name);
+                        Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
                     }
                 });
             }(bot, response.values));
         }.bind(null, this));
     }
 
-    _initUpdateMenuCron() {
-        let updateMenuCron = this.settings.getValueByKey('cron_updateMenu');
+    _initUpdateBistroMenusCron() {
+        let updateMenuCron = this.settings.getValueByKey('cron_notificationUpdateBistroMenus');
         Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
         Cron.schedule(updateMenuCron, function (bot) {
-            Logger.logger().info('Send begin dialog update menu to administrators');
-            let firstAdminId = bot.settings.getValueByKey('first_menu_administrator');
-            let secondMenuId = bot.settings.getValueByKey('second_menu_administrator');
-            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), firstAdminId, '', OrderFoodDialog.name());
-            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), secondMenuId, '', OrderFoodDialog.name());
+            Logger.logger().info('Running updateMenu cron, send update menu msg to administrators');
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
+                    if (user.id) {
+                        if(user.isAdmin){
+                            Logger.logger().info('Sending update message to [%s].', user.name);
+                            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'It\'s time to update **Bistro** menus for this week ;)');
+                        }else{
+                            Logger.logger().debug('User [%s] is not admin, skip',user.name);
+                        }
+                    }
+                    else {
+                        Logger.logger().debug('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
+                    }
+                });
+            }(bot, response.values));
+
+        }.bind(null, this));
+    }
+
+    _initUpdateMicoMenusCron() {
+        let updateMenuCron = this.settings.getValueByKey('cron_notificationUpdateMicoMenus');
+        Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
+        Cron.schedule(updateMenuCron, function (bot) {
+            Logger.logger().info('Running updateMenu cron, send update menu msg to administrators');
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
+                    if (user.id) {
+                        if(user.isAdmin){
+                            Logger.logger().info('Sending update message to [%s].', user.name);
+                            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'It\'s time to update **Mico** menus for next week ;)');
+                        }else{
+                            Logger.logger().debug('User [%s] is not admin, skip',user.name);
+                        }
+                    }
+                    else {
+                        Logger.logger().debug('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
+                    }
+                });
+            }(bot, response.values));
+
         }.bind(null, this));
     }
 
@@ -311,7 +348,7 @@ class SkypeBot {
         }
         if (!this._isUpdateMenuCronTheSame(newSettings)) {
             Logger.logger().info("Update menu cron is not the same");
-            this._initUpdateMenuCron();
+            this._initUpdateBistroMenusCron();
         }
         if (!this._isJokeCronTheSame(newSettings)) {
             Logger.logger().info("Update menu cron is not the same");

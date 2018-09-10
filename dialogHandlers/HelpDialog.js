@@ -20,7 +20,7 @@ class HelpDialog {
                         'Say \'**food**\' when you want to order meal for today<br/>' +
                         'Say \'**food fr**\' when you want to order meal for Friday<br/>' +
                         'Say \'**food cancel mo**\' when you want to cancel your meal for Monday<br/>' +
-                        'Say \'**food status**\' when you want to see your choises for Today');
+                        'Say \'**food status**\' when you want to see your choices for Today');
         session.endDialog(msg);
     }
 

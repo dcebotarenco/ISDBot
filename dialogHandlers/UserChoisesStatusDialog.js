@@ -76,7 +76,7 @@ class UserChoisesStatusDialog {
                     next();
                 } else {
                     Logger.logger().info('There are not choices(notEmpty) for users [%s] and date[%s]', session.message.user.id, actionDate.format("YYYY-MM-DD"));
-                    session.endDialog("Seems that there are no choises for %s", actionDate.format("D MMM YYYY"));
+                    session.endDialog("Seems that there are no choices for %s", actionDate.format("D MMM YYYY"));
                 }
 
             }
