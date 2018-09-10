@@ -29,13 +29,13 @@ class PlaceOrderDialog {
         let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
         let dialogArguments = session.options.dialogArgs;
         let msgToSend = "Here is menu for " + dayName + ":";
-        if(dialogArguments.fromCron ==="_initOrderFoodCron"){
+        if(dialogArguments !== undefined && dialogArguments.fromCron ==="_initOrderFoodCron"){
             menuForDay = menuForDay.filter(function (menu) {
                return menu.provider != "Mico";//TO DO: make this configurable
             });
             msgToSend+=" (without Mico)";
         }
-        if(dialogArguments.fromCron ==="_initEveningOrderFoodCron" && userSelectedMenuDate.toDate().getDay() === 5){
+        if(dialogArguments !== undefined && dialogArguments.fromCron ==="_initEveningOrderFoodCron" && userSelectedMenuDate.toDate().getDay() === 5){
             menuForDay = menuForDay.filter(function (menu) {
                 return menu.provider != "Bistro";//TO DO: make this configurable
             });
