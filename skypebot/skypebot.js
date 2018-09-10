@@ -33,6 +33,7 @@ class SkypeBot {
             appId: this.APP_ID,
             appPassword: this.PSW
         });
+        //this.notWorkingDays = findNotWorkingDays(this.settings())
         var inMemoryStorage = new botbuilder.MemoryBotStorage();
         this.bot = new botbuilder.UniversalBot(this.botConnection).set('storage', inMemoryStorage);
         this.bot.on('error', function (error) {
@@ -53,15 +54,17 @@ class SkypeBot {
         this.bot.dialog(SendMessageToUser.name(), new SendMessageToUser().dialog);
 
         this._initOrderFoodCron();
+        this._initEveningOrderFoodCron();
         this._initStartOrderFoodAgain();
         this._initOrderFoodStatusCron();
         this._initUpdateMenuCron();
         this._initJokesCron();
     }
 
+    /*only on Mondays, and only Bistro*/
     _initOrderFoodCron() {
         let orderFoodCron = this.settings.getValueByKey('cron_orderFood');
-        Logger.logger().info("Creating order food cron at [%s]", orderFoodCron);
+        Logger.logger().info("Creating order food cron at [%s] only for Mondays and only for Bistro", orderFoodCron);
         Cron.schedule(orderFoodCron, function (bot) {
             Logger.logger().info("Running order food cron");
             var month = new Date().toLocaleString("en-us", {month: "long"});
@@ -84,10 +87,52 @@ class SkypeBot {
                             if (todayChoices.choices.length - emptyChoices.length === 0) {
                                 Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
                                 Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
-                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), PlaceOrderDialog.name());
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {dialogToStart: PlaceOrderDialog.name(), fromCron: "_initOrderFoodCron"});
                             }
                             else {
                                 Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", user.fullName);
+                            }
+                        } else {
+                            Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
+                        }
+                    });
+
+                }(bot, response, employeeList));
+            }(bot, response));
+        }.bind(null, this));
+    }
+
+    /*every evening for both Bistro and Mico(exception: Friday just for Mico)*/
+    _initEveningOrderFoodCron() {
+        let orderFoodCron = this.settings.getValueByKey('cron_eveningOrderFood');
+        Logger.logger().info("Creating evening order food cron at [%s] for both Bistro and Mico", orderFoodCron);
+        Cron.schedule(orderFoodCron, function (bot) {
+            Logger.logger().info("Running order food cron");
+            var month = new Date().toLocaleString("en-us", {month: "long"});
+            var year = new Date().getFullYear();
+            var choiceSheetName = month + " " + year;
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
+                let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
+                GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
+                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList);
+                    choicesSheet.employees.forEach(function (user) {
+                        let employee = employeeList.filter(function (emp) {
+                            return emp.id === user.id;
+                        });
+                        //checking if food notifications are turned on for this user
+                        if (employee[0].notifications.foodNotification == 'YES') {
+                            let nextWorkingDay = CalendarUtil.getNextWorkingDay(new Date());
+                            let userChoices = user.getChoicesByDate(nextWorkingDay);
+                            let emptyChoices = userChoices.choices.filter(function (choice) {
+                                return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+                            });
+                            if (userChoices.choices.length - emptyChoices.length === 0) {
+                                Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
+                                Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {dialogToStart: PlaceOrderDialog.name(), fromCron: "_initEveningOrderFoodCron"});
+                            }
+                            else {
+                                Logger.logger().info("User[%s] has at least one choice for [%s], skipping asking him today for food", user.fullName, nextWorkingDay);
                             }
                         } else {
                             Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
@@ -125,7 +170,7 @@ class SkypeBot {
                                 Logger.logger().info("User[%s] has at least one choice for today. Sending food status dialog", user.fullName);
                                 Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", UserChoisesStatusDialog.name(), user.skypeName, user.id);
                                 // session.userData.orderActionDate = moment(new Date());
-                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), UserChoisesStatusDialog.name());
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {dialogToStart: UserChoisesStatusDialog.name(), fromCron: "_initOrderFoodStatusCron"});
                             }
                             else {
                                 Logger.logger().info('There are not choices for user [%s] and date[%s]', user.fullName, moment(new Date()).format("YYYY-MM-DD"));
@@ -306,7 +351,7 @@ class SkypeBot {
         }
     }
 
-    beginDialogForUser(serviceUrl, userId, userName, dialogToGetDataFrom, dialogToStart) {
+    beginDialogForUser(serviceUrl, userId, userName, dialogToGetDataFrom, dialogArguments) {
         var address =
             {
                 bot: {
@@ -325,7 +370,7 @@ class SkypeBot {
                     id: userId
                 }
             };
-        this.bot.beginDialog(address, dialogToGetDataFrom, dialogToStart);
+        this.bot.beginDialog(address, dialogToGetDataFrom, dialogArguments);
     }
 
     /**
@@ -371,5 +416,23 @@ class SkypeBot {
         });
     }
 
+    /*findNotWorkingDays(settings) {
+        let rawNotWokingDays = settings.getValueByKey('not_working_days');
+        let notWorkingDays = rawNotWokingDays.split(";");
+        let validatedNotWokingDays = [];
+        notWorkingDays.forEach(function (day) {
+            if (CalendarUtil.isValidDate(day)) {
+                validatedNotWokingDays.push(day);
+            }
+        });
+        Logger.logger().info(`Validated [${validatedNotWokingDays.length}] out of [${notWorkingDays.length}].`);
+        return validatedNotWokingDays;
+    }
+
+    getNotWorkingDays() {
+        return this.notWorkingDays;
+    }*/
+
 }
+
 module.exports = SkypeBot;

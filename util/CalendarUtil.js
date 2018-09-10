@@ -10,6 +10,22 @@ class CalendarUtil {
         return date;
     }
 
+    /*static  getNextDay(){
+        var today = new Date();
+        var tomorrow = new Date();
+        tomorrow.setDate(today.getDate()+1);
+        return tomorrow;
+    }*/
+    static getNextWorkingDay(date) {
+        // Copy date so don't affect original
+        date = new Date(+date);
+        // Add days until get not Sat or Sun
+        do {
+            date.setDate(date.getDate() + 1);
+        } while (!(date.getDay() % 6));
+        return date;
+    }
+
     static resolveDate(userChoice)
     {
         //mo|tu|we|th|fr|today
@@ -40,7 +56,7 @@ class CalendarUtil {
     }
 
 
-    // Validates that the input string is a valid date formatted as "mm/dd/yyyy"
+    // Validates that the input string is a valid date formatted as "dd.mm.yyyy"
     static isValidDate(dateString)
 {
     // First check for the pattern

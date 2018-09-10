@@ -27,10 +27,24 @@ class PlaceOrderDialog {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
         let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
+        let dialogArguments = session.options.dialogArgs;
+        let msgToSend = "Here is menu for " + dayName + ":";
+        if(dialogArguments.fromCron ==="_initOrderFoodCron"){
+            menuForDay = menuForDay.filter(function (menu) {
+               return menu.provider != "Mico";//TO DO: make this configurable
+            });
+            msgToSend+=" (without Mico)";
+        }
+        if(dialogArguments.fromCron ==="_initEveningOrderFoodCron" && userSelectedMenuDate.toDate().getDay() === 5){
+            menuForDay = menuForDay.filter(function (menu) {
+                return menu.provider != "Bistro";//TO DO: make this configurable
+            });
+            msgToSend+=" (without Bistro)";
+        }
         let responseStr = 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.<br/>Choose what you want to order or say "bye"';
         if (menuForDay !== undefined) {
             let menusForDayView = MenusFactory.buildMenusForDay(session, menuForDay);
-            session.send("Here is menu for " + dayName + ":");
+            session.send(msgToSend);
             Logger.logger().info("Asking for meal");
             session.userData.choicesSheet = null;
             builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, { retryPrompt: responseStr, listStyle: builder.ListStyle.none });

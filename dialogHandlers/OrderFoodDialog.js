@@ -135,9 +135,9 @@ class OrderFoodDialog {
             }
         } else {
             Logger.logger().info("Orderfood dialog called without no input message. This is Cron");
-            if (session.options.dialogArgs === PlaceOrderDialog.name()) {
+            if (session.options.dialogArgs.dialogToStart === PlaceOrderDialog.name()) {
                 OrderFoodDialog.startCronDialog(session, PlaceOrderDialog.name());
-            }else if(session.options.dialogArgs === UserChoisesStatusDialog.name()){
+            }else if(session.options.dialogArgs.dialogToStart === UserChoisesStatusDialog.name()){
                 OrderFoodDialog.startCronDialog(session, UserChoisesStatusDialog.name());
             }
         }
@@ -145,7 +145,12 @@ class OrderFoodDialog {
 
     static startCronDialog(session, dialogName){
         Logger.logger().info('Begin Cron Dialog [%s]', dialogName);
-        session.userData.orderActionDate = new Date();
+        let dialogArguments = session.options.dialogArgs;
+        let date = new Date();
+        if(dialogArguments.fromCron ==="_initEveningOrderFoodCron"){
+            date = CalendarUtil.getNextWorkingDay(date);
+        }
+        session.userData.orderActionDate = date;
         session.beginDialog(dialogName);
     }
 
