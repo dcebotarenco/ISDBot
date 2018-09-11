@@ -453,6 +453,20 @@ class SkypeBot {
         });
     }
 
+    /*notifyAdmins(employee) {
+        Logger.logger().info(`Notifying admins that [${employee}] tried to select Mico for current day:`);
+        GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
+            ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
+                if (user.id && user.isAdmin) {
+                    Logger.logger().info(`Notifying [${user.name}]`);
+                    bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), `Hi, just wanted to let you know that **${employee}** tried to select Mico for today`);
+                } else {
+                    Logger.logger().debug('User [%s] is not admin, skip', user.name);
+                }
+            });
+        }(bot, response.values));
+    }*/
+
     /*findNotWorkingDays(settings) {
         let rawNotWokingDays = settings.getValueByKey('not_working_days');
         let notWorkingDays = rawNotWokingDays.split(";");

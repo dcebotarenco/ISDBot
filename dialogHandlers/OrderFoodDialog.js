@@ -64,13 +64,13 @@ class OrderFoodDialog {
     static resolveAction(session, results, next) {
         Logger.logger().info("Resolving Orderfood Dialog");
         let userMsg = session.message.text.toLowerCase().trim();
-        let cancelRegex = /^food cancel( )?(today|mo|tu|we|th|fr)?$/;
-        let statusRegex = /^food status( )?(today|mo|tu|we|th|fr)?$/;
-        let foodRegex = /^food( )?(today|mo|tu|we|th|fr)?$/;
+        let cancelRegex = /^food cancel( )?(today|mo|tu|we|th|fr|nd)?$/;
+        let statusRegex = /^food status( )?(today|mo|tu|we|th|fr|nd)?$/;
+        let foodRegex = /^food( )?(today|mo|tu|we|th|fr|nd)?$/;
 
         //user entered food cancel
         if (cancelRegex.test(userMsg)) {
-            let foodCancelOnSpecificDayRegex = /(food cancel (today|mo|tu|we|th|fr))/i;
+            let foodCancelOnSpecificDayRegex = /(food cancel (today|mo|tu|we|th|fr|nd))/i;
             let isfoodCancelOnSpecificDay = foodCancelOnSpecificDayRegex.exec(userMsg);
             let foodCancelOnCurrentDayRegex = /(food cancel)/i;
             let isfoodCancelOnCurrentDay = foodCancelOnCurrentDayRegex.exec(userMsg);
@@ -90,11 +90,11 @@ class OrderFoodDialog {
                 session.beginDialog(CancelOrderDialog.name());
             } else {
                 session.userData.choicesSheet = null;
-                session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr)");
+                session.endDialog("Invalid input. Use food cancel (today|mo|tu|we|th|fr|nd)");
             }
         //user entered food status
         } else if (statusRegex.test(userMsg)) {
-            let foodStatusOnSpecificDayRegex = /(food status (today|mo|tu|we|th|fr))/i;
+            let foodStatusOnSpecificDayRegex = /(food status (today|mo|tu|we|th|fr|nd))/i;
             let isFoodStatusOnSpecificDay = foodStatusOnSpecificDayRegex.exec(userMsg);
             let foodStatusOnCurrentDayRegex = /(food status)/i;
             let isFoodStatusOnCurrentDay = foodStatusOnCurrentDayRegex.exec(userMsg);
@@ -109,14 +109,14 @@ class OrderFoodDialog {
                 session.beginDialog(UserChoisesStatusDialog.name());
             } else {
                 session.userData.choicesSheet = null;
-                session.endDialog("Invalid input. Use food status (today|mo|tu|we|th|fr)");
+                session.endDialog("Invalid input. Use food status (today|mo|tu|we|th|fr|nd)");
             }
         }
         //user entered food
         else if (foodRegex.test(userMsg)) {
             let placeOrderOnCurrentDayRegex = /(food)/i;
             let isPlaceOrderOnCurrentDay = placeOrderOnCurrentDayRegex.exec(userMsg);
-            let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr))/i;
+            let placeOrderOnSpecificDayRegex = /(food (mo|tu|we|th|fr|nd))/i;
             let isPlaceOrderOnSpecificDay = placeOrderOnSpecificDayRegex.exec(userMsg);
             if (isPlaceOrderOnSpecificDay) {
                 Logger.logger().info("Place order for a specific day");
@@ -163,7 +163,7 @@ class OrderFoodDialog {
     }
 
     static match() {
-        return /(^food( )?(today|mo|tu|we|th|fr)?$)|(^food status( )?(today|mo|tu|we|th|fr)?$)|(^food cancel( )?(today|mo|tu|we|th|fr)?$)/i;
+        return /(^food( )?(today|mo|tu|we|th|fr|nd)?$)|(^food status( )?(today|mo|tu|we|th|fr|nd)?$)|(^food cancel( )?(today|mo|tu|we|th|fr|nd)?$)/i;
     }
 }
 module.exports = OrderFoodDialog;

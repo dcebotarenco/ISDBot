@@ -28,7 +28,7 @@ class CalendarUtil {
 
     static resolveDate(userChoice)
     {
-        //mo|tu|we|th|fr|today
+        //mo|tu|we|th|fr|today|nd
         let weekNumber;
         switch (userChoice)
         {
@@ -49,6 +49,9 @@ class CalendarUtil {
                 break;
             case 'today':
                 return moment();
+                break;
+            case 'nd':
+                return moment(this.getNextWorkingDay(new Date()));
                 break;
         }
         let ret = moment().day(weekNumber);

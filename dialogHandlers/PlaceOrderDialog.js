@@ -27,19 +27,20 @@ class PlaceOrderDialog {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
         let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
+        session.userData.menuForDay = menuForDay;
         let dialogArguments = session.options.dialogArgs;
         let msgToSend = "Here is menu for " + dayName + ":";
-        if(dialogArguments !== undefined && dialogArguments.fromCron ==="_initOrderFoodCron"){
+        if (dialogArguments !== undefined && dialogArguments.fromCron === "_initOrderFoodCron") {
             menuForDay = menuForDay.filter(function (menu) {
-               return menu.provider != "Mico";//TO DO: make this configurable
+                return menu.provider != "Mico";//TO DO: make this configurable
             });
-            msgToSend+=" (without Mico)";
+            msgToSend += " (without Mico)";
         }
-        if(dialogArguments !== undefined && dialogArguments.fromCron ==="_initEveningOrderFoodCron" && userSelectedMenuDate.toDate().getDay() === 5){
+        if (dialogArguments !== undefined && dialogArguments.fromCron === "_initEveningOrderFoodCron" && userSelectedMenuDate.toDate().getDay() === 5) {
             menuForDay = menuForDay.filter(function (menu) {
                 return menu.provider != "Bistro";//TO DO: make this configurable
             });
-            msgToSend+=" (without Bistro)";
+            msgToSend += " (without Bistro)";
         }
         let responseStr = 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.<br/>Choose what you want to order or say "bye"';
         if (menuForDay !== undefined) {
@@ -47,7 +48,10 @@ class PlaceOrderDialog {
             session.send(msgToSend);
             Logger.logger().info("Asking for meal");
             session.userData.choicesSheet = null;
-            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, { retryPrompt: responseStr, listStyle: builder.ListStyle.none });
+            builder.Prompts.choice(session, menusForDayView.msg, menusForDayView.choises, {
+                retryPrompt: responseStr,
+                listStyle: builder.ListStyle.none
+            });
         } else {
             session.endDialog("There is no menu for " + dayName);
         }
@@ -86,54 +90,65 @@ class PlaceOrderDialog {
         Logger.logger().info('Placing order[%s] for id[%s]', session.message.text, session.message.user.id);
         let userChoice = session.message.text;
         Logger.logger().info('Resolved choice[%s]', userChoice);
-        if (choicesObjNonCircular) {
-            let emptyChoicesNonCircular = choicesObjNonCircular.filter(function (choice) {
-                return choice.choiceMenuNumber.length === 0;
-            });
-            if (emptyChoicesNonCircular.length > 0) {
-                if(SheetUtil.contains(session.userData.allMenuTypes,userChoice)){
-                Logger.logger().debug('User has empty choices. Updating one..');
-                Choice.updateChoice(userChoice, emptyChoicesNonCircular[0].columnLetter, emptyChoicesNonCircular[0].rowNumber, (response, err, value)=>function (response, err, value, session) {
-                    if (err) {
-                        Logger.logger().error('The API returned an error: ' + err);
+
+        //checking first if order selected menu is Mico for current day, if it's the case don't allow operation
+        let selectedMenu = session.userData.menuForDay.filter(function (menu) {
+            return menu._number === userChoice.slice(0, 1);
+        })[0];
+        if (selectedMenu && selectedMenu._provider === "Mico" && moment(session.userData.orderActionDate).isSame(moment(new Date), 'day')) {
+            Logger.logger().info('Not allowing to choose Mico for current day for user [%s]', session.message.address.user.name);
+            session.endDialog("Sorry dude, but it is not allowed to select **Mico** for current day :(");
+            //TO DO: would be nice to notify admins as well SkypeBot.notifyAdmins
+        } else {
+            if (choicesObjNonCircular) {
+                let emptyChoicesNonCircular = choicesObjNonCircular.filter(function (choice) {
+                    return choice.choiceMenuNumber.length === 0;
+                });
+                if (emptyChoicesNonCircular.length > 0) {
+                    if (SheetUtil.contains(session.userData.allMenuTypes, userChoice)) {
+                        Logger.logger().debug('User has empty choices. Updating one..');
+                        Choice.updateChoice(userChoice, emptyChoicesNonCircular[0].columnLetter, emptyChoicesNonCircular[0].rowNumber, (response, err, value) => function (response, err, value, session) {
+                            if (err) {
+                                Logger.logger().error('The API returned an error: ' + err);
+                                session.userData.choicesSheet = null;
+                                session.endDialog(err.message);
+                            }
+                            else {
+                                Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
+                                session.userData.choicesSheet = null;
+                                session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
+                            }
+                        }(response, err, value, session));
+                    } else {
+                        session.endDialog("The kitten has exploded, don't mess with us, or another kitten will die");
+                    }
+                }
+                else {
+                    Logger.logger().info('User has no empty choices.');
+                    Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
+                    if (choicesObjNonCircular.length > 1) {
                         session.userData.choicesSheet = null;
-                        session.endDialog(err.message);
+                        session.endDialog("Dude sorry :( , seems that you have all choices completed.Can you delete one via 'food cancel (today|nd|mo|tu|we|th|fr)'.");
                     }
                     else {
-                        Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
-                        session.userData.choicesSheet = null;
-                        session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
+                        Choice.updateChoice(userChoice, choicesObjNonCircular[0].columnLetter, choicesObjNonCircular[0].rowNumber, (response, err, value) => function (response, err, value, session) {
+                            if (err) {
+                                Logger.logger().error('The API returned an error: ' + err);
+                                session.userData.choicesSheet = null;
+                                session.endDialog(err.message);
+                            }
+                            else {
+                                Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
+                                session.userData.choicesSheet = null;
+                                session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
+                            }
+                        }(response, err, value, session));
                     }
-                }(response, err, value, session));
-                }else{
-                    session.endDialog("The kitten has exploded, don't mess with us, or another kitten will die");
                 }
             }
             else {
-                Logger.logger().info('User has no empty choices.');
-                Logger.logger().debug('Sorting choices by update numbers to get the least updated choice');
-                if (choicesObjNonCircular.length > 1) {
-                    session.userData.choicesSheet = null;
-                    session.endDialog("Dude sorry :( , seems that you have all choices completed.Can you delete one via 'food cancel (today|mo|tu|we|th|fr)'.");
-                }
-                else {
-                    Choice.updateChoice(userChoice, choicesObjNonCircular[0].columnLetter, choicesObjNonCircular[0].rowNumber, (response, err, value)=>function (response, err, value, session) {
-                        if (err) {
-                            Logger.logger().error('The API returned an error: ' + err);
-                            session.userData.choicesSheet = null;
-                            session.endDialog(err.message);
-                        }
-                        else {
-                            Logger.logger().info('Range[%s] updated with value[%s]', response.updatedRange, value);
-                            session.userData.choicesSheet = null;
-                            session.endDialog("Order Placed \"" + value + "\". Thank you for choosing our airline ;) .");
-                        }
-                    }(response, err, value, session));
-                }
+                session.endDialog("There is no such date [%s] in the menu" + actionDate.toDate());
             }
-        }
-        else {
-            session.endDialog("There is no such date [%s] in the menu" + actionDate.toDate());
         }
     }
 
