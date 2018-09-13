@@ -26,7 +26,17 @@ class PlaceOrderDialog {
     static askUserForMeal(session, results, next) {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
-        let menuForDay = session.userData.sheet.getMenusForDate(userSelectedMenuDate.toDate());
+
+        //check if order is for next weeks, nr. of days is going to be subtracted depending of nr. of weeks difference related to current week
+        let nrOfDaysDiff = 0;
+        var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        if (today.getWeek() < session.userData.orderActionDate.getWeek()) {
+            nrOfDaysDiff = (session.userData.orderActionDate.getWeek()- today.getWeek()) *7;//week difference * nr. of days per week
+            Logger.logger().info(`Current week [${today.getWeek()}], order is for week [${session.userData.orderActionDate.getWeek()}], subtracting [${nrOfDaysDiff}] from order date [${session.userData.orderActionDate}]`);
+        }
+        let newUserSelectedMenuDate = userSelectedMenuDate.toDate();
+        newUserSelectedMenuDate.setDate(newUserSelectedMenuDate.getDate() - nrOfDaysDiff);
+        let menuForDay = session.userData.sheet.getMenusForDate(newUserSelectedMenuDate);
         session.userData.menuForDay = menuForDay;
         let dialogArguments = session.options.dialogArgs;
         let msgToSend = "Here is menu for " + dayName + ":";
@@ -36,7 +46,7 @@ class PlaceOrderDialog {
             });
             msgToSend += " (without Mico)";
         }
-        if (dialogArguments !== undefined && dialogArguments.fromCron === "_initEveningOrderFoodCron" && userSelectedMenuDate.toDate().getDay() === 5) {
+        if (dialogArguments !== undefined && dialogArguments.fromCron === "_initEveningOrderFoodCron" && today.getDay() === 5) {
             menuForDay = menuForDay.filter(function (menu) {
                 return menu.provider != "Bistro";//TO DO: make this configurable
             });

@@ -31,7 +31,7 @@ class MenusView {
         let choises = [];
         this.menuList.forEach(function (menu) {
             menu.btns.forEach(function (button) {
-                choises.push(button.choice);
+                choises.push(button.data.value);
             });
         });
         return choises.join('|');
