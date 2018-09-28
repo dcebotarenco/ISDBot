@@ -26,16 +26,23 @@ class CancelOrderDialog {
     }
 
     static fetchEmployeeChoices(session, results, next) {
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
+        var month = new Date(session.userData.orderActionDate).toLocaleString("en-us", {month: "long"});
+        var year = new Date(session.userData.orderActionDate).getFullYear();
         var choiceSheetName = month + " " + year;
+        session.userData.choiceSheetName = choiceSheetName;
         Logger.logger().info("CancelOrderDialog: Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => CancelOrderDialog.onChoicesReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => CancelOrderDialog.onChoicesReceived(session, results, next, response));
     }
 
     static onChoicesReceived(session, results, next, rows) {
-        Logger.logger().info("CancelOrderDialog: Choises Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows, session.userData.employeesList);
+        Logger.logger().info("CancelOrderDialog: Choices Received");
+        if(rows === null){
+            //notify user
+            session.endDialog(`Ooops, something went wrong while reading google spreadsheet [${session.userData.choiceSheetName}] :(`);
+            // TO DO: notify admin
+            return;
+        }
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows.values, session.userData.employeesList,session.userData.orderActionDate);
         session.dialogData.choicesSheet = choicesSheet;
         next();
     }
@@ -93,7 +100,18 @@ class CancelOrderDialog {
         let userSelectedMenuDate = moment(session.userData.orderActionDate);
         let dayName = userSelectedMenuDate.isSame(moment(new Date), 'day') ? 'Today' : userSelectedMenuDate.format('dddd');
         let sheet = new Sheet(session.userData.sheet);
-        let menuForDay = sheet.getMenusForDate(userSelectedMenuDate.toDate());
+
+
+        //check if order is for next weeks, nr. of days is going to be subtracted depending of nr. of weeks difference related to current week
+        let nrOfDaysDiff = 0;
+        var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        if (today.getWeek() < session.userData.orderActionDate.getWeek()) {
+            nrOfDaysDiff = (session.userData.orderActionDate.getWeek()- today.getWeek()) *7;//week difference * nr. of days per week
+            Logger.logger().info(`Current week [${today.getWeek()}], order is for week [${session.userData.orderActionDate.getWeek()}], subtracting [${nrOfDaysDiff}] from order date [${session.userData.orderActionDate}]`);
+        }
+        let newUserSelectedMenuDate = userSelectedMenuDate.toDate();
+        newUserSelectedMenuDate.setDate(newUserSelectedMenuDate.getDate() - nrOfDaysDiff);
+        let menuForDay = sheet.getMenusForDate(newUserSelectedMenuDate);
         let availableUserChoicesPerDay = session.userData.availableUserChoicesPerDay;
         let menuList = [];
         if (menuForDay !== undefined) {
@@ -133,8 +151,8 @@ class CancelOrderDialog {
                 choiceToDelete = choice;
             }
         });
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
+        var month = new Date(session.userData.orderActionDate).toLocaleString("en-us", {month: "long"});
+        var year = new Date(session.userData.orderActionDate).getFullYear();
         var choiceSheetName = month + " " + year;
         google.updateValue(choiceToDelete.columnLetter, choiceToDelete.rowNumber, '', choiceSheetName, (response, err, value)=>function (response, err, value, session) {
             if (err) {

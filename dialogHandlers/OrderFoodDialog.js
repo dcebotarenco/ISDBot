@@ -35,11 +35,18 @@ class OrderFoodDialog {
 
     static fetchMenu(session, results, next) {
         Logger.logger().info("Gather all data from [%s]", menuSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, menuSheetName, 'ROWS', (response) => OrderFoodDialog.onMenuReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, menuSheetName, 'ROWS', (response) => OrderFoodDialog.onMenuReceived(session, results, next, response));
     }
 
     static onMenuReceived(session, results, next, columns) {
-        let sheet = ModelBuilder.createMenuModelSheet(columns,session);
+        Logger.logger().info("Menu Received");
+        if(columns === null){
+            //notify user
+            session.endDialog(`Ooops, something went wrong while reading google spreadsheet [${menuSheetName}] :(`);
+            // TO DO: notify admin
+            return;
+        }
+        let sheet = ModelBuilder.createMenuModelSheet(columns.values,session);
         session.userData.sheet = sheet;
         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
         Logger.logger().info('Today: %s', today);
@@ -78,7 +85,7 @@ class OrderFoodDialog {
                 Logger.logger().info("Cancel order for a specific day");
                 let date = CalendarUtil.resolveDate(isfoodCancelOnSpecificDay[2]);
                 if (date.isSameOrAfter(moment(new Date()), 'day')) {
-                    session.userData.orderActionDate = date;
+                    session.userData.orderActionDate = date.toDate();
                     session.beginDialog(CancelOrderDialog.name());
                 } else {
                     session.userData.sheet = null;

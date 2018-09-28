@@ -67,14 +67,14 @@ class ModelBuilder {
      * @param sheetRows
      * @returns {ChoicesSheet}
      */
-    static createChoiceModelSheet(sheetRows, employees) {
+    static createChoiceModelSheet(sheetRows, employees, orderActionDate) {
         Logger.logger().debug("Creating choice model");
-
+        let actionDate = new Date(orderActionDate);
         let workingDays = [];
         Logger.logger().debug("Creating WorkingDay");
         sheetRows[3].forEach(function (date, columnIndex) {
             if (ModelBuilder.isNumeric(date)) {
-                let currentDate = new Date(new Date().getFullYear(), new Date().getMonth(), parseInt(date));
+                let currentDate = new Date(actionDate.getFullYear(), actionDate.getMonth(), parseInt(date));
                 let columnLetter = SheetUtil.columnToLetter(columnIndex + 1);
                 Logger.logger().debug("Created a WorkingDay for date [%s] on columns index [%d] and column letter [%s]", currentDate, columnIndex, columnLetter);
                 workingDays.push(new WorkingDay(currentDate, columnIndex, columnLetter));

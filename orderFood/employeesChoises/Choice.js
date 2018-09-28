@@ -45,9 +45,9 @@ class Choice {
         this._numberOfUpdates++;
     }
 
-    static updateChoice(value, columnLetter, rowNumber, cb) {
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
+    static updateChoice(value, columnLetter, rowNumber,date, cb) {
+        var month = new Date(date).toLocaleString("en-us", {month: "long"});
+        var year = new Date(date).getFullYear();
         var choiceSheetName = month + " " + year;
         GoogleConnection.updateValue(columnLetter, rowNumber, value, choiceSheetName, cb);
         this._numberOfUpdates++;

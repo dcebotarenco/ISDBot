@@ -74,7 +74,13 @@ class SkypeBot {
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
                 let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
                 GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList);
+                    if(response === null){
+                        //notify user
+                        Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
+                        // TO DO: notify admin
+                        return;
+                    }
+                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList, new Date());
                     choicesSheet.employees.forEach(function (user) {
                         let employee = employeeList.filter(function (emp) {
                             return emp.id === user.id;
@@ -109,20 +115,27 @@ class SkypeBot {
         Logger.logger().info("Creating evening order food cron at [%s] for both Bistro and Mico", orderFoodCron);
         Cron.schedule(orderFoodCron, function (bot) {
             Logger.logger().info("Running order food cron");
-            var month = new Date().toLocaleString("en-us", {month: "long"});
-            var year = new Date().getFullYear();
+            let nextWorkingDay = CalendarUtil.getNextWorkingDay(new Date());
+            var month = new Date(nextWorkingDay).toLocaleString("en-us", {month: "long"});
+            var year = new Date(nextWorkingDay).getFullYear();
             var choiceSheetName = month + " " + year;
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
                 let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
                 GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList);
+                    if(response === null){
+                        //notify user
+                        Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
+                        // TO DO: notify admin
+                        return;
+                    }
+
+                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList, nextWorkingDay);
                     choicesSheet.employees.forEach(function (user) {
                         let employee = employeeList.filter(function (emp) {
                             return emp.id === user.id;
                         });
                         //checking if food notifications are turned on for this user
                         if (employee[0].notifications.foodNotification == 'YES') {
-                            let nextWorkingDay = CalendarUtil.getNextWorkingDay(new Date());
                             let userChoices = user.getChoicesByDate(nextWorkingDay);
                             let emptyChoices = userChoices.choices.filter(function (choice) {
                                 return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
@@ -156,7 +169,13 @@ class SkypeBot {
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
                 let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
                 GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList);
+                    if(response === null){
+                        //notify user
+                        Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
+                        // TO DO: notify admin
+                        return;
+                    }
+                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList, new Date());
                     choicesSheet.employees.forEach(function (user) {
                         let employee = employeeList.filter(function (emp) {
                             return emp.id === user.id;

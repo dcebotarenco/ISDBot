@@ -68,16 +68,23 @@ class PlaceOrderDialog {
     }
 
     static fetchEmployeeChoices(session, results, next) {
-        var month = new Date().toLocaleString("en-us", {month: "long"});
-        var year = new Date().getFullYear();
+        var month = new Date(session.userData.orderActionDate).toLocaleString("en-us", {month: "long"});
+        var year = new Date(session.userData.orderActionDate).getFullYear();
         var choiceSheetName = month + " " + year;
+        session.userData.choiceSheetName = choiceSheetName;
         Logger.logger().info("Gather all data from [%s]", choiceSheetName);
-        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => PlaceOrderDialog.onChoicesReceived(session, results, next, response.values));
+        google.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => PlaceOrderDialog.onChoicesReceived(session, results, next, response));
     }
 
     static onChoicesReceived(session, results, next, rows) {
         Logger.logger().info("Choices Received");
-        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows, session.userData.employeesList);
+        if(rows === null){
+            //notify user
+            session.endDialog(`Ooops, something went wrong while reading google spreadsheet [${session.userData.choiceSheetName}] :(`);
+            // TO DO: notify admin
+            return;
+        }
+        let choicesSheet = ModelBuilder.createChoiceModelSheet(rows.values, session.userData.employeesList, session.userData.orderActionDate);
         let users = choicesSheet.getUsersById(session.message.user.id);
         let actionDate = moment(session.userData.orderActionDate);
         let choicesObj = users[0].getChoicesByDate(actionDate.toDate());
@@ -117,7 +124,7 @@ class PlaceOrderDialog {
                 if (emptyChoicesNonCircular.length > 0) {
                     if (SheetUtil.contains(session.userData.allMenuTypes, userChoice)) {
                         Logger.logger().debug('User has empty choices. Updating one..');
-                        Choice.updateChoice(userChoice, emptyChoicesNonCircular[0].columnLetter, emptyChoicesNonCircular[0].rowNumber, (response, err, value) => function (response, err, value, session) {
+                        Choice.updateChoice(userChoice, emptyChoicesNonCircular[0].columnLetter, emptyChoicesNonCircular[0].rowNumber,session.userData.orderActionDate, (response, err, value) => function (response, err, value, session) {
                             if (err) {
                                 Logger.logger().error('The API returned an error: ' + err);
                                 session.userData.choicesSheet = null;
@@ -141,7 +148,7 @@ class PlaceOrderDialog {
                         session.endDialog("Dude sorry :( , seems that you have all choices completed.Can you delete one via 'food cancel (today|nd|mo|tu|we|th|fr)'.");
                     }
                     else {
-                        Choice.updateChoice(userChoice, choicesObjNonCircular[0].columnLetter, choicesObjNonCircular[0].rowNumber, (response, err, value) => function (response, err, value, session) {
+                        Choice.updateChoice(userChoice, choicesObjNonCircular[0].columnLetter, choicesObjNonCircular[0].rowNumber,session.userData.orderActionDate, (response, err, value) => function (response, err, value, session) {
                             if (err) {
                                 Logger.logger().error('The API returned an error: ' + err);
                                 session.userData.choicesSheet = null;

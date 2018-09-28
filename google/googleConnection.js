@@ -38,10 +38,11 @@ class GoogleConnection {
         }, function (err, response) {
             if (err) {
                 Logger.logger().error('The API returned an error: ' + err);
-                return;
+                callback(null)
+            } else {
+                Logger.logger().debug('Fetched google sheet [%s]', sheetName);
+                callback(response)
             }
-            Logger.logger().debug('Fetched google sheet [%s]', sheetName);
-            callback(response)
         });
     }
 
@@ -66,7 +67,7 @@ class GoogleConnection {
             }
             Logger.logger().debug('Registered employees fetched');
             //removing first row from the result
-            response.values.splice(0,1);
+            response.values.splice(0, 1);
             c(response);
         });
     }
@@ -135,4 +136,5 @@ class GoogleConnection {
     }
 
 }
+
 module.exports = GoogleConnection;
