@@ -40,18 +40,6 @@ class PlaceOrderDialog {
         session.userData.menuForDay = menuForDay;
         let dialogArguments = session.options.dialogArgs;
         let msgToSend = "Here is menu for " + dayName + ":";
-        if (dialogArguments !== undefined && dialogArguments.fromCron === "_initOrderFoodCron") {
-            menuForDay = menuForDay.filter(function (menu) {
-                return menu.provider != "Mico";//TO DO: make this configurable
-            });
-            msgToSend += " (without Mico)";
-        }
-        if (dialogArguments !== undefined && dialogArguments.fromCron === "_initEveningOrderFoodCron" && today.getDay() === 5) {
-            menuForDay = menuForDay.filter(function (menu) {
-                return menu.provider != "Bistro";//TO DO: make this configurable
-            });
-            msgToSend += " (without Bistro)";
-        }
         let responseStr = 'Ok funny guy, if you keep it up, you\'ll end up ordering food by yourself.<br/>Choose what you want to order or say "bye"';
         if (menuForDay !== undefined) {
             let menusForDayView = MenusFactory.buildMenusForDay(session, menuForDay);

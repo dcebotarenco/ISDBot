@@ -54,7 +54,6 @@ class SkypeBot {
         this.bot.dialog(SendMessageToUser.name(), new SendMessageToUser().dialog);
 
         this._initOrderFoodCron();
-        this._initEveningOrderFoodCron();
         this._initStartOrderFoodAgain();
         this._initOrderFoodStatusCron();
         this._initUpdateBistroMenusCron();
@@ -109,54 +108,6 @@ class SkypeBot {
         }.bind(null, this));
     }
 
-    /*every evening for both Bistro and Mico(exception: Friday just for Mico)*/
-    _initEveningOrderFoodCron() {
-        let orderFoodCron = this.settings.getValueByKey('cron_eveningOrderFood');
-        Logger.logger().info("Creating evening order food cron at [%s] for both Bistro and Mico", orderFoodCron);
-        Cron.schedule(orderFoodCron, function (bot) {
-            Logger.logger().info("Running order food cron");
-            let nextWorkingDay = CalendarUtil.getNextWorkingDay(new Date());
-            var month = new Date(nextWorkingDay).toLocaleString("en-us", {month: "long"});
-            var year = new Date(nextWorkingDay).getFullYear();
-            var choiceSheetName = month + " " + year;
-            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
-                let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
-                GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    if(response === null){
-                        //notify user
-                        Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
-                        // TO DO: notify admin
-                        return;
-                    }
-
-                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList, nextWorkingDay);
-                    choicesSheet.employees.forEach(function (user) {
-                        let employee = employeeList.filter(function (emp) {
-                            return emp.id === user.id;
-                        });
-                        //checking if food notifications are turned on for this user
-                        if (employee[0].notifications.foodNotification == 'YES') {
-                            let userChoices = user.getChoicesByDate(nextWorkingDay);
-                            let emptyChoices = userChoices.choices.filter(function (choice) {
-                                return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
-                            });
-                            if (userChoices.choices.length - emptyChoices.length === 0) {
-                                Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
-                                Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
-                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {dialogToStart: PlaceOrderDialog.name(), fromCron: "_initEveningOrderFoodCron"});
-                            }
-                            else {
-                                Logger.logger().info("User[%s] has at least one choice for [%s], skipping asking him today for food", user.fullName, nextWorkingDay);
-                            }
-                        } else {
-                            Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
-                        }
-                    });
-
-                }(bot, response, employeeList));
-            }(bot, response));
-        }.bind(null, this));
-    }
 
     _initOrderFoodStatusCron() {
         let orderFoodStatusCron = this.settings.getValueByKey('cron_orderFoodStatus');

@@ -154,9 +154,6 @@ class OrderFoodDialog {
         Logger.logger().info('Begin Cron Dialog [%s]', dialogName);
         let dialogArguments = session.options.dialogArgs;
         let date = new Date();
-        if(dialogArguments.fromCron ==="_initEveningOrderFoodCron"){
-            date = CalendarUtil.getNextWorkingDay(date);
-        }
         session.userData.orderActionDate = date;
         session.beginDialog(dialogName);
     }
