@@ -57,7 +57,6 @@ class SkypeBot {
         this._initStartOrderFoodAgain();
         this._initOrderFoodStatusCron();
         this._initUpdateBistroMenusCron();
-        this._initUpdateMicoMenusCron();
         this._initJokesCron();
     }
 
@@ -257,30 +256,6 @@ class SkypeBot {
                         if(user.isAdmin){
                             Logger.logger().info('Sending update message to [%s].', user.name);
                             bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'It\'s time to update **Bistro** menus for this week ;)');
-                        }else{
-                            Logger.logger().debug('User [%s] is not admin, skip',user.name);
-                        }
-                    }
-                    else {
-                        Logger.logger().debug('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
-                    }
-                });
-            }(bot, response.values));
-
-        }.bind(null, this));
-    }
-
-    _initUpdateMicoMenusCron() {
-        let updateMenuCron = this.settings.getValueByKey('cron_notificationUpdateMicoMenus');
-        Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
-        Cron.schedule(updateMenuCron, function (bot) {
-            Logger.logger().info('Running updateMenu cron, send update menu msg to administrators');
-            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
-                ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
-                    if (user.id) {
-                        if(user.isAdmin){
-                            Logger.logger().info('Sending update message to [%s].', user.name);
-                            bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'It\'s time to update **Mico** menus for next week ;)');
                         }else{
                             Logger.logger().debug('User [%s] is not admin, skip',user.name);
                         }
