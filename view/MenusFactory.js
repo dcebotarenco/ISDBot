@@ -37,8 +37,8 @@ class MenusFactory {
                 buttonList.push(builder.CardAction.imBack(session, menu.number + size, size));
             });
             let menuMealsWithName = [menu.firstMeal, menu.secondMeal, menu.garnish];
-            let name = menu.provider + " " + menu.title + " (" +  menu.number + ")";
-            menuList.push(new Menu(session, name , menuMealsWithName, buttonList));
+            let name = menu.provider + " " + menu.title + " (" + menu.number + ")";
+            menuList.push(new Menu(session, name, menuMealsWithName, buttonList, menu.url));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

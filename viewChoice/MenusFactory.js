@@ -20,7 +20,7 @@ class MenusFactory {
             let nr = menuObj.menuNumber + menuObj.menuName;
             let title = name + " (" + nr + ")";
             buttonList.push(new Button(session, nr, nr));
-            menuList.push(new Menu(session, title, nr, mealGroup, buttonList));
+            menuList.push(new Menu(session, title, nr, mealGroup, buttonList, menuObj.menu._url));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

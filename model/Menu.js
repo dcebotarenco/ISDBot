@@ -1,10 +1,11 @@
 var Logger = require('../logger/logger');
 var builder = require('botbuilder');
+
 /**
  * Created by aumanet on 23/03/2018.
  */
 
-class Menu{
+class Menu {
     //title --1,2,3,post,dieta...
     //provider -- bistro, don taco ...
     //sizes -- [s],[m],[s,m] ...
@@ -14,7 +15,7 @@ class Menu{
     //number 1...10
 
 
-    constructor(title, provider, sizes, firstMeal, secondMeal, garnish, date, number) {
+    constructor(title, provider, sizes, firstMeal, secondMeal, garnish, date, number, url) {
         this.title = title;
         this.provider = provider;
         this.sizes = sizes;
@@ -23,75 +24,85 @@ class Menu{
         this.garnish = garnish;
         this.date = date;
         this.number = number;
+        this.url = url;
     }
 
-    set session(session){
+    set session(session) {
         this._session = session;
     }
 
-    set title(title){
+    set title(title) {
         this._title = title;
     }
 
-    set provider(provider){
+    set provider(provider) {
         this._provider = provider;
     }
 
-    set sizes(sizes){
+    set sizes(sizes) {
         this._sizes = sizes;
     }
 
-    set firstMeal(firstMeal){
+    set firstMeal(firstMeal) {
         this._firstMeal = firstMeal;
     }
 
-    set secondMeal(secondMeal){
+    set secondMeal(secondMeal) {
         this._secondMeal = secondMeal;
     }
 
-    set garnish(garnish){
+    set garnish(garnish) {
         this._garnish = garnish;
     }
 
-    set date(date){
+    set date(date) {
         this._date = date;
     }
 
-    set number(number){
+    set number(number) {
         this._number = number;
     }
 
-    get session(){
+    set url(url) {
+        this._url = url;
+    }
+
+    get session() {
         return this._session;
     }
 
-    get title(){
+    get title() {
         return this._title;
     }
 
-    get provider(){
+    get provider() {
         return this._provider;
     }
 
-    get sizes(){
+    get sizes() {
         return this._sizes;
     }
 
-    get firstMeal(){
+    get firstMeal() {
         return this._firstMeal;
     }
 
-    get secondMeal(){
+    get secondMeal() {
         return this._secondMeal;
     }
 
-    get garnish(){
+    get garnish() {
         return this._garnish;
     }
 
-    get number(){
+    get number() {
         return this._number;
     }
 
+    get url() {
+        return this._url;
+    }
+
 }
+
 module.exports = Menu;

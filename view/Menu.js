@@ -5,16 +5,19 @@ var builder = require('botbuilder');
 var SheetUtil = require('../util/SheetUtil');
 
 class Menu {
-    constructor(session, title, mealList, buttons) {
+    constructor(session, title, mealList, buttons, url) {
         this.buttons = buttons;
         this.title = title;
         this.mealList = mealList;
         this.session = session;
+        this.url = url;
         this.mealCard = this._buildMealCard();
     }
 
     _buildMealCard() {
-        return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName()).buttons(this.buttons)
+        return new builder.HeroCard(this.session).title(this.title).text(this._formatMealsName())
+            .tap(builder.CardAction.openUrl(this.session, this.url, 'menuUrl'))
+            .buttons(this.buttons);
     }
 
     _formatMealsName() {

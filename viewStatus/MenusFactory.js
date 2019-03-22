@@ -18,7 +18,7 @@ class MenusFactory {
             let nr = menuObj.menuNumber + menuObj.menuName;
             let title = name + " (" + nr + ")";
             /*not so nice with index, to be changed later : mealGroup[0].meals*/
-            menuList.push(new Menu(session, title, menuObj.menu.name, mealGroup));
+            menuList.push(new Menu(session, title, menuObj.menu.name, mealGroup, menuObj.menu._url));
         });
         let dayMenu = new MenusView(session, menuList);
         Logger.logger().info("View of Menus created");

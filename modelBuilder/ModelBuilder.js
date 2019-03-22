@@ -40,16 +40,17 @@ class ModelBuilder {
                     allMenuTypes.push(menuNr + size);
                 });
 
-                for(let col = 1 ; col < 6 ; col++){
-                    let firstMeal = (rows[i+1][col]);
-                    let secondMeal = (rows[i+2][col]);
-                    let garnish = (rows[i+3][col]);
+                for (let col = 1; col < 6; col++) {
+                    let firstMeal = (rows[i + 1][col]);
+                    let secondMeal = (rows[i + 2][col]);
+                    let garnish = (rows[i + 3][col]);
+                    let url = (rows[i + 4][col]);
                     let menuDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + (col - 1));
-                    if( (firstMeal && firstMeal.trim() !== "")  || (secondMeal && secondMeal.trim() !== "") || (garnish && garnish.trim() !== "")){
-                        menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr));
+                    if ((firstMeal && firstMeal.trim() !== "") || (secondMeal && secondMeal.trim() !== "") || (garnish && garnish.trim() !== "")) {
+                        menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr, url));
                     }
                 }
-                i += 3;
+                i += 5;
             } else if (rows[i].length > 0 && rows[i][0] === "Update date:") {
                 updateDate = new Date(rows[i][1].replace(pattern, '$3-$2-$1'));
                 i++;
@@ -102,8 +103,7 @@ class ModelBuilder {
                     let user = ModelBuilder.createUser(row, index, rows, workingDays, employee);
                     users.push(user);
                     Logger.logger().debug("User[%s] pushed", user.fullName);
-                }
-                else {
+                } else {
                     Logger.logger().debug('Employee [%s] has no id', employee._name);
                 }
             } else {
@@ -157,8 +157,7 @@ class ModelBuilder {
             let choiceMenuName = fullChoice[1];
             let choice = new Choice(choiceMenuNumber, choiceMenuName, workingDay, user, currentRowIndex + 1);
             choices.push(choice);
-        }
-        else {
+        } else {
             let choice = new Choice("", "", workingDay, user, currentRowIndex + 1);
             choices.push(choice);
         }
@@ -199,7 +198,7 @@ class ModelBuilder {
         return choices;
     }
 
-    static  isNumeric(n) {
+    static isNumeric(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
