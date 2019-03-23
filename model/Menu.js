@@ -15,7 +15,7 @@ class Menu {
     //number 1...10
 
 
-    constructor(title, provider, sizes, firstMeal, secondMeal, garnish, date, number, url) {
+    constructor(title, provider, sizes, firstMeal, secondMeal, garnish, date, number, menuUrl, imgUrl) {
         this.title = title;
         this.provider = provider;
         this.sizes = sizes;
@@ -24,7 +24,8 @@ class Menu {
         this.garnish = garnish;
         this.date = date;
         this.number = number;
-        this.url = url;
+        this.menuUrl = menuUrl;
+        this.imgUrl = imgUrl;
     }
 
     set session(session) {
@@ -63,8 +64,12 @@ class Menu {
         this._number = number;
     }
 
-    set url(url) {
-        this._url = url;
+    set menuUrl(menuUrl) {
+        this._menuUrl = menuUrl;
+    }
+
+    set imgUrl(imgUrl) {
+        this._imgUrl = imgUrl;
     }
 
     get session() {
@@ -99,8 +104,12 @@ class Menu {
         return this._number;
     }
 
-    get url() {
-        return this._url;
+    get menuUrl() {
+        return this._menuUrl;
+    }
+
+    get imgUrl() {
+        return this._imgUrl;
     }
 
 }

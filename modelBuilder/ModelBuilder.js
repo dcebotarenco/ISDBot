@@ -44,13 +44,20 @@ class ModelBuilder {
                     let firstMeal = (rows[i + 1][col]);
                     let secondMeal = (rows[i + 2][col]);
                     let garnish = (rows[i + 3][col]);
-                    let url = (rows[i + 4][col]);
+                    let menuUrl = (rows[i + 4][col]);
+                    let imgUrl = (rows[i + 5][col]);
+
+                    // to do: fetch default image url from setting document
+                    if (imgUrl == undefined) {
+                        imgUrl = 'https://i.imgur.com/M6UUe2S.png';
+                    }
+
                     let menuDate = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate() + (col - 1));
                     if ((firstMeal && firstMeal.trim() !== "") || (secondMeal && secondMeal.trim() !== "") || (garnish && garnish.trim() !== "")) {
-                        menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr, url));
+                        menus.push(new Menu(title, provider, sizes, firstMeal, secondMeal, garnish, menuDate, menuNr, menuUrl, imgUrl));
                     }
                 }
-                i += 5;
+                i += 6;
             } else if (rows[i].length > 0 && rows[i][0] === "Update date:") {
                 updateDate = new Date(rows[i][1].replace(pattern, '$3-$2-$1'));
                 i++;
