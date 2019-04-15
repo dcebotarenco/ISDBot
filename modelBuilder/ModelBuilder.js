@@ -13,6 +13,8 @@ let SheetUtil = require('../util/SheetUtil');
 let Book = require('../viewBooks/Book');
 let Notifications = require('../registration/Notifications');
 let Menu = require('../model/Menu.js');
+let MenusToOrder = require('../orderFood/lunchList/menusToOrder/MenusToOrder');
+let ProviderToOrderFrom = require('../orderFood/lunchList/menusToOrder/ProviderToOrderFrom');
 
 class ModelBuilder {
     constructor() {
@@ -118,6 +120,87 @@ class ModelBuilder {
             }
         });
         return new ChoicesSheet(workingDays, users);
+    }
+
+
+    static createOrderListModel(sheetRows, orderActionDate) {
+        Logger.logger().debug("Creating order list model");
+        let actionDate = new Date(orderActionDate);
+        let workingDay;
+        sheetRows[3].forEach(function (date, columnIndex) {
+            if (ModelBuilder.isNumeric(date) && date == actionDate.getDate()) {
+                let currentDate = new Date(actionDate.getFullYear(), actionDate.getMonth(), parseInt(date));
+                let columnLetter = SheetUtil.columnToLetter(columnIndex + 1);
+                Logger.logger().debug("Created a WorkingDay for date [%s] on columns index [%d] and column letter [%s]", currentDate, columnIndex, columnLetter);
+                workingDay = new WorkingDay(currentDate, columnIndex, columnLetter);
+                return;
+            }
+        });
+
+        let users = [];
+        sheetRows.filter(function (row) {
+            return row.length > 0;
+        });
+
+        //only total rows are needed, they have S or M in second column
+        sheetRows = sheetRows.filter(function (row) {
+            return row.length > 1 && (row[1].toUpperCase() == 'S' || row[1].toUpperCase() == 'M');
+        });
+
+        let providerToOrderFrom = [];
+        let menusToOrder = [];
+        //collecting all MenusToOrder
+        sheetRows.forEach(function (row, index, rows) {
+            let nrOfMenus = row[workingDay.columnNumber];
+
+            //only totals which have nr of menu needed
+            if (nrOfMenus !== undefined) {//to add: check if row[1] is S or M
+                let menuName = row[0];
+                let menuType = row[1];
+
+                // menuName is given just for menus of type S(google sheet specific), so for M menuType, menuName should be the same as previous record(of type S)
+                if (row[1] == 'M') {//menuName == undefined
+                    menuName = rows[index - 1][0];
+                }
+                menusToOrder.push(new MenusToOrder(menuName, menuType, nrOfMenus));
+                Logger.logger().debug(` row [${index}] with name [${row[0]}] and value[${nrOfMenus}] `);
+            } else {
+                Logger.logger().debug(` Skipping row [${index}] with name [${row[0]}], menuType [${row[1]}] and value[${nrOfMenus}] `);
+            }
+        });
+
+        //building providerToOrderFrom(separate MenusToOrder per provider)
+        while (menusToOrder.length > 0) {
+            //get first menu
+            let firstMenu = menusToOrder[0];
+
+            //get provider name(assuming that all menu names have provider name as first word)
+            let firstProviderName = firstMenu.menuName.substring(0, firstMenu.menuName.indexOf(' '));
+            let menusToOrderPerProvider = [];
+            let totalNrOfMenusPerProvider = 0;
+
+            //temporary array to be used for removing needed menus for it(not possible to remove directly menusToOrder while iterating over it)
+            let tempMenusToOrder = menusToOrder.slice();
+            let tempMenusToOrderIndex = 0;
+
+            // find all menus with same provider
+            menusToOrder.forEach(function (menuToOrder) {
+                let providerName = menuToOrder.menuName.substring(0, menuToOrder.menuName.indexOf(' '));
+
+                //if firstProviderName from main loop is equal with current providerName => move menusToOrder to current provider list
+                if (firstProviderName == providerName) {
+                    totalNrOfMenusPerProvider+= parseInt(menuToOrder.nrOfMenus);
+                    menusToOrderPerProvider.push(tempMenusToOrder.splice(tempMenusToOrderIndex, 1)[0]);
+                    tempMenusToOrderIndex--;
+                }
+                tempMenusToOrderIndex++;
+                Logger.logger().debug(` menuToOrder length => [${tempMenusToOrder.length}] and menusToOrderPerProvider length => [${menusToOrderPerProvider.length}] `);// TO DO: to be removed
+            });
+            providerToOrderFrom.push(new ProviderToOrderFrom(firstProviderName, menusToOrderPerProvider, totalNrOfMenusPerProvider));
+            menusToOrder = tempMenusToOrder;
+        }
+        Logger.logger().debug(` ProviderToOrderFrom[${providerToOrderFrom.length}]`);// TO DO: to be removed
+        return providerToOrderFrom;
     }
 
     /**

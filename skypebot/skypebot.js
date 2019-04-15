@@ -1,4 +1,4 @@
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -17,6 +17,7 @@ var GoogleConnection = require('../google/googleConnection');
 var ModelBuilder = require('../modelBuilder/ModelBuilder');
 var NotificationDialog = require('../dialogHandlers/NotificationDialog');
 var SendMessageToUser = require('../dialogHandlers/SendMessageToUser');
+var SendMenusToOrder = require('../dialogHandlers/SendMenusToOrder');
 var Logger = require('../logger/logger');
 var Cron = require('node-cron');
 var moment = require('moment');
@@ -52,11 +53,13 @@ class SkypeBot {
         this.bot.dialog(BooksDialog.name(), new BooksDialog().dialog);
         this.bot.dialog(NotificationDialog.name(), new NotificationDialog().dialog);
         this.bot.dialog(SendMessageToUser.name(), new SendMessageToUser().dialog);
+        this.bot.dialog(SendMenusToOrder.name(), new SendMenusToOrder().dialog);
 
         this._initOrderFoodCron();
         this._initStartOrderFoodAgain();
         this._initOrderFoodStatusCron();
         this._initUpdateBistroMenusCron();
+        this._initOrderListToAdmins();
         this._initJokesCron();
     }
 
@@ -72,7 +75,7 @@ class SkypeBot {
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
                 let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
                 GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    if(response === null){
+                    if (response === null) {
                         //notify user
                         Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
                         // TO DO: notify admin
@@ -92,9 +95,11 @@ class SkypeBot {
                             if (todayChoices.choices.length - emptyChoices.length === 0) {
                                 Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
                                 Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
-                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {dialogToStart: PlaceOrderDialog.name(), fromCron: "_initOrderFoodCron"});
-                            }
-                            else {
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {
+                                    dialogToStart: PlaceOrderDialog.name(),
+                                    fromCron: "_initOrderFoodCron"
+                                });
+                            } else {
                                 Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", user.fullName);
                             }
                         } else {
@@ -119,7 +124,7 @@ class SkypeBot {
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
                 let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
                 GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    if(response === null){
+                    if (response === null) {
                         //notify user
                         Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
                         // TO DO: notify admin
@@ -140,9 +145,11 @@ class SkypeBot {
                                 Logger.logger().info("User[%s] has at least one choice for today. Sending food status dialog", user.fullName);
                                 Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", UserChoisesStatusDialog.name(), user.skypeName, user.id);
                                 // session.userData.orderActionDate = moment(new Date());
-                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {dialogToStart: UserChoisesStatusDialog.name(), fromCron: "_initOrderFoodStatusCron"});
-                            }
-                            else {
+                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {
+                                    dialogToStart: UserChoisesStatusDialog.name(),
+                                    fromCron: "_initOrderFoodStatusCron"
+                                });
+                            } else {
                                 Logger.logger().info('There are not choices for user [%s] and date[%s]', user.fullName, moment(new Date()).format("YYYY-MM-DD"));
                             }
                         } else {
@@ -167,12 +174,10 @@ class SkypeBot {
                         if (user.notifications.jokeNotification == 'YES') {
                             Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", JokeDialog.name(), user.name, user.id);
                             bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.name, JokeDialog.name());
-                        }
-                        else {
+                        } else {
                             Logger.logger().info('Joke notifications are turned off for user[%s]', user.name);
                         }
-                    }
-                    else {
+                    } else {
                         Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', JokeDialog.name(), user.name);
                     }
                 });
@@ -200,44 +205,40 @@ class SkypeBot {
                             let pattern = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
                             let startDate = null;
                             var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-                            today.setHours(0,0,0,0);//we need to compare date without time
+                            today.setHours(0, 0, 0, 0);//we need to compare date without time
                             Logger.logger().info('Today: [%s]', today);
                             startDate = new Date(user.notifications.startDate.replace(pattern, '$3-$2-$1'));
-                            startDate.setHours(0,0,0,0);//we need to compare date without time
+                            startDate.setHours(0, 0, 0, 0);//we need to compare date without time
                             Logger.logger().info('Start Date: %s', startDate);
                             if (user.notifications.foodNotification == 'NO' && today.getDate() === startDate.getDate()) {
                                 Logger.logger().info('Food notification needs to be turned on.');
-                                GoogleConnection.updateValue(foodNotificationColumnLetter,user.rowNumber, foodNotificationValueToWrite, SheetName, (response, err, value)=>function (response, err, value) {
+                                GoogleConnection.updateValue(foodNotificationColumnLetter, user.rowNumber, foodNotificationValueToWrite, SheetName, (response, err, value) => function (response, err, value) {
                                     if (err) {
                                         Logger.logger().error('The API returned an error: ' + err);
-                                    }
-                                    else {
+                                    } else {
                                         Logger.logger().info('Range[%s] updated with value[%s] for user [%s]', response.updatedRange, value, user.name);
                                     }
                                 }(response, err, value));
-                                GoogleConnection.updateValue(startDateColumnLetter, user.rowNumber, '', SheetName, (response, err, value)=>function (response, err, value) {
+                                GoogleConnection.updateValue(startDateColumnLetter, user.rowNumber, '', SheetName, (response, err, value) => function (response, err, value) {
                                     if (err) {
                                         Logger.logger().error('The API returned an error: ' + err);
-                                    }
-                                    else {
+                                    } else {
                                         Logger.logger().info('Range[%s] updated with value[%s] for user [%s]', response.updatedRange, value, user.name);
                                     }
                                 }(response, err, value));
 
                                 bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'Did you miss me? I know you did ;) ... i\'m gonna send you food notifications again (noworries)');
-                            }
-                            else if (user.notifications.foodNotification == 'NO' && today.getDate() < startDate.getDate()) {
-                                Logger.logger().info('Food notification is going to be turned on2 [%s]' ,startDate.getDate()+'.'+(startDate.getMonth()+1)+'.'+startDate.getFullYear() );
-                            }else if (user.notifications.foodNotification == 'YES') {
+                            } else if (user.notifications.foodNotification == 'NO' && today.getDate() < startDate.getDate()) {
+                                Logger.logger().info('Food notification is going to be turned on2 [%s]', startDate.getDate() + '.' + (startDate.getMonth() + 1) + '.' + startDate.getFullYear());
+                            } else if (user.notifications.foodNotification == 'YES') {
                                 Logger.logger().info('Food notification is already on for user [%s]', user.name);
-                            }else{
+                            } else {
                                 Logger.logger().info('Start Date [%s] is in the past, no further action needed', startDate);
                             }
                         } else {
                             Logger.logger().warn('Invalid date:  [%s]', user.notifications.startDate);
                         }
-                    }
-                    else {
+                    } else {
                         Logger.logger().info('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
                     }
                 });
@@ -253,14 +254,52 @@ class SkypeBot {
             GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
                 ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
                     if (user.id) {
-                        if(user.isAdmin){
+                        if (user.isAdmin) {
                             Logger.logger().info('Sending update message to [%s].', user.name);
                             bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMessageToUser.name(), 'It\'s time to update **Bistro** menus for this week ;)');
-                        }else{
-                            Logger.logger().debug('User [%s] is not admin, skip',user.name);
+                        } else {
+                            Logger.logger().debug('User [%s] is not admin, skip', user.name);
                         }
+                    } else {
+                        Logger.logger().debug('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
                     }
-                    else {
+                });
+            }(bot, response.values));
+
+        }.bind(null, this));
+    }
+
+    _initOrderListToAdmins() {
+        let updateMenuCron = this.settings.getValueByKey('cron_dailyOrderList');
+        Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
+        Cron.schedule(updateMenuCron, function (bot) {
+            Logger.logger().info('Running OrderListToAdmins cron');
+            var month = new Date().toLocaleString("en-us", {month: "long"});
+            var year = new Date().getFullYear();
+            var choiceSheetName = month + " " + year;
+            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, rows) {
+                ModelBuilder.createRegisteredEmployees(rows).forEach(function (user) {
+                    if (user.id) {
+                        if (user.isAdmin) {
+                            Logger.logger().info('Sending order list to [%s].', user.name);
+                            GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response) {
+                                if (response === null) {
+                                    //notify user
+                                    Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
+                                    // TO DO: notify admin
+                                    return;
+                                }
+                                let providerToOrderFrom = ModelBuilder.createOrderListModel(response.values, new Date());
+                                if (providerToOrderFrom.length == 0) {
+                                    Logger.logger().warn(`No menus found to order, not sending to admins`);
+                                } else {
+                                    bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, SendMenusToOrder.name(), providerToOrderFrom);
+                                }
+                            }(bot, response));
+                        } else {
+                            Logger.logger().debug('User [%s] is not admin, skip', user.name);
+                        }
+                    } else {
                         Logger.logger().debug('Cannot send begin dialog [%s] because user[%s] is not registered, id is missing', SendMessageToUser.name(), user.name);
                     }
                 });
@@ -327,8 +366,7 @@ class SkypeBot {
             session.message.address.useAuth);
         if (session.message.text === "bye") {
             session.endConversation("Bye ;)");
-        }
-        else {
+        } else {
             next();
         }
     }
