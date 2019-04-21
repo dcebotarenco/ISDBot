@@ -271,7 +271,7 @@ class SkypeBot {
 
     _initOrderListToAdmins() {
         let updateMenuCron = this.settings.getValueByKey('cron_dailyOrderList');
-        Logger.logger().info("Creating update menu cron at [%s]", updateMenuCron);
+        Logger.logger().info("Creating daily order list to admins cron at [%s]", updateMenuCron);
         Cron.schedule(updateMenuCron, function (bot) {
             Logger.logger().info('Running OrderListToAdmins cron');
             var month = new Date().toLocaleString("en-us", {month: "long"});

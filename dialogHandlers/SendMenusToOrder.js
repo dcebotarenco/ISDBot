@@ -17,7 +17,7 @@ class SendMenusToOrder {
         let receipts = [];
         providerToOrderFrom.forEach(function (provider) {
             let receiptItems = [];
-            let receiptCard = new builder.ReceiptCard(session).title("Menus to order from " + provider.providerName).total(provider.totalNrOfMenus);
+            let receiptCard = new builder.ReceiptCard(session).title(provider.providerName + " Orders").total(provider.totalNrOfMenus);
             provider.menusToOrderList.forEach(function (menusToOrder) {
                 //inserting order type after order number
                 var match = menusToOrder.menuName.match(/\d+/);//find first number
