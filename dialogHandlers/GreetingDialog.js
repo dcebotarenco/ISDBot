@@ -22,11 +22,9 @@ class GreetingDialog {
             .images([
                 builder.CardImage.create(session, "http://isd-soft.com/wp-content/themes/isd/images/logo.png")
             ]);
-        var id = new builder.HeroCard(session)
-            .subtitle("Your ID")
-            .text("Please provide this key [%s] to Administrator", session.message.user.id);
-        var msg = new builder.Message(session).attachments([logo,id]);
-        session.send(msg);
+        session.send(new builder.Message(session).attachments([logo]));
+        session.send(new builder.Message(session)
+            .text("Please provide this key [%s] to Administrator", session.message.user.id));
         session.beginDialog(HelpDialog.name());
     }
 
