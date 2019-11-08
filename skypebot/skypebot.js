@@ -66,50 +66,53 @@ class SkypeBot {
     /*only on Mondays, and only Bistro*/
     _initOrderFoodCron() {
         let orderFoodCron = this.settings.getValueByKey('cron_orderFood');
-        Logger.logger().info("Creating order food cron at [%s] only for Mondays and only for Bistro", orderFoodCron);
-        Cron.schedule(orderFoodCron, function (bot) {
-            Logger.logger().info("Running order food cron");
-            var month = new Date().toLocaleString("en-us", {month: "long"});
-            var year = new Date().getFullYear();
-            var choiceSheetName = month + " " + year;
-            GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
-                let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
-                GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
-                    if (response === null) {
-                        //notify user
-                        Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
-                        // TO DO: notify admin
-                        return;
-                    }
-                    let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList, new Date());
-                    choicesSheet.employees.forEach(function (user) {
-                        let employee = employeeList.filter(function (emp) {
-                            return emp.id === user.id;
-                        });
-                        //checking if food notifications are turned on for this user
-                        if (employee[0].notifications.foodNotification == 'YES') {
-                            let todayChoices = user.getChoicesByDate(new Date());
-                            let emptyChoices = todayChoices.choices.filter(function (choice) {
-                                return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
-                            });
-                            if (todayChoices.choices.length - emptyChoices.length === 0) {
-                                Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
-                                Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
-                                bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {
-                                    dialogToStart: PlaceOrderDialog.name(),
-                                    fromCron: "_initOrderFoodCron"
-                                });
-                            } else {
-                                Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", user.fullName);
-                            }
-                        } else {
-                            Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
+        let allCrons = orderFoodCron.split('|');
+        for (let cron of allCrons) {
+            Logger.logger().info("Creating order food cron at [%s] only for Mondays and only for Bistro", cron);
+            Cron.schedule(cron, function (bot) {
+                Logger.logger().info("Running order food cron");
+                var month = new Date().toLocaleString("en-us", {month: "long"});
+                var year = new Date().getFullYear();
+                var choiceSheetName = month + " " + year;
+                GoogleConnection.fetchRegisteredEmployees((response) => function (bot, response) {
+                    let employeeList = ModelBuilder.createRegisteredEmployees(response.values);
+                    GoogleConnection.fetchGoogleSheet(process.env.G_SPREADSHEET_ID, choiceSheetName, 'ROWS', (response) => function (bot, response, employeeList) {
+                        if (response === null) {
+                            //notify user
+                            Logger.logger().error(`Ooops, something went wrong while reading google spreadsheet [${choiceSheetName}] :(`);
+                            // TO DO: notify admin
+                            return;
                         }
-                    });
+                        let choicesSheet = ModelBuilder.createChoiceModelSheet(response.values, employeeList, new Date());
+                        choicesSheet.employees.forEach(function (user) {
+                            let employee = employeeList.filter(function (emp) {
+                                return emp.id === user.id;
+                            });
+                            //checking if food notifications are turned on for this user
+                            if (employee[0].notifications.foodNotification == 'YES') {
+                                let todayChoices = user.getChoicesByDate(new Date());
+                                let emptyChoices = todayChoices.choices.filter(function (choice) {
+                                    return choice.choiceMenuName.length === 0 && choice.choiceMenuNumber.length === 0;
+                                });
+                                if (todayChoices.choices.length - emptyChoices.length === 0) {
+                                    Logger.logger().info("User[%s] haven't made choice for today. Asking him for food", user.fullName);
+                                    Logger.logger().info("Send begin dialog[%s] to user[%s] with id[%s]", OrderFoodDialog.name(), user.skypeName, user.id);
+                                    bot.beginDialogForUser(bot.settings.getValueByKey('service_url'), user.id, user.skypeName, OrderFoodDialog.name(), {
+                                        dialogToStart: PlaceOrderDialog.name(),
+                                        fromCron: "_initOrderFoodCron"
+                                    });
+                                } else {
+                                    Logger.logger().info("User[%s] has at least one choice for today, skipping asking him today for food", user.fullName);
+                                }
+                            } else {
+                                Logger.logger().info('Food notifications are turned off for user[%s]', user.fullName);
+                            }
+                        });
 
-                }(bot, response, employeeList));
-            }(bot, response));
-        }.bind(null, this));
+                    }(bot, response, employeeList));
+                }(bot, response));
+            }.bind(null, this));
+        }
     }
 
 
