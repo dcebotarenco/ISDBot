@@ -22,7 +22,7 @@
   "dependencies": {
     "botbuilder": "^3.14.1",
     "googleapis": "^12.4.0",
-    "log4js": "^0.6.38",
+    "log4js": "^6.4.0",
     "moment": "^2.21.0",
     "node-cron": "^1.2.1",
     "restify": "^4.3.2"
